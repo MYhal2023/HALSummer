@@ -10,7 +10,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	MODEL_ENEMY		"data/MODEL/slime.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE		"data/MODEL/grape.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE_PARTS		"data/MODEL/grape_parts.obj"			// 読み込むモデル名
 #define MAX_ENEMY		(1)					// プレイヤーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ
@@ -60,3 +61,4 @@ void UpdateEnemy(void);
 void DrawEnemy(void);
 
 ENEMY *GetEnemy(void);
+void SetGrape(int i, int num);

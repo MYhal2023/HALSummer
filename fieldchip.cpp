@@ -39,7 +39,7 @@ int g_DebugMap[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1]
 {
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1},
 	{0,0,0,0,0,0,0,0},
 };
 //=============================================================================
@@ -52,9 +52,10 @@ HRESULT InitMapChip(void)
 		switch (i)
 		{
 		case ROW:
-			LoadModel(MODEL_PLAYER, &g_MapChip[i].model);
+			LoadModel(MODEL_FIELD001, &g_MapChip[i].model);
 			break;
 		case HIGH:
+			LoadModel(MODEL_FIELD002, &g_MapChip[i].model);
 			break;
 		case MAX_VAL:
 			break;

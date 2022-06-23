@@ -104,6 +104,15 @@ void UpdateCamera(void)
 		g_Cam.at.z = g_Cam.pos.z + cosf(g_Cam.rot.y) * g_Cam.len;
 	}
 
+	if (GetKeyboardPress(DIK_R))
+	{
+		g_Cam.rot.x += 0.1f;
+	}
+	else if (GetKeyboardPress(DIK_F))
+	{
+		g_Cam.rot.x -= 0.1f;
+
+	}
 
 	if (g_Cam.tbl_adr != NULL)
 	{

@@ -10,10 +10,11 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	MODEL_PLAYER		"data/MODEL/slime.obj"			// 読み込むモデル名
-#define MAX_CHIP_NUM		(1)					// フィールドチップ種類
-#define MAX_CHIP_WIDTH		(8)					// フィールドチップ種類
-#define MAX_CHIP_HEIGHT		(4)					// フィールドチップ種類
+#define	MODEL_FIELD001		"data/MODEL/shortrange2.obj"			// 読み込むモデル名
+#define	MODEL_FIELD002		"data/MODEL/longrange2.obj"			// 読み込むモデル名
+#define MAX_CHIP_NUM		(2)					// フィールドチップ種類
+#define MAX_CHIP_WIDTH		(8)					// 横のセット数
+#define MAX_CHIP_HEIGHT		(4)					// 縦のセット数
 
 #define	CHIP_SIZE		(30.0f)					// チップサイズの大きさ
 
@@ -45,9 +46,9 @@ struct MAP_CHIP
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitPlayer(void);
-void UninitPlayer(void);
-void UpdatePlayer(void);
-void DrawPlayer(void);
+HRESULT InitMapChip(void);
+void UninitMapChip(void);
+void UpdateMapChip(void);
+void DrawMapChip(void);
 
-PLAYER *GetPlayer(void);
+MAP_CHIP *GetMapChip(void);

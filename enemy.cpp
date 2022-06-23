@@ -45,7 +45,7 @@ static ENEMY		g_Enemy[MAX_ENEMY];						// プレイヤー
 
 static BOOL			g_Load = FALSE;
 static int			atCount;
-static int			enemyNum;					//何体のエネミーがいるか
+static int			enemyNum = 0;		//何体のエネミーがいるか
 
 // プレイヤーの階層アニメーションデータ
 static INTERPOLATION_DATA move_tbl_right[] = {	// pos, rot, scl, frame
@@ -71,27 +71,27 @@ HRESULT InitEnemy(void)
 {
 	for (int i = 0; i < MAX_ENEMY; i++)
 	{
-		LoadModel(MODEL_ENEMY, &g_Enemy[i].model);
-		// モデルのディフューズを保存しておく。色変え対応の為。
-		GetModelDiffuse(&g_Enemy[i].model, &g_Enemy[i].diffuse[0]);
+		//LoadModel(MODEL_GRAPE, &g_Enemy[i].model);
+		//// モデルのディフューズを保存しておく。色変え対応の為。
+		//GetModelDiffuse(&g_Enemy[i].model, &g_Enemy[i].diffuse[0]);
 
-		g_Enemy[i].load = TRUE;
+		g_Enemy[i].load = FALSE;
 
-		g_Enemy[i].pos = { 0.0f, ENEMY_OFFSET_Y, 0.0f };
+		g_Enemy[i].pos = { -100.0f, ENEMY_OFFSET_Y, 0.0f };
 		g_Enemy[i].rot = { 0.0f, 0.0f, 0.0f };
 		g_Enemy[i].scl = { 0.8f, 1.0f, 1.0f };
 
 		g_Enemy[i].size = ENEMY_SIZE;	// 当たり判定の大きさ
 		g_Enemy[i].life = ENEMY_LIFE;
 		g_Enemy[i].lifeMax = g_Enemy[i].life;
-		g_Enemy[i].use = TRUE;
+		g_Enemy[i].use = FALSE;
 		g_Enemy[i].attack = FALSE;
 		g_Enemy[i].attackUse = FALSE;
 
 		// 階層アニメーション用の初期化処理
 		g_Enemy[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 	}
-	enemyNum = 3;
+	enemyNum = 0;
 	g_Load = TRUE;
 	atCount = 0;
 	return S_OK;
@@ -217,4 +217,33 @@ void DrawEnemy(void)
 ENEMY *GetEnemy(void)
 {
 	return &g_Enemy[0];
+}
+
+//引数1：配列の使用を開始する添え字、引数2：セットするエネミーの数
+void SetGrape(int i, int num)
+{
+	for (int s = 0; s < num; s++)
+	{
+		int number = i + s;
+		LoadModel(MODEL_GRAPE, &g_Enemy[number].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_Enemy[number].model, &g_Enemy[number].diffuse[0]);
+
+		g_Enemy[number].load = TRUE;
+
+		g_Enemy[number].pos = { -100.0f, ENEMY_OFFSET_Y, 0.0f };
+		g_Enemy[number].rot = { 0.0f, 0.0f, 0.0f };
+		g_Enemy[number].scl = { 0.8f, 1.0f, 1.0f };
+
+		g_Enemy[number].size = ENEMY_SIZE;	// 当たり判定の大きさ
+		g_Enemy[number].life = ENEMY_LIFE;
+		g_Enemy[number].lifeMax = g_Enemy[number].life;
+		g_Enemy[number].use = TRUE;
+		g_Enemy[number].attack = FALSE;
+		g_Enemy[number].attackUse = FALSE;
+
+		// 階層アニメーション用の初期化処理
+		g_Enemy[number].parent = NULL;			// 本体（親）なのでNULLを入れる
+		enemyNum++;
+	}
 }

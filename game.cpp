@@ -21,6 +21,7 @@
 #include "player.h"
 #include "cost.h"
 #include "enemy.h"
+#include "fieldchip.h"
 
 
 //*****************************************************************************
@@ -76,7 +77,11 @@ void InitSystem(void)
 	// フィールドの初期化
 	InitMeshField(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), FIELD_X, FIELD_Z, BLOCK_SIZE, BLOCK_SIZE, WATER);
 
+	InitMapChip();
+
 	InitCost();
+
+	SetGrape(0, 1);
 }
 
 //=============================================================================
@@ -90,6 +95,7 @@ void UninitGame(void)
 	UninitPlayer();
 
 	UninitEnemy();
+	UninitMapChip();
 }
 
 //=============================================================================
@@ -118,6 +124,10 @@ void UpdateGame(void)
 	if(g_bPause == FALSE)
 		return;
 
+	UpdateCamera();
+
+	UpdateMapChip();
+
 	UpdatePlayer();
 
 	UpdateEnemy();
@@ -145,6 +155,8 @@ void DrawGame0(void)
 	SwapShader(ans);
 
 	DrawMeshField();
+
+	DrawMapChip();
 
 	DrawPlayer();
 
@@ -184,6 +196,8 @@ void DrawGame0(void)
 void DrawGame1(void)
 {
 	DrawMeshField();
+
+	DrawMapChip();
 
 	DrawPlayer();
 
