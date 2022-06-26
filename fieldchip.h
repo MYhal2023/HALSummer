@@ -14,9 +14,9 @@
 #define	MODEL_FIELD002		"data/MODEL/longrange2.obj"			// 読み込むモデル名
 #define MAX_CHIP_NUM		(2)					// フィールドチップ種類
 #define MAX_CHIP_WIDTH		(8)					// 横のセット数
-#define MAX_CHIP_HEIGHT		(4)					// 縦のセット数
+#define MAX_CHIP_HEIGHT		(6)					// 縦のセット数
 
-#define	CHIP_SIZE		(30.0f)					// チップサイズの大きさ
+#define	CHIP_SIZE		(50.0f)					// チップサイズの大きさ
 
 enum CHIP_VAL
 {

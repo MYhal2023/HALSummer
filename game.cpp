@@ -22,6 +22,7 @@
 #include "cost.h"
 #include "enemy.h"
 #include "fieldchip.h"
+#include "base.h"
 
 
 //*****************************************************************************
@@ -81,7 +82,17 @@ void InitSystem(void)
 
 	InitCost();
 
-	SetGrape(0, 1);
+	SetGrape(5.0f);
+	SetGrape(50.0f);
+	SetGrape(90.0f);
+	SetGrape(100.0f);
+	SetGrape(110.0f);
+	SetPlayer(XMFLOAT3(200.0f, 10.0f, 100.0f));
+	SetNeutrophils(XMFLOAT3(100.0f, 10.0f, 100.0f));
+	XMFLOAT3 pos[2];
+	pos[0] = { 25.0f, 0.0f, 100.0f };
+	pos[1] = { 25.0f, 0.0f, 300.0f };
+	InitBase(3, &pos[0], 2);
 }
 
 //=============================================================================
@@ -142,6 +153,8 @@ void UpdateGame(void)
 	UpdateFog();
 	
 	UpdateSound();
+
+	BaseDamage();
 }
 
 //=============================================================================
@@ -210,8 +223,10 @@ void DrawGame(void)
 	XMFLOAT3 pos;
 
 	// プレイヤー視点
-	pos = GetPlayer()->pos;
-	//pos = {0.0f, 0.0f, 0.0f};
+	//pos = GetPlayer()->pos;
+	float center_w = CHIP_SIZE * (MAX_CHIP_WIDTH - 1) * 0.5f;
+	float center_h = CHIP_SIZE * MAX_CHIP_HEIGHT * 0.5f;
+	pos = { center_w, 0.0f, center_h };
 	//pos = GetEnemy()->pos;	//デバッグ用
 	SetCameraAT(pos);
 	SetCamera();
@@ -315,4 +330,15 @@ float FloatCompare(BOOL flag, float a, float b)
 BOOL CheckGameover(void)
 {
 	return FALSE;
+}
+
+//ダメージ計算関数。引数のそれぞれに、攻撃者の攻撃力と防御側の防御力を持ってくる
+int DamageFunc(int attacker, int diffender)
+{
+	//ひとまず単純な計算式で済ます
+	int ans = attacker - diffender;
+	//必ず1以上でダメージを返すようにする
+	if (ans <= 0)
+		ans = 1;
+	return ans;
 }

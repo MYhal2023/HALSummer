@@ -37,10 +37,12 @@ static BOOL			g_Load = FALSE;
 //ここで使用するマップチップナンバーを設定
 int g_DebugMap[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1]
 {
+	{1,1,1,1,1,1,1,1},
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0},
 	{1,1,1,1,1,1,1,1},
 	{0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1},
 };
 //=============================================================================
 // 初期化処理
@@ -76,9 +78,9 @@ HRESULT InitMapChip(void)
 	{
 		for (int k = 0; k < MAX_CHIP_WIDTH; k++)
 		{
-			g_MapSet[i][k].pos = { 0.0f + CHIP_SIZE * k, 0.0f,  0.0f + CHIP_SIZE * i };
+			g_MapSet[i][k].pos = { 0.0f + CHIP_SIZE * k, -1.0f,  0.0f + CHIP_SIZE * i };
 			g_MapSet[i][k].rot = { 0.0f, 0.0f, 0.0f };
-			g_MapSet[i][k].scl = { 1.0f, 1.0f, 1.0f };
+			g_MapSet[i][k].scl = { 1.7f, 1.0f, 1.7f };
 		}
 	}
 	g_Load = TRUE;

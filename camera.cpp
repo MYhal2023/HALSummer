@@ -11,6 +11,7 @@
 //#include "player.h"
 #include "time.h"
 #include "debugproc.h"
+#include "fieldchip.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
@@ -45,7 +46,7 @@ static int				g_ViewPortType = TYPE_FULL_SCREEN;
 //=============================================================================
 void InitCamera(void)
 {
-	g_Cam.pos = { 0.0f, 200.0f, 350.0f };
+	g_Cam.pos = { 0.0f, 300.0f, 350.0f };
 	g_Cam.at = { 0.0f, 0.0f, 0.0f };
 	g_Cam.atPos = { 0.0f, 0.0f, 0.0f };
 	g_Cam.up  = { 0.0f, 1.0f, 0.0f };
