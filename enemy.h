@@ -13,8 +13,10 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	MODEL_GRAPE		"data/MODEL/grape.obj"			// 読み込むモデル名
-#define	MODEL_GRAPE_PARTS		"data/MODEL/grape_parts.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE		"data/MODEL/grape0.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE_PARTS001		"data/MODEL/grape_parts001.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE_PARTS002		"data/MODEL/grape_parts002.obj"			// 読み込むモデル名
+#define	MODEL_GRAPE_PARTS003		"data/MODEL/grape_parts003.obj"			// 読み込むモデル名
 #define MAX_ENEMY		(5)					// エネミーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ

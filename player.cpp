@@ -368,9 +368,9 @@ void SetPlayer(XMFLOAT3 pos)
 	//パーツの初期化処理
 	for (int k = 0; k < g_Player[playerNum].partsNum; k++)
 	{
-		LoadModel(MODEL_GRAPE_PARTS, &g_Parts[partsNum].model);
-		// モデルのディフューズを保存しておく。色変え対応の為。
-		GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+		//LoadModel(MODEL_GRAPE_PARTS, &g_Parts[partsNum].model);
+		//// モデルのディフューズを保存しておく。色変え対応の為。
+		//GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
 		g_Parts[partsNum].load = TRUE;
 
 		g_Parts[partsNum].pos = { 20.0f, 10.0f, 0.0f };		// ポリゴンの位置
@@ -429,9 +429,9 @@ void SetNeutrophils(XMFLOAT3 pos)
 	//パーツの初期化処理
 	for (int k = 0; k < g_Player[playerNum].partsNum; k++)
 	{
-		LoadModel(MODEL_GRAPE_PARTS, &g_Parts[partsNum].model);
-		// モデルのディフューズを保存しておく。色変え対応の為。
-		GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+		//LoadModel(MODEL_GRAPE_PARTS, &g_Parts[partsNum].model);
+		//// モデルのディフューズを保存しておく。色変え対応の為。
+		//GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
 		g_Parts[partsNum].load = TRUE;
 
 		g_Parts[partsNum].pos = { 20.0f, 10.0f, 0.0f };		// ポリゴンの位置
