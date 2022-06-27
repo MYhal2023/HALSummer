@@ -381,9 +381,9 @@ void EnemyInterPoration(int i)
 	XMVECTOR scl = s1 - s0;
 	XMStoreFloat3(&g_Enemy[i].scl, s0 + scl * time);
 
-	for (int k = 0; k < g_Enemy[i].partsNum; k++)
+	for (int k = g_Enemy[i].startNum; k < g_Enemy[i].startNum + g_Enemy[i].partsNum; k++)
 	{
-		if (g_Parts[k].tbl_adr == NULL)return;	// 線形補間を実行する？
+		if (g_Parts[k].tbl_adr == NULL)continue;;	// 線形補間を実行する？
 
 		int		index = (int)g_Parts[k].move_time;
 		float	time = g_Parts[k].move_time - index;
