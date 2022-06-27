@@ -53,3 +53,8 @@ int GetBaseLife(void)
 {
 	return g_Base.life;
 }
+
+Base *GetBase(void)
+{
+	return &g_Base;
+}

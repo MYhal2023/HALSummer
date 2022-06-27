@@ -48,13 +48,11 @@ static PlayerParts	g_Parts[MAX_PLAYER * 2];						// プレイヤー
 static BOOL			g_Load = FALSE;
 static int			playerNum;
 static int			partsNum;
-
 // 階層アニメーションデータ
 static INTERPOLATION_DATA neutro_Attack[] = {	// pos, rot, scl, frame
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
-
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
 };
 
 
@@ -118,26 +116,30 @@ void UninitPlayer(void)
 //=============================================================================
 void UpdatePlayer(void)
 {
+	BlockEnemy();	//ブロック情報を更新
+
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		if (g_Player[i].use != TRUE)continue;
 
-		g_Player[i].StateCheck();
+		g_Player[i].StateCheck(i);
+		CheckEnemyTarget(i);
 		switch (g_Player[i].state)
 		{
 		case Standby:
 			break;
 
-		case Diffend:
+		case Deffend:
 			PlayerInterPoration(i);
 			break;
 		}
 
 	}
-	BlockEnemy();	//ブロック情報を更新
 #ifdef _DEBUG
 	PrintDebugProc("プレイヤー体力:%d\n", g_Player[0].life);
 	PrintDebugProc("プレイヤー体力:%d\n", g_Player[1].life);
+	PrintDebugProc("プレイヤー状態:%d\n", g_Player[1].state);
+	PrintDebugProc("プレイヤーターゲット:%d\n", g_Player[1].target);
 #endif
 }
 
@@ -255,7 +257,7 @@ void PlayerInterPoration(int i)
 	XMVECTOR r1 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 1].rot);	// 次の角度
 	XMVECTOR r0 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 0].rot);	// 現在の角度
 	XMVECTOR rot = r1 - r0;
-	XMStoreFloat3(&g_Player[i].rot, r0 + rot * time);
+	XMStoreFloat3(&g_Player[i].rot, XMLoadFloat3(&g_Player[i].rot) + r0 + rot * time);
 
 	// scaleを求める S = StartX + (EndX - StartX) * 今の時間
 	XMVECTOR s1 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 1].scl);	// 次のScale
@@ -282,6 +284,7 @@ void BlockEnemy(void)
 		enemy[k].blocked = FALSE;
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
+		if (g_Player[i].use != TRUE)continue;
 		g_Player[i].blockNum = 0;	//ブロック数を0にリセット
 		for (int k = 0; k < MAX_ENEMY; k++)
 		{
@@ -304,22 +307,27 @@ void BlockEnemy(void)
 void CheckEnemyTarget(int i)
 {
 	//攻撃中ではないならここでターゲット決定はしない
-	if (g_Player[i].state != Diffend) {
+	if (g_Player[i].state != Deffend) {
 		g_Player[i].target = 99;
 		return;
 	}
 	ENEMY *enemy = GetEnemy();
+	Base *base = GetBase();
 	float cmp = 0.0f;;
-	for (int k = 0; k < MAX_ENEMY; k++)
+	for (int k = 0; k < g_Player[i].count; k++)
 	{
-		XMVECTOR v1 = XMLoadFloat3(&g_Player[i].pos) - XMLoadFloat3(&enemy[k].pos);
-		XMFLOAT3 countData;
-		XMStoreFloat3(&countData, v1);
-		float dist = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
-		if (dist > cmp)
+		if (g_Player[i].targetable[k] == 99)continue;
+		for (int j = 0; j < base->baseNum; j++)
 		{
-			cmp = dist;
-			g_Player[i].target = k;	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…
+			XMVECTOR v1 = XMLoadFloat3(&base->pos[j]) - XMLoadFloat3(&enemy[g_Player[i].targetable[k]].pos);
+			XMFLOAT3 countData;
+			XMStoreFloat3(&countData, v1);
+			float dist = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
+			if (dist > cmp)
+			{
+				cmp = dist;
+				g_Player[i].target = g_Player[i].targetable[k];	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…
+			}
 		}
 	}
 }
@@ -346,6 +354,10 @@ void SetPlayer(XMFLOAT3 pos)
 	g_Player[playerNum].attackUse = FALSE;
 	g_Player[playerNum].blockMax = 2;
 	g_Player[playerNum].blockNum = 0;
+	g_Player[playerNum].target = 99;
+	for (int i = 0; i < MAX_TARGET; i++)
+		g_Player[playerNum].targetable[i] = 99;
+	g_Player[playerNum].count = 0;
 	g_Player[playerNum].startNum = partsNum;
 	g_Player[playerNum].partsNum = 0;
 
@@ -398,14 +410,17 @@ void SetNeutrophils(XMFLOAT3 pos)
 	g_Player[playerNum].blockMax = 2;
 	g_Player[playerNum].blockNum = 0;
 	g_Player[playerNum].target = 99;
+	for (int i = 0; i < MAX_TARGET; i++)
+		g_Player[playerNum].targetable[i] = 99;
+	g_Player[playerNum].count = 0;
 	g_Player[playerNum].atCount = 0;
 	g_Player[playerNum].atFrameCount = 0;
 	g_Player[playerNum].atFrame = 20;
 	g_Player[playerNum].startNum = partsNum;
 	g_Player[playerNum].partsNum = 0;
-	g_Parts[partsNum].tbl_adr = neutro_Attack;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_size = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].move_time = 0;	// 実行時間
+	g_Player[playerNum].tbl_adr = neutro_Attack;	// アニメデータのテーブル先頭アドレス
+	g_Player[playerNum].tbl_size = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Player[playerNum].move_time = 0.0f;	// 実行時間
 
 	// 階層アニメーション用の初期化処理
 	g_Player[playerNum].parent = NULL;			// 本体（親）なのでNULLを入れる
@@ -445,7 +460,23 @@ PLAYER *GetPlayer(void)
 	return &g_Player[0];
 }
 
-void PLAYER::StateCheck(void)
+void PLAYER::StateCheck(int i)
 {
-
+	g_Player[i].state = Standby;	//とりあえず待機状態にセット
+	ENEMY *enemy = GetEnemy();
+	g_Player[i].count = 0;
+	for (int k = 0; k < MAX_TARGET; k++)
+	{
+		g_Player[i].targetable[k] = 99;
+	}
+	for (int k = 0; k < GetEnemyNum(); k++)
+	{
+		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る
+		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size, 10.0f))
+		{
+			g_Player[i].state = Deffend;
+			g_Player[i].targetable[g_Player[i].count] = k;
+			g_Player[i].count++;
+		}
+	}
 }

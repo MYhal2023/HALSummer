@@ -15,13 +15,14 @@
 #define	MODEL_PLAYER		"data/MODEL/dendritic_cells.obj"			// 読み込むモデル名
 #define	MODEL_NEUTROPHILS	"data/MODEL/neutrophils.obj"			// 読み込むモデル名
 #define MAX_PLAYER		(2)					// プレイヤーの数
+#define MAX_TARGET		(10)					// プレイヤーの数
 
-#define	PLAYER_SIZE		(5.0f)				// 当たり判定の大きさ
+#define	PLAYER_SIZE		(10.0f)				// 当たり判定の大きさ
 
 enum PLAYER_STATE
 {
 	Standby,	//待機中
-	Diffend,	//迎撃中
+	Deffend,	//迎撃中
 };
 
 //*****************************************************************************
@@ -36,7 +37,9 @@ public:
 	int				blockNum;		//ブロックしている数
 	int				blockMax;		//ブロック可能数
 	int				target;			//ターゲット無しは99で
-	void StateCheck(void);
+	int				targetable[MAX_TARGET];	//ターゲット可能な敵の配列添え字を保存しておくもの。このリストの内から、target変数に引き渡される
+	int				count;					//現在ターゲットにしている数
+	void StateCheck(int i);			//配列の添え字を引数に持ってくる
 };
 
 struct PlayerParts

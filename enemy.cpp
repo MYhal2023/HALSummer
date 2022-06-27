@@ -163,6 +163,8 @@ void UpdateEnemy(void)
 #ifdef _DEBUG
 	PrintDebugProc("エネミー体力:%d\n", g_Enemy[0].life);
 	PrintDebugProc("エネミー体力:%d\n", g_Enemy[1].life);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[2].life);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[3].life);
 #endif
 
 }
@@ -378,6 +380,43 @@ void EnemyInterPoration(int i)
 	XMVECTOR s0 = XMLoadFloat3(&g_Enemy[i].tbl_adr[index + 0].scl);	// 現在のScale
 	XMVECTOR scl = s1 - s0;
 	XMStoreFloat3(&g_Enemy[i].scl, s0 + scl * time);
+
+	for (int k = 0; k < g_Enemy[i].partsNum; k++)
+	{
+		if (g_Parts[k].tbl_adr == NULL)return;	// 線形補間を実行する？
+
+		int		index = (int)g_Parts[k].move_time;
+		float	time = g_Parts[k].move_time - index;
+		int		size = g_Parts[k].tbl_size;
+
+		float dt = 1.0f / g_Parts[k].tbl_adr[index].frame;	// 1フレームで進める時間
+		g_Parts[k].move_time += dt;							// アニメーションの合計時間に足す
+
+		if (index > (size - 2))	// ゴールをオーバーしていたら、データを最初に戻して攻撃を終了
+		{
+			g_Parts[k].move_time = 0.0f;
+			index = 0;
+		}
+
+		// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 1].pos);	// 次の場所
+		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 0].pos);	// 現在の場所
+		XMVECTOR vec = p1 - p0;
+		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+
+		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 1].rot);	// 次の角度
+		XMVECTOR r0 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 0].rot);	// 現在の角度
+		XMVECTOR rot = r1 - r0;
+		XMStoreFloat3(&g_Parts[k].rot, r0 + rot * time);
+
+		// scaleを求める S = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR s1 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 1].scl);	// 次のScale
+		XMVECTOR s0 = XMLoadFloat3(&g_Parts[k].tbl_adr[index + 0].scl);	// 現在のScale
+		XMVECTOR scl = s1 - s0;
+		XMStoreFloat3(&g_Parts[k].scl, s0 + scl * time);
+	}
+
 
 	//ここから攻撃処理
 	if (g_Enemy[i].target == NULL || g_Enemy[i].attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？

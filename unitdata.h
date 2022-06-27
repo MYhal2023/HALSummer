@@ -15,7 +15,7 @@ public:
 	XMFLOAT4			diffuse[MODEL_MAX_MATERIAL];	// モデルの色
 
 	float				dir;		// 向き
-	float				size;		// 当たり判定の大きさ
+	float				size;		// 攻撃範囲の大きさ
 	BOOL				use;
 
 	// 階層アニメーション用のメンバー変数
