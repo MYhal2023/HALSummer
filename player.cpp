@@ -54,14 +54,27 @@ static INTERPOLATION_DATA neutro_Attack[] = {	// pos, rot, scl, frame
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
 };
-
-
+static INTERPOLATION_DATA neutro_Attack2[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
+};
+static INTERPOLATION_DATA neutro_Attack3[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
+};
+static INTERPOLATION_DATA* data[3] = { neutro_Attack ,neutro_Attack2 ,neutro_Attack3 };
+static char name[2][64];
 
 //=============================================================================
 // 初期化処理
 //=============================================================================
 HRESULT InitPlayer(void)
 {
+	strcpy(name[0], MODEL_PLAYER);
+	strcpy(name[1], MODEL_NEUTROPHILS);
+
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		//LoadModel(MODEL_PLAYER, &g_Player[i].model);
@@ -99,6 +112,8 @@ void UninitPlayer(void)
 {
 	if (g_Load == FALSE) return;
 
+	name[0][0] = NULL;
+	name[1][0] = NULL;
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		// モデルの解放処理
@@ -303,7 +318,8 @@ void BlockEnemy(void)
 	}
 }
 
-//敵キャラの攻撃ターゲット決定。一番近い敵を見つけて攻撃する
+//遠距離キャラのターゲット決定関数？一応近接キャラもいける
+//敵キャラの攻撃ターゲット決定。拠点から一番近い敵を見つけて攻撃する
 void CheckEnemyTarget(int i)
 {
 	//攻撃中ではないならここでターゲット決定はしない
@@ -332,9 +348,10 @@ void CheckEnemyTarget(int i)
 	}
 }
 
+
 void SetPlayer(XMFLOAT3 pos)
 {
-	LoadModel(MODEL_PLAYER, &g_Player[playerNum].model);
+	LoadModel(name[0], &g_Player[playerNum].model);
 	// モデルのディフューズを保存しておく。色変え対応の為。
 	GetModelDiffuse(&g_Player[playerNum].model, &g_Player[playerNum].diffuse[0]);
 
@@ -389,7 +406,7 @@ void SetPlayer(XMFLOAT3 pos)
 
 void SetNeutrophils(XMFLOAT3 pos)
 {
-	LoadModel(MODEL_NEUTROPHILS, &g_Player[playerNum].model);
+	LoadModel(name[1], &g_Player[playerNum].model);
 	// モデルのディフューズを保存しておく。色変え対応の為。
 	GetModelDiffuse(&g_Player[playerNum].model, &g_Player[playerNum].diffuse[0]);
 
@@ -452,6 +469,20 @@ int GetPlayerNum(void)
 {
 	return playerNum;
 }
+
+void SetPlayerNum(int s)
+{
+	playerNum += s;
+}
+int GetPlayerPartsNum(void)
+{
+	return partsNum;
+}
+
+void SetPlayerPartsNum(int s)
+{
+	partsNum += s;
+}
 //=============================================================================
 // プレイヤー情報を取得
 //=============================================================================
@@ -460,6 +491,17 @@ PLAYER *GetPlayer(void)
 	return &g_Player[0];
 }
 
+PlayerParts *GetPlayerParts(void)
+{
+	return &g_Parts[0];
+}
+
+INTERPOLATION_DATA *GetInterPorationData(void)
+{
+	return data[0];
+}
+
+//現在は最初に登場した敵を優先してターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)
 {
 	g_Player[i].state = Standby;	//とりあえず待機状態にセット

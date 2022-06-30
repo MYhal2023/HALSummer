@@ -249,8 +249,6 @@ void DrawEnemy(void)
 	}
 
 
-
-
 	// ƒJƒŠƒ“ƒOİ’è‚ğ–ß‚·
 	SetCullingMode(CULL_MODE_BACK);
 }

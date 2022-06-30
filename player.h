@@ -70,10 +70,14 @@ void DrawPlayer(void);
 
 void BlockEnemy(void);
 PLAYER *GetPlayer(void);
+PlayerParts *GetPlayerParts(void);
+INTERPOLATION_DATA *GetInterPorationData(void);
 void PlayerInterPoration(int i);
 void CheckEnemyTarget(int i);
 void SetPlayer(XMFLOAT3 pos);
 void SetNeutrophils(XMFLOAT3 pos);
 int GetPlayerNum(void);
-
+void SetPlayerNum(int s);
+int GetPlayerPartsNum(void);
+void SetPlayerPartsNum(int s);
 #endif

@@ -147,11 +147,13 @@
     <ClCompile Include="meshfield.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="playerSet.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="shadow.cpp" />
     <ClCompile Include="shadow_renderer.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="team.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.h" />
@@ -164,12 +166,14 @@
     <ClInclude Include="fieldchip.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="team.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="meshfield.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="playerSet.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="shadow.h" />
     <ClInclude Include="shadow_renderer.h" />

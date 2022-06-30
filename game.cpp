@@ -44,6 +44,7 @@ static int	g_ViewPortType_Game = TYPE_FULL_SCREEN;
 
 static BOOL	g_bPause = TRUE;	// ポーズON/OFF
 static int	g_PlayMode = MAIN_GAME;
+static int mode = 1;
 
 //=============================================================================
 // 初期化処理
@@ -115,18 +116,15 @@ void UninitGame(void)
 void UpdateGame(void)
 {
 #ifdef _DEBUG
-	if (GetKeyboardTrigger(DIK_V))
-	{
-		g_ViewPortType_Game = (g_ViewPortType_Game + 1) % TYPE_NONE;
-		SetViewPort(g_ViewPortType_Game);
-	}
-
 	if (GetKeyboardTrigger(DIK_P))
 	{
 		g_bPause = g_bPause ? FALSE : TRUE;
 	}
 
-
+	if (GetKeyboardTrigger(DIK_O))
+	{
+		mode == 1 ? mode++ : mode--;
+	}
 #endif
 	FADE fade = GetFade();
 	if (fade != FADE_NONE)return;
@@ -135,26 +133,29 @@ void UpdateGame(void)
 	if(g_bPause == FALSE)
 		return;
 
-	UpdateCamera();
+	for (int i = 0; i < mode; i++)
+	{
+		UpdateCamera();
 
-	UpdateMapChip();
+		UpdateMapChip();
 
-	UpdatePlayer();
+		UpdatePlayer();
 
-	UpdateEnemy();
+		UpdateEnemy();
 
-	UpdateLight();
+		UpdateLight();
 
-	IncTimeCost();
+		IncTimeCost();
 
-	// 影の更新処理
-	UpdateShadow();
+		// 影の更新処理
+		UpdateShadow();
 
-	UpdateFog();
-	
-	UpdateSound();
+		UpdateFog();
 
-	BaseDamage();
+		UpdateSound();
+
+		BaseDamage();
+	}
 }
 
 //=============================================================================
