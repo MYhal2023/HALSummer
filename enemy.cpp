@@ -20,6 +20,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+#define TEXTURE_MAX			(1)								// テクスチャの数
+#define VAR_WIDTH			(50.0f)
+#define VAR_HEIGHT			(5.0f)
 #define	VALUE_MOVE			(2.0f)							// 移動量
 #define	VALUE_AT_MOVE		(4.0f)							// 移動量
 #define	VALUE_ROTATE		(XM_PI * 0.02f)					// 回転量
@@ -32,7 +35,7 @@
 #define ENEMY_PARTS_MAX	(1)								// プレイヤーのパーツの数
 #define ENEMY_AT_FLAME		(30.0f)							// プレイヤーの攻撃フレーム
 #define ENEMY_INVINC_FLAME	(120.0f)						// プレイヤー無敵フレーム
-
+#define MAX_ENEMY_PARTS (MAX_ENEMY * 3)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -41,8 +44,14 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
+static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
+static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static char* g_TextureName[] = {
+	"data/TEXTURE/var.png",
+};
+static PLAYER_VAR	g_EnemyVar;
 static ENEMY		g_Enemy[MAX_ENEMY];						// エネミー
-static EnemyParts	g_Parts[MAX_ENEMY * 3];					// エネミーのパーツ。余裕をもってエネミー×2倍の数用意
+static EnemyParts	g_Parts[MAX_ENEMY_PARTS];					// エネミーのパーツ。余裕をもってエネミー×2倍の数用意
 
 static BOOL			g_Load = FALSE;
 static int			atCount;
@@ -65,6 +74,26 @@ static INTERPOLATION_DATA grape_Attack[] = {	// pos, rot, scl, frame
 //=============================================================================
 HRESULT InitEnemy(void)
 {
+	ID3D11Device *pDevice = GetDevice();
+	MakeVertexEnemyVar();
+	// テクスチャ生成
+	for (int i = 0; i < TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_TextureName[i],
+			NULL,
+			NULL,
+			&g_Texture[i],
+			NULL);
+	}
+
+	ZeroMemory(&g_EnemyVar.material, sizeof(g_EnemyVar.material));
+	g_EnemyVar.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	g_EnemyVar.pos = { 0.0f, 0.0f, 0.0f };
+	g_EnemyVar.rot = { XM_PI * -0.5f, 0.0f, 0.0f };
+	g_EnemyVar.scl = { 1.0f, 1.0f, 1.0f };
+	g_EnemyVar.load = TRUE;
+
 	for (int i = 0; i < MAX_ENEMY; i++)
 	{
 		//LoadModel(MODEL_GRAPE, &g_Enemy[i].model);
@@ -78,6 +107,7 @@ HRESULT InitEnemy(void)
 		g_Enemy[i].scl = { 0.8f, 1.0f, 1.0f };
 
 		g_Enemy[i].size = ENEMY_SIZE;	// 当たり判定の大きさ
+		g_Enemy[i].state = Move;
 		g_Enemy[i].life = ENEMY_LIFE;
 		g_Enemy[i].lifeMax = g_Enemy[i].life;
 		g_Enemy[i].use = FALSE;
@@ -87,11 +117,12 @@ HRESULT InitEnemy(void)
 		g_Enemy[i].tbl_adr = NULL;	// アニメデータのテーブル先頭アドレス
 		g_Enemy[i].tbl_size = 0;	// 登録したテーブルのレコード総数
 		g_Enemy[i].move_time = 0;	// 実行時間
-
+		g_Enemy[i].partsNum = 0;
+		g_Enemy[i].startNum = 0;
 		// 階層アニメーション用の初期化処理
 		g_Enemy[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 	}
-	for (int i = 0; i < MAX_ENEMY * 2; i++)
+	for (int i = 0; i < MAX_ENEMY_PARTS; i++)
 	{
 		g_Parts[i].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
 		g_Parts[i].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
@@ -119,6 +150,12 @@ HRESULT InitEnemy(void)
 void UninitEnemy(void)
 {
 	if (g_Load == FALSE) return;
+	// 頂点バッファの解放
+	if (g_VertexBuffer)
+	{
+		g_VertexBuffer->Release();
+		g_VertexBuffer = NULL;
+	}
 
 	for (int i = 0; i < MAX_ENEMY; i++)
 	{
@@ -127,6 +164,15 @@ void UninitEnemy(void)
 		{
 			UnloadModel(&g_Enemy[i].model);
 			g_Enemy[i].load = FALSE;
+		}
+	}
+	for (int i = 0; i < MAX_ENEMY_PARTS; i++)
+	{
+		// モデルの解放処理
+		if (g_Parts[i].load)
+		{
+			UnloadModel(&g_Parts[i].model);
+			g_Parts[i].load = FALSE;
 		}
 	}
 	g_Load = FALSE;
@@ -142,6 +188,11 @@ void UpdateEnemy(void)
 		//ルールベースで敵を攻撃し、ステートベースで遷移を行う。線形補間で移動
 
 		SetEnemyTime(i);	//エネミーの出現チェック
+
+		if (g_Enemy[i].life <= 0 && g_Enemy[i].use) {
+			g_Enemy[i].use = FALSE;
+			continue;
+		}
 
 		if (g_Enemy[i].use != TRUE)continue;	//死んでるか出現してない奴はスルー
 
@@ -165,6 +216,10 @@ void UpdateEnemy(void)
 	PrintDebugProc("エネミー体力:%d\n", g_Enemy[1].life);
 	PrintDebugProc("エネミー体力:%d\n", g_Enemy[2].life);
 	PrintDebugProc("エネミー体力:%d\n", g_Enemy[3].life);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[0].blocked);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[1].blocked);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[2].blocked);
+	PrintDebugProc("エネミー体力:%d\n", g_Enemy[3].blocked);
 #endif
 
 }
@@ -285,7 +340,7 @@ void SetGrape(float time)
 	g_Enemy[enemyNum].atInterval = 180;
 	g_Enemy[enemyNum].atFrame = 20;
 	g_Enemy[enemyNum].atFrameCount = 0;
-	g_Enemy[enemyNum].power = 5;
+	g_Enemy[enemyNum].power = 10;
 	g_Enemy[enemyNum].target = NULL;
 	g_Enemy[enemyNum].atCount = g_Enemy[enemyNum].atInterval;	//最初はノータイムで攻撃モーションへ
 	g_Enemy[enemyNum].type = Proximity;;
@@ -494,8 +549,18 @@ int StateCheck(int i)
 	if (g_Enemy[i].state == Attack)return Attack;
 
 	int ans = Move;			//デフォルトは移動
+	BOOL check = FALSE;
 	PLAYER *player = GetPlayer();
-	if (!CollisionBC(g_Enemy[i].pos, player->pos, 100.0f, 1.0f))return ans;
+	for (int k = 0; k < MAX_PLAYER; k++)
+	{
+		//1人でも生存しているユニットを見つけたら攻撃モードへ
+		if (player[k].use != TRUE)continue;
+		if (CollisionBC(g_Enemy[i].pos, player[k].pos, 100.0f, 1.0f)) { 
+			check = TRUE;
+			break;
+		}
+	}
+	if (check == FALSE)return ans;
 
 	g_Enemy[i].atCount++;
 	if (g_Enemy[i].atCount >= g_Enemy[i].atInterval)
@@ -516,6 +581,7 @@ void CheckTarget(int i)
 	float cmp = 0.0f;;
 	for (int k = 0; k < MAX_PLAYER; k++)
 	{
+		if (player[k].use != TRUE)continue;
 		XMVECTOR v1 = XMLoadFloat3(&g_Enemy[i].pos) - XMLoadFloat3(&player[k].pos);
 		XMFLOAT3 countData;
 		XMStoreFloat3(&countData, v1);
@@ -531,4 +597,124 @@ void CheckTarget(int i)
 int GetEnemyNum(void)
 {
 	return enemyNum;
+}
+
+//プレイヤーキャラの体力バーの表示処理
+void DrawEnemyLife(void)
+{
+	// Z比較なし
+	SetDepthEnable(FALSE);
+	// ライティングを無効
+	SetLightEnable(FALSE);
+
+	// 頂点バッファ設定
+	UINT stride = sizeof(VERTEX_3D);
+	UINT offset = 0;
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+
+	// プリミティブトポロジ設定
+	GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
+
+	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
+	//hpバーを設置
+	for (int i = 0; i < MAX_ENEMY; i++)
+	{
+		if (g_Enemy[i].use != TRUE)continue;	//使われてないプレイヤーはスルー
+
+		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
+		{
+			g_EnemyVar.pos = { g_Enemy[i].pos.x, g_Enemy[i].pos.y + 15.0f, g_Enemy[i].pos.z - 15.0f };
+			if (k == 0)
+			{
+				g_EnemyVar.scl = { 1.0f, 1.0f, 1.0f };
+				g_EnemyVar.material.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.7f);
+			}
+			else
+			{
+				float par = (float)(g_Enemy[i].life) / (float)(g_Enemy[i].lifeMax);
+				g_EnemyVar.scl = { par, 1.0f, 1.0f };
+				g_EnemyVar.pos.x -= (VAR_WIDTH * (1.0f - par)) * 0.5f;
+				g_EnemyVar.material.Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+			}
+			// ワールドマトリックスの初期化
+			mtxWorld = XMMatrixIdentity();
+
+			// スケールを反映
+			mtxScl = XMMatrixScaling(g_EnemyVar.scl.x, g_EnemyVar.scl.y, g_EnemyVar.scl.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+			// 回転を反映
+			mtxRot = XMMatrixRotationRollPitchYaw(g_EnemyVar.rot.x, g_EnemyVar.rot.y, g_EnemyVar.rot.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+			// 移動を反映
+			mtxTranslate = XMMatrixTranslation(g_EnemyVar.pos.x, g_EnemyVar.pos.y, g_EnemyVar.pos.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+			// ワールドマトリックスの設定
+			SetWorldMatrix(&mtxWorld);
+
+			// マテリアルの設定
+			SetMaterial(g_EnemyVar.material);
+
+			// ポリゴンの描画
+			GetDeviceContext()->Draw(4, 0);
+		}
+	}
+	// Z比較あり
+	SetDepthEnable(TRUE);
+	// ライティングを有効に
+	SetLightEnable(TRUE);
+
+}
+
+HRESULT MakeVertexEnemyVar(void)
+{
+	// 頂点バッファ生成
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VERTEX_3D) * 4;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
+
+
+	{//頂点バッファの中身を埋める
+		D3D11_MAPPED_SUBRESOURCE msr;
+		GetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+
+		VERTEX_3D* vertex = (VERTEX_3D*)msr.pData;
+
+		// 頂点座標の設定
+		vertex[0].Position = XMFLOAT3(-VAR_WIDTH / 2, 0.0f, VAR_HEIGHT / 2);
+		vertex[1].Position = XMFLOAT3(VAR_WIDTH / 2, 0.0f, VAR_HEIGHT / 2);
+		vertex[2].Position = XMFLOAT3(-VAR_WIDTH / 2, 0.0f, -VAR_HEIGHT / 2);
+		vertex[3].Position = XMFLOAT3(VAR_WIDTH / 2, 0.0f, -VAR_HEIGHT / 2);
+
+		// 法線の設定
+		vertex[0].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[1].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[2].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[3].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+		// 拡散光の設定
+		vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[3].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// テクスチャ座標の設定
+		vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
+		vertex[1].TexCoord = XMFLOAT2(1.0f, 0.0f);
+		vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
+		vertex[3].TexCoord = XMFLOAT2(1.0f, 1.0f);
+
+		GetDeviceContext()->Unmap(g_VertexBuffer, 0);
+	}
+
+	return S_OK;
 }

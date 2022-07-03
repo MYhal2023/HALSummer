@@ -5,6 +5,10 @@
 //
 //=============================================================================
 #include "playerSet.h"
+#include "debugproc.h"
+#include "team.h"
+#include "player.h"
+#include "game.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -21,9 +25,19 @@
 //*****************************************************************************
 static PlayerSet g_PlayerSet;
 static BOOL g_Load = FALSE;
-HRESULT PlayerSet::InitPlayerSet(void)
+HRESULT InitPlayerSet(void)
 {
 	g_PlayerSet.setPos = XMFLOAT3(0.0f, 15.0f, 0.0f);
+	g_PlayerSet.setMode = FALSE;
+	PlayerStatus *member = GetTeam();
+	//編成情報から、セット可能な配列箇所を読み込む
+	for (int i = 0; i < MAX_PLAYER_SET; i++)
+	{
+		g_PlayerSet.use[i] = FALSE;
+		if (member[i].use == FALSE)continue;	//編成枠未使用
+		g_PlayerSet.use[i] = TRUE;	//セット可能であることを表している
+		g_PlayerSet.setCharID = member[i].charID;
+	}
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -31,12 +45,18 @@ HRESULT PlayerSet::InitPlayerSet(void)
 void UninitPlayerSet(void)
 {
 	if (!g_Load)return;
+
+
 }
 
 void UpdatePlayerSet(void)
 {
-	g_PlayerSet.PlayerSetMap();
-	g_PlayerSet.SetPosition();
+	PlayerSetMap();
+	SetPosition();
+#ifdef _DEBUG
+	PrintDebugProc("カーソル座標:X:%f Z:%f", g_PlayerSet.setPos.x, g_PlayerSet.setPos.z);
+	PrintDebugProc("セットモード:%d", g_PlayerSet.setMode);
+#endif
 }
 
 void DrawPlayerSet(void)
@@ -45,118 +65,137 @@ void DrawPlayerSet(void)
 }
 
 //押されたテンキーを基にプレイヤーをセットする準備をする
-void PlayerSet::PlayerSetMap(void)
+void PlayerSetMap(void)
 {
 	if (GetKeyboardTrigger(DIK_0))
 	{
-		g_PlayerSet.SetModeChange(0);
+		SetModeChange(0);
 	}
-	if (GetKeyboardTrigger(DIK_1))
+	else if (GetKeyboardTrigger(DIK_1))
 	{
-		g_PlayerSet.SetModeChange(1);
+		SetModeChange(1);
 	}
 	else if (GetKeyboardTrigger(DIK_2))
 	{
-		g_PlayerSet.SetModeChange(2);
+		SetModeChange(2);
 
 	}
 	else if (GetKeyboardTrigger(DIK_3))
 	{
-		g_PlayerSet.SetModeChange(3);
+		SetModeChange(3);
 
 	}
 	else if (GetKeyboardTrigger(DIK_4))
 	{
-		g_PlayerSet.SetModeChange(4);
+		SetModeChange(4);
 
 	}
 	else if (GetKeyboardTrigger(DIK_5))
 	{
-		g_PlayerSet.SetModeChange(5);
+		SetModeChange(5);
 
 	}
 	else if (GetKeyboardTrigger(DIK_6))
 	{
-		g_PlayerSet.SetModeChange(6);
+		SetModeChange(6);
 
 	}
 	else if (GetKeyboardTrigger(DIK_7))
 	{
-		g_PlayerSet.SetModeChange(7);
+		SetModeChange(7);
 
 	}
 	else if (GetKeyboardTrigger(DIK_8))
 	{
-		g_PlayerSet.SetModeChange(8);
+		SetModeChange(8);
 
 	}
 	else if (GetKeyboardTrigger(DIK_9))
 	{
-		g_PlayerSet.SetModeChange(9);
-
+		SetModeChange(9);
 	}
 }
 
-void PlayerSet::SetModeChange(int i)
+void SetModeChange(int i)
 {
-	PLAYER *member = Team::GetTeam();
-	PlayerParts *parts = Team::GetTeamParts();
-	if (member[i].use != TRUE)return; //セット番号が空白。ここで返す
-	//編成情報から、セットするプレイヤーの先頭アドレスを抜き出す
+	if (g_PlayerSet.use[i] == FALSE)return;	//編成に登録されていないため返す
+
 	g_PlayerSet.setMode = TRUE;
-	g_PlayerSet.setPlayerParts = &parts[member[i].startNum];
-	g_PlayerSet.setPlayerNum = &member[i];
+	g_PlayerSet.setPlayer = i;
+	SetSlowMode(TRUE);
 }
 
 //プレイヤーをセットする座標を十字キーで変更できる
-void PlayerSet::SetPosition(void)
+void SetPosition(void)
 {
 	//セットモードに移行してなければ座標変更できない
 	if (!g_PlayerSet.setMode)return;
 
+	//マップ限界の中のみカーソル移動可
 	if (GetKeyboardTrigger(DIK_LEFT))
 	{
+		if(g_PlayerSet.setPos.x > 0.0f)
 		g_PlayerSet.setPos.x -= CHIP_SIZE;
 	}
 	else if (GetKeyboardTrigger(DIK_RIGHT))
 	{
+		if (g_PlayerSet.setPos.x < GetMapWidth())
 		g_PlayerSet.setPos.x += CHIP_SIZE;
 	}
 	else if (GetKeyboardTrigger(DIK_UP))
 	{
+		if (g_PlayerSet.setPos.z < GetMapHeight())
 		g_PlayerSet.setPos.z += CHIP_SIZE;
 	}
 	else if (GetKeyboardTrigger(DIK_DOWN))
 	{
+		if (g_PlayerSet.setPos.z > 0.0f)
 		g_PlayerSet.setPos.z -= CHIP_SIZE;
 	}
 
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
-		g_PlayerSet.setPlayerNum->pos = g_PlayerSet.setPos;
-		g_PlayerSet.SetPlayerInfo(g_PlayerSet.setPlayerNum, g_PlayerSet.setPlayerParts);
+		//プレイヤーを指定されたマップにセット
+		PLAYER *player = GetPlayer();
+		PlayerStatus *member = GetTeam();
+		PlayerPartsStatus *parts = GetTeamParts();
+		int x = (int)(g_PlayerSet.setPos.x / CHIP_SIZE);
+		int z = (int)(g_PlayerSet.setPos.z / CHIP_SIZE);
+		//設置可能マスで、まだ使われてないマスなら設置
+		if (CheckPlayerAble(&member[g_PlayerSet.setPlayer]) && !GetMapChipUse(z,x))
+		{
+			SetPlayerInfo(&member[g_PlayerSet.setPlayer], &parts[g_PlayerSet.setPlayer]);
+			g_PlayerSet.use[g_PlayerSet.setPlayer] = FALSE;	//セット不可状態にする
+			g_PlayerSet.setMode = FALSE;					//セットモード解除
+			SetMapChipUse(TRUE, z, x);
+			SetSlowMode(FALSE);
+		}
 	}
 }
 
-//抜き出したプレイヤー情報を出す
-void PlayerSet::SetPlayerInfo(PLAYER *member, PlayerParts* memberParts)
+//編成情報から抜き出したプレイヤー情報を戦闘用プレイヤー配列にセットして初期化
+void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 {
 	PLAYER *player = GetPlayer();
 	PlayerParts *parts = GetPlayerParts();
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
-		if (player[i].use != FALSE)continue;
+		if (player[i].use != FALSE)continue;	//未使用プレイヤー配列までスキップ
 
 		player[i].model = member->model;
 		GetModelDiffuse(&player[i].model, &player[i].diffuse[0]);
+		player[i].load = TRUE;
 		player[i].use = TRUE;
-		player[i].pos = member->pos;
-		player[i].rot = member->rot;
+		player[i].pos = g_PlayerSet.setPos;
+		player[i].rot = g_PlayerSet.setRot;
 		player[i].scl = member->scl;
-		player[i].atCount = member->atCount;
+		player[i].atCount = 0;
+		player[i].atFrameCount = 0;
+		player[i].atFrame = member->atFrame;
 		player[i].size = member->size;	// 当たり判定の大きさ
+		player[i].state = Standby;
 		player[i].life = member->life;
-		player[i].lifeMax = player[i].life;
+		player[i].lifeMax = member->lifeMax;
 		player[i].power = member->power;
 		player[i].diffend = member->diffend;
 		player[i].attack = FALSE;
@@ -170,12 +209,16 @@ void PlayerSet::SetPlayerInfo(PLAYER *member, PlayerParts* memberParts)
 		player[i].startNum = GetPlayerPartsNum();;
 		player[i].partsNum = member->partsNum;
 		player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
+		player[i].tbl_adr = member->tbl_adr;
+		player[i].tbl_size = member->tbl_size;
+		player[i].move_time = 0.0f;
 		SetPlayerNum(1);
 
 		//パーツの初期化処理
-		for (int k = GetPlayerPartsNum(); k < player[i].partsNum + GetPlayerPartsNum(); k++)
+		//使用する配列場所は、member->startNumとpartsNumによって事前に決められている
+		for (int k = player[i].startNum; k < player[i].partsNum + player[i].startNum; k++)
 		{
-			player[i].model = memberParts[k].model;
+			parts[k].model = memberParts[k].model;
 			GetModelDiffuse(&memberParts[k].model, &memberParts[k].diffuse[0]);
 			parts[k].load = TRUE;
 
@@ -185,11 +228,27 @@ void PlayerSet::SetPlayerInfo(PLAYER *member, PlayerParts* memberParts)
 
 			// 階層アニメーション用のメンバー変数
 			parts[k].tbl_adr = memberParts[k].tbl_adr;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_size = 0;	// 登録したテーブルのレコード総数
-			parts[k].move_time = 0;	// 実行時間
+			parts[k].tbl_size = sizeof(memberParts[k].tbl_adr) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
+			parts[k].move_time = 0;			// 実行時間
 			parts[k].parent = &player[i];	// 自分が親ならNULL、自分が子供なら親のアドレス
 			SetPlayerPartsNum(1);
 		}
-		return;
+		return;	//セットしきったので処理終了
 	}
+}
+
+//配置しようとしているマスは設置可能か否か
+BOOL CheckPlayerAble(PlayerStatus *member)
+{
+	BOOL ans = TRUE;
+	int x = (int)(g_PlayerSet.setPos.x / CHIP_SIZE);
+	int z = (int)(g_PlayerSet.setPos.z / CHIP_SIZE);
+	if (member->charType != GetMapChiptype(z, x))
+		ans = FALSE;
+
+	return ans;
+}
+PlayerSet *GetSetPos(void)
+{
+	return &g_PlayerSet;
 }

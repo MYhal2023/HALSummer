@@ -40,7 +40,11 @@ struct DX11_MODEL
 	unsigned short	SubsetNum;
 };
 
-
+enum ModelName
+{
+	MainPlayer,
+	Neutrophils,
+};
 
 //*****************************************************************************
 // プロトタイプ宣言

@@ -57,6 +57,7 @@ using namespace DirectX;
 #define	MAP_DOWN		(-MAP_H/2)
 #define	MAP_LEFT		(-MAP_W/2)
 #define	MAP_RIGHT		(MAP_W/2)
+#define MAX_PLAYER_SET (10)
 
 // 補間用のデータ構造体を定義
 struct INTERPOLATION_DATA

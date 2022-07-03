@@ -48,7 +48,7 @@ enum SHADER_MODE
 {
 	MODE_PLANE,
 	MODE_MONO,
-	MODE_SPECULAR,
+	MODE_FIELD_CHIP,
 	MODE_SHADER_NUM
 };
 //*********************************************************
@@ -158,6 +158,7 @@ void SetFog(FOG* fog);
 void DebugTextOut(char* text, int x, int y);
 
 void SetFuchi(int flag);
+void SetChip(int chip);
 void SetShaderCamera(XMFLOAT3 pos);
 void SwapShader(int flag);
 LIGHT *GetLight(void);

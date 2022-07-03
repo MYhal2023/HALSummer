@@ -5,6 +5,7 @@
 //
 //=============================================================================
 #include "main.h"
+#include "math.h"
 #include "input.h"
 #include "camera.h"
 #include "debugproc.h"
@@ -22,6 +23,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+#define TEXTURE_MAX			(1)								// テクスチャの数
+#define VAR_WIDTH			(50.0f)
+#define VAR_HEIGHT			(5.0f)
 #define	VALUE_MOVE			(2.0f)							// 移動量
 #define	VALUE_AT_MOVE		(4.0f)							// 移動量
 #define	VALUE_ROTATE		(XM_PI * 0.02f)					// 回転量
@@ -34,7 +38,7 @@
 #define PLAYER_PARTS_MAX	(1)								// プレイヤーのパーツの数
 #define PLAYER_AT_FLAME		(30.0f)							// プレイヤーの攻撃フレーム
 #define PLAYER_INVINC_FLAME	(120.0f)						// プレイヤー無敵フレーム
-
+#define MAX_PLAYER_PARTS (MAX_PLAYER * 2)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -43,8 +47,14 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
+static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
+static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static char* g_TextureName[] = {
+	"data/TEXTURE/var.png",
+};
+static PLAYER_VAR	g_PlayerVar;
 static PLAYER		g_Player[MAX_PLAYER];						// プレイヤー
-static PlayerParts	g_Parts[MAX_PLAYER * 2];						// プレイヤー
+static PlayerParts	g_Parts[MAX_PLAYER_PARTS];						// プレイヤー
 static BOOL			g_Load = FALSE;
 static int			playerNum;
 static int			partsNum;
@@ -72,6 +82,26 @@ static char name[2][64];
 //=============================================================================
 HRESULT InitPlayer(void)
 {
+	ID3D11Device *pDevice = GetDevice();
+	MakeVertexPlayerVar();
+	// テクスチャ生成
+	for (int i = 0; i < TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_TextureName[i],
+			NULL,
+			NULL,
+			&g_Texture[i],
+			NULL);
+	}
+
+	ZeroMemory(&g_PlayerVar.material, sizeof(g_PlayerVar.material));
+	g_PlayerVar.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	g_PlayerVar.pos = { 0.0f, 0.0f, 0.0f };
+	g_PlayerVar.rot = { XM_PI * -0.5f, 0.0f, 0.0f };
+	g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
+	g_PlayerVar.load = TRUE;
+
 	strcpy(name[0], MODEL_PLAYER);
 	strcpy(name[1], MODEL_NEUTROPHILS);
 
@@ -80,8 +110,8 @@ HRESULT InitPlayer(void)
 		//LoadModel(MODEL_PLAYER, &g_Player[i].model);
 		//// モデルのディフューズを保存しておく。色変え対応の為。
 		//GetModelDiffuse(&g_Player[i].model, &g_Player[i].diffuse[0]);
-
-		g_Player[i].pos = { 200.0f, PLAYER_OFFSET_Y, 100.0f };
+		g_Player[i].load = FALSE;
+		g_Player[i].pos = { 0.0f, PLAYER_OFFSET_Y, 0.0f };
 		g_Player[i].rot = { 0.0f, -XM_PI * 0.5f, 0.0f };
 		g_Player[i].scl = { 0.8f, 1.0f, 1.0f };
 
@@ -95,14 +125,20 @@ HRESULT InitPlayer(void)
 		g_Player[i].attackUse = FALSE;
 		g_Player[i].blockMax = 2;
 		g_Player[i].blockNum = 0;
-
+		g_Player[i].partsNum = 0;
+		g_Player[i].startNum = 0;
 		// 階層アニメーション用の初期化処理
 		g_Player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 	}
+
+	for (int i = 0; i < MAX_PLAYER_PARTS; i++)
+	{
+		g_Parts[i].load = FALSE;
+	}
+	
 	g_Load = TRUE;
 	playerNum = 0;
 	return S_OK;
-
 }
 
 //=============================================================================
@@ -112,8 +148,16 @@ void UninitPlayer(void)
 {
 	if (g_Load == FALSE) return;
 
-	name[0][0] = NULL;
-	name[1][0] = NULL;
+	name[0][0] = '0';
+	name[1][0] = '0';
+	// 頂点バッファの解放
+	if (g_VertexBuffer)
+	{
+		g_VertexBuffer->Release();
+		g_VertexBuffer = NULL;
+	}
+
+
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		// モデルの解放処理
@@ -121,6 +165,15 @@ void UninitPlayer(void)
 		{
 			UnloadModel(&g_Player[i].model);
 			g_Player[i].load = FALSE;
+		}
+	}
+	for (int i = 0; i < MAX_PLAYER_PARTS; i++)
+	{
+		// モデルの解放処理
+		if (g_Player[i].load)
+		{
+			UnloadModel(&g_Parts[i].model);
+			g_Parts[i].load = FALSE;
 		}
 	}
 	g_Load = FALSE;
@@ -137,6 +190,11 @@ void UpdatePlayer(void)
 	{
 		if (g_Player[i].use != TRUE)continue;
 
+		//体力が無くなったキャラの処理。消去する
+		if (g_Player[i].life <= 0 && g_Player[i].use) {
+			g_Player[i].use = FALSE;
+			continue;
+		}
 		g_Player[i].StateCheck(i);
 		CheckEnemyTarget(i);
 		switch (g_Player[i].state)
@@ -151,6 +209,11 @@ void UpdatePlayer(void)
 
 	}
 #ifdef _DEBUG
+	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[0].pos.x);
+	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[0].pos.z);
+	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[1].pos.x);
+	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[1].pos.z);
+	PrintDebugProc("プレイヤuse:%d\n", g_Player[0].use);
 	PrintDebugProc("プレイヤー体力:%d\n", g_Player[0].life);
 	PrintDebugProc("プレイヤー体力:%d\n", g_Player[1].life);
 	PrintDebugProc("プレイヤー状態:%d\n", g_Player[1].state);
@@ -297,6 +360,7 @@ void BlockEnemy(void)
 	ENEMY *enemy = GetEnemy();
 	for(int k = 0; k < MAX_ENEMY; k++)
 		enemy[k].blocked = FALSE;
+
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		if (g_Player[i].use != TRUE)continue;
@@ -308,12 +372,13 @@ void BlockEnemy(void)
 			if (g_Player[i].blockNum >= g_Player[i].blockMax ||
 				enemy[k].type != Proximity ||
 				enemy[k].use != TRUE)continue;
-			if (!CollisionBC(g_Player[i].pos, enemy[k].pos, 10.0f, 10.0f))continue;
+			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 10.0f, 10.0f)) {
+				//ここでエネミーを被ブロック状態へ変更する。攻撃先も自分へ
+				g_Player[i].blockNum++;
+				enemy[k].blocked = TRUE;
+				enemy[k].target = &g_Player[i];
+			}
 
-			//ここでエネミーを被ブロック状態へ変更する。攻撃先も自分へ
-			g_Player[i].blockNum++;
-			enemy[k].blocked = TRUE;
-			enemy[k].target = &g_Player[i];
 		}
 	}
 }
@@ -343,6 +408,9 @@ void CheckEnemyTarget(int i)
 			{
 				cmp = dist;
 				g_Player[i].target = g_Player[i].targetable[k];	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…
+				XMVECTOR v2 = XMLoadFloat3(&enemy[g_Player[i].targetable[k]].pos) - XMLoadFloat3(&g_Player[i].pos);
+				XMStoreFloat3(&countData, v2);
+				g_Player[i].rot.y = atan2f(countData.x, countData.z);
 			}
 		}
 	}
@@ -511,8 +579,9 @@ void PLAYER::StateCheck(int i)
 	{
 		g_Player[i].targetable[k] = 99;
 	}
-	for (int k = 0; k < GetEnemyNum(); k++)
+	for (int k = 0; k < MAX_ENEMY; k++)
 	{
+		if (enemy[k].use != TRUE)continue;
 		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る
 		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size, 10.0f))
 		{
@@ -521,4 +590,126 @@ void PLAYER::StateCheck(int i)
 			g_Player[i].count++;
 		}
 	}
+}
+
+//プレイヤーキャラの体力バーの表示処理
+void DrawPlayerLife(void)
+{
+	// Z比較なし
+	SetDepthEnable(FALSE);
+	// ライティングを無効
+	SetLightEnable(FALSE);
+
+	// 頂点バッファ設定
+	UINT stride = sizeof(VERTEX_3D);
+	UINT offset = 0;
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+
+	// プリミティブトポロジ設定
+	GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
+
+	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
+	//hpバーを設置
+	for (int i = 0; i < MAX_PLAYER; i++)
+	{
+		if (g_Player[i].use != TRUE)continue;	//使われてないプレイヤーはスルー
+		
+		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
+		{
+			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y, g_Player[i].pos.z - 25.0f };
+			if (k == 0)
+			{
+				g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
+				g_PlayerVar.material.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.7f);
+			}
+			else
+			{
+				float par = (float)(g_Player[i].life) / (float)(g_Player[i].lifeMax);
+				g_PlayerVar.scl = { par, 1.0f, 1.0f };
+				g_PlayerVar.pos.x -= (VAR_WIDTH * (1.0f - par)) * 0.5f;
+				g_PlayerVar.material.Diffuse = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+			}
+			// ワールドマトリックスの初期化
+			mtxWorld = XMMatrixIdentity();
+
+			// スケールを反映
+			mtxScl = XMMatrixScaling(g_PlayerVar.scl.x, g_PlayerVar.scl.y, g_PlayerVar.scl.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+			// 回転を反映
+			mtxRot = XMMatrixRotationRollPitchYaw(g_PlayerVar.rot.x, g_PlayerVar.rot.y, g_PlayerVar.rot.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+			// 移動を反映
+			mtxTranslate = XMMatrixTranslation(g_PlayerVar.pos.x, g_PlayerVar.pos.y, g_PlayerVar.pos.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+			// ワールドマトリックスの設定
+			SetWorldMatrix(&mtxWorld);
+
+			// マテリアルの設定
+			SetMaterial(g_PlayerVar.material);
+
+			// ポリゴンの描画
+			GetDeviceContext()->Draw(4, 0);
+		}
+	}
+	// Z比較あり
+	SetDepthEnable(TRUE);
+	// ライティングを有効に
+	SetLightEnable(TRUE);
+
+}
+
+
+
+HRESULT MakeVertexPlayerVar(void)
+{
+	// 頂点バッファ生成
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VERTEX_3D) * 4;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
+
+
+	{//頂点バッファの中身を埋める
+		D3D11_MAPPED_SUBRESOURCE msr;
+		GetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+
+		VERTEX_3D* vertex = (VERTEX_3D*)msr.pData;
+
+		// 頂点座標の設定
+		vertex[0].Position = XMFLOAT3(-VAR_WIDTH / 2, 0.0f, VAR_HEIGHT / 2);
+		vertex[1].Position = XMFLOAT3(VAR_WIDTH / 2, 0.0f, VAR_HEIGHT / 2);
+		vertex[2].Position = XMFLOAT3(-VAR_WIDTH / 2, 0.0f, -VAR_HEIGHT / 2);
+		vertex[3].Position = XMFLOAT3(VAR_WIDTH / 2, 0.0f, -VAR_HEIGHT / 2);
+
+		// 法線の設定
+		vertex[0].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[1].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[2].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		vertex[3].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+		// 拡散光の設定
+		vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertex[3].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// テクスチャ座標の設定
+		vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
+		vertex[1].TexCoord = XMFLOAT2(1.0f, 0.0f);
+		vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
+		vertex[3].TexCoord = XMFLOAT2(1.0f, 1.0f);
+
+		GetDeviceContext()->Unmap(g_VertexBuffer, 0);
+	}
+
+	return S_OK;
 }

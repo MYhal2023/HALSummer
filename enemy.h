@@ -95,5 +95,6 @@ void EnemyInterPoration(int i);
 void EnemyMove(int i);
 void CheckTarget(int i);
 int GetEnemyNum(void);
-
+void DrawEnemyLife(void);
+HRESULT MakeVertexEnemyVar(void);
 #endif

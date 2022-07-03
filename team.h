@@ -6,16 +6,15 @@
 //=============================================================================
 #pragma once
 #include "main.h"
-#include "player.h"
-#define MAX_PLAYER_SET (10)
+#include "playerSet.h"
 
-class Team : public PLAYER, public PlayerParts
+class Team
 {
-private:
-	int member[MAX_PLAYER_SET];
 public:
-	void InitTeam(void);
-	void SetMember(void);
-	static PLAYER* GetTeam(void);
-	static PlayerParts* GetTeamParts(void);
 };
+
+void UninitTeam(void);
+void InitTeam(void);
+void SetMember(int i);
+PlayerStatus* GetTeam(void);
+PlayerPartsStatus* GetTeamParts(void);

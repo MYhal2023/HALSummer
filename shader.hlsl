@@ -92,7 +92,10 @@ cbuffer LightProjectionBuffer : register(b9)
 	matrix LightProjection;
 }
 
-
+cbuffer FieldChip : register(b10)
+{
+	int			chip;
+}
 //=============================================================================
 // 頂点シェーダ
 //=============================================================================
@@ -346,7 +349,7 @@ void VertexShaderSpecularPolygon(in  float4 inPosition		: POSITION0,
 //=============================================================================
 //水面のピクセルシェーダー
 //=============================================================================
-void PixelShaderSpecularPolygon(	in  float4 inPosition	: SV_POSITION,
+void PixelShaderFieldChipPolygon(	in  float4 inPosition	: SV_POSITION,
 							in  float4 inNormal		: NORMAL0,
 							in  float2 inTexCoord	: TEXCOORD0,
 							in  float4 inDiffuse	: COLOR0,
@@ -377,53 +380,77 @@ void PixelShaderSpecularPolygon(	in  float4 inPosition	: SV_POSITION,
 
 	float SMZValue = g_SMDepth.Sample(g_SMSamplerState, SMTexture).r + 0.001f;	//影にしたい領域
 
-	if (SMZValue < ZValue) // ライトPOSから計算　SM＝ライトからの情報　Z＝視点からの情報
+	if (Light.Enable == 0)
 	{
-		color = float4(clamp(color.rgb - 0.2f, 0.0f, 1.0f), 1.0f);   // 影の色
+		color = color * Material.Diffuse;
+	}
+	else if (SMZValue < ZValue) // ライトPOSから計算　SM＝ライトからの情報　Z＝視点からの情報
+	{
+		color = float4(clamp(color.rgb - 0.85f, 0.0f, 1.0f), 1.0f);   // 影の色
 	}
 	else
 	{
-		float3 lightDir;
-		float light;
 		float4 tempColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		float4 outColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		if (Light.Flags[0].y == 1)
+		for (int i = 0; i < 5; i++)
 		{
-			if (Light.Flags[0].x == 1)
+			float3 lightDir;
+			float light;
+
+			if (Light.Flags[i].y == 1)
 			{
-				lightDir = normalize(Light.Direction[0].xyz);
-				light = dot(lightDir, inNormal.xyz);
+				if (Light.Flags[i].x == 1)
+				{
+					lightDir = normalize(Light.Direction[i].xyz);
+					light = dot(lightDir, inNormal.xyz);
 
-				light = 0.5 - 0.5 * light;
-				tempColor = color * Material.Diffuse * light * Light.Diffuse[0];
+					light = 0.5 - 0.5 * light;
+					tempColor = color * Material.Diffuse * light * Light.Diffuse[i];
+				}
+				else if (Light.Flags[i].x == 2)
+				{
+					lightDir = normalize(Light.Position[i].xyz - inWorldPos.xyz);
+					light = dot(lightDir, inNormal.xyz);
+
+					tempColor = color * Material.Diffuse * light * Light.Diffuse[i];
+
+					float distance = length(inWorldPos - Light.Position[i]);
+
+					float att = saturate((Light.Attenuation[i].x - distance) / Light.Attenuation[i].x);
+					tempColor *= att;
+				}
+				else
+				{
+					tempColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				outColor += tempColor;
 			}
-			else if (Light.Flags[0].x == 2)
-			{
-				lightDir = normalize(Light.Position[0].xyz - inWorldPos.xyz);
-				light = dot(lightDir, inNormal.xyz);
-
-				tempColor = color * Material.Diffuse * light * Light.Diffuse[0];
-
-				float distance = length(inWorldPos - Light.Position[0]);
-
-				float att = saturate((Light.Attenuation[0].x - distance) / Light.Attenuation[0].x);
-				tempColor *= att;
-			}
-			else
-			{
-				tempColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-			}
-
-			outColor += tempColor;
 		}
 
 		color = outColor;
 		color.a = inDiffuse.a * Material.Diffuse.a;
-
 	}
 
-	color.a = inDiffuse.a * Material.Diffuse.a;
-	outDiffuse = color;
+	//フォグ
+	if (Fog.Enable == 1)
+	{
+		float z = inPosition.z*inPosition.w;
+		float f = (Fog.Distance.y - z) / (Fog.Distance.y - Fog.Distance.x);
+		f = saturate(f);
+		outDiffuse = f * color + (1 - f)*Fog.FogColor;
+		outDiffuse.a = color.a;
+	}
+	else
+	{
+		outDiffuse = color;
+	}
+
+	//選択されたフィールドチップの色変化
+	if (chip == 1)
+	{
+		outDiffuse.rgb *= 0.5f;
+	}
 
 }

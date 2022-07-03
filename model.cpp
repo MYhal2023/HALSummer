@@ -8,6 +8,8 @@
 #include "main.h"
 #include "model.h"
 #include "camera.h"
+#include "player.h"
+#include "enemy.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -586,16 +588,12 @@ void SetModelDiffuse(DX11_MODEL *Model, int mno, XMFLOAT4 diffuse)
 	Model->SubsetArray[mno].Material.Material.Diffuse = diffuse;
 }
 
-//3Dモデルデータを一括で読み込む
+//3Dモデルデータのファイルをあらかじめセット
 void InitLoadModel(void)
 {
-	//PLAYER *player = GetPlayer();
-	//LoadModel(MODEL_PLAYER, &player->model);
-	//// モデルのディフューズを保存しておく。色変え対応の為。
-	//GetModelDiffuse(&player->model, &player->diffuse[0]);
-
 
 }
+
 
 void UninitModel(void)
 {

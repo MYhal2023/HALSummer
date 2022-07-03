@@ -14,7 +14,7 @@
 //*****************************************************************************
 #define	MODEL_PLAYER		"data/MODEL/dendritic_cells.obj"			// 読み込むモデル名
 #define	MODEL_NEUTROPHILS	"data/MODEL/neutrophils.obj"			// 読み込むモデル名
-#define MAX_PLAYER		(2)					// プレイヤーの数
+#define MAX_PLAYER		(10)					// プレイヤーの数
 #define MAX_TARGET		(10)					// プレイヤーの数
 
 #define	PLAYER_SIZE		(10.0f)				// 当たり判定の大きさ
@@ -60,6 +60,18 @@ struct PlayerParts
 	PLAYER				*parent;	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
 };
 
+struct PLAYER_VAR
+{
+	XMFLOAT3			pos;		// ポリゴンの位置
+	XMFLOAT3			rot;		// ポリゴンの向き(回転)
+	XMFLOAT3			scl;		// ポリゴンの大きさ(スケール)
+
+	XMFLOAT4X4			mtxWorld;	// ワールドマトリックス
+	MATERIAL			material;
+	BOOL				load;
+
+};
+
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -80,4 +92,6 @@ int GetPlayerNum(void);
 void SetPlayerNum(int s);
 int GetPlayerPartsNum(void);
 void SetPlayerPartsNum(int s);
+void DrawPlayerLife(void);
+HRESULT MakeVertexPlayerVar(void);
 #endif

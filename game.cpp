@@ -23,6 +23,10 @@
 #include "enemy.h"
 #include "fieldchip.h"
 #include "base.h"
+#include "playerSet.h"
+#include "team.h"
+#include "gameover.h"
+#include "ui.h"
 
 
 //*****************************************************************************
@@ -43,8 +47,20 @@
 static int	g_ViewPortType_Game = TYPE_FULL_SCREEN;
 
 static BOOL	g_bPause = TRUE;	// ポーズON/OFF
+static BOOL g_Slow = FALSE;
+static int s_mode = FALSE;
 static int	g_PlayMode = MAIN_GAME;
 static int mode = 1;
+//ここで使用するマップチップナンバーを設定
+int g_DebugMap[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1]
+{
+	{1,1,1,1,1,1,1,1},
+	{0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1},
+	{0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1},
+};
 
 //=============================================================================
 // 初期化処理
@@ -83,13 +99,21 @@ void InitSystem(void)
 
 	InitCost();
 
-	SetGrape(5.0f);
-	SetGrape(50.0f);
+	InitOver();
+
+	InitTeam();
+	SetMember(0);
+	SetMember(1);
+	SetMember(2);
+	InitPlayerSet();
+
+	InitUI();
+	SetBattleMap(g_DebugMap, MAX_CHIP_HEIGHT, MAX_CHIP_WIDTH);
+	//SetGrape(5.0f);
+	//SetGrape(50.0f);
 	SetGrape(90.0f);
-	SetGrape(100.0f);
-	SetGrape(110.0f);
-	SetPlayer(XMFLOAT3(200.0f, 10.0f, 100.0f));
-	SetNeutrophils(XMFLOAT3(100.0f, 10.0f, 100.0f));
+	SetGrape(120.0f);
+	SetGrape(180.0f);
 	XMFLOAT3 pos[2];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	pos[1] = { 25.0f, 0.0f, 300.0f };
@@ -106,8 +130,14 @@ void UninitGame(void)
 
 	UninitPlayer();
 
+	UninitOver();
+	//UninitTeam();
+
 	UninitEnemy();
+
 	UninitMapChip();
+
+	UninitUI();
 }
 
 //=============================================================================
@@ -116,22 +146,44 @@ void UninitGame(void)
 void UpdateGame(void)
 {
 #ifdef _DEBUG
+
+#endif
 	if (GetKeyboardTrigger(DIK_P))
 	{
-		g_bPause = g_bPause ? FALSE : TRUE;
+		if (g_bPause == TRUE)
+			g_bPause = FALSE;
+		else
+			g_bPause = TRUE;
 	}
 
+	//等速と倍速の切り替え
 	if (GetKeyboardTrigger(DIK_O))
 	{
 		mode == 1 ? mode++ : mode--;
 	}
-#endif
+
 	FADE fade = GetFade();
 	if (fade != FADE_NONE)return;
 
 
 	if(g_bPause == FALSE)
 		return;
+
+	UpdateOver();
+	if (CheckGameover())return;
+
+	UpdatePlayerSet();
+
+	if (g_Slow == TRUE)
+	{
+		mode = 1;
+		s_mode++;
+		if (s_mode > 2)
+		{
+			s_mode = 0;
+		}
+		else return;	//スロー中なら2回に1回だけ処理
+	}
 
 	for (int i = 0; i < mode; i++)
 	{
@@ -147,6 +199,7 @@ void UpdateGame(void)
 
 		IncTimeCost();
 
+
 		// 影の更新処理
 		UpdateShadow();
 
@@ -155,6 +208,8 @@ void UpdateGame(void)
 		UpdateSound();
 
 		BaseDamage();
+
+		UpdateUI();
 	}
 }
 
@@ -170,23 +225,28 @@ void DrawGame0(void)
 
 	DrawMeshField();
 
+	DrawBG();	//背景を先に描画
+
 	DrawMapChip();
 
 	DrawPlayer();
 
 	DrawEnemy();
 
-	// 影の描画処理
-	DrawShadow();
+	DrawPlayerLife();
 
-	// 2Dの物を描画する処理
+	DrawEnemyLife();
+
+	// 2D座標で物を描画する処理
 	// Z比較なし
 	SetDepthEnable(FALSE);
 
 	// ライティングを無効
 	SetLightEnable(FALSE);
 
+	DrawUI();
 
+	DrawOver();
 	//// スコアの描画処理
 	//DrawScore();
 
@@ -271,6 +331,10 @@ int GetPlayMode(void)
 	return g_PlayMode;
 }
 
+void SetSlowMode(BOOL flag)
+{
+	g_Slow = flag;
+}
 //void SetPlayStage(int stageNum)
 //{
 //	g_PlayStage = stageNum;
@@ -330,7 +394,9 @@ float FloatCompare(BOOL flag, float a, float b)
 
 BOOL CheckGameover(void)
 {
-	return FALSE;
+	BOOL ans = FALSE;
+	if (GetBaseLife() <= 0)ans = TRUE;
+	return ans;
 }
 
 //ダメージ計算関数。引数のそれぞれに、攻撃者の攻撃力と防御側の防御力を持ってくる

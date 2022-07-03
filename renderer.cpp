@@ -67,6 +67,12 @@ struct FUCHI
 	int			fill[3];
 };
 
+// フィールドチップ用バッファ
+struct CHIP
+{
+	int			chip;
+	int			fill[3];
+};
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -92,7 +98,7 @@ static ID3D11VertexShader*		g_VertexMonoShader = NULL;		//モノトーンフィルタ
 static ID3D11VertexShader*		g_VertexSpecularShader = NULL;	//水面用頂点シェーダー
 static ID3D11PixelShader*		g_PixelShader = NULL;
 static ID3D11PixelShader*		g_PixelMonoShader = NULL;		//モノトーンフィルタ
-static ID3D11PixelShader*		g_PixelSpecularShader = NULL;	//水面用ピクセルシェーダー
+static ID3D11PixelShader*		g_PixelFieldChip = NULL;	//水面用ピクセルシェーダー
 static ID3D11InputLayout*		g_VertexLayout = NULL;			//通常書き込み先
 static ID3D11InputLayout*		g_VertexMonoLayout = NULL;		//モノトーンフィルタ書き込み先
 static ID3D11InputLayout*		g_VertexWaterLayout = NULL;		//水面書き込み先
@@ -106,6 +112,7 @@ static ID3D11Buffer*			g_MaterialBuffer = NULL;
 static ID3D11Buffer*			g_LightBuffer = NULL;
 static ID3D11Buffer*			g_FogBuffer = NULL;
 static ID3D11Buffer*			g_FuchiBuffer = NULL;
+static ID3D11Buffer*			g_ChipBuffer = NULL;
 static ID3D11Buffer*			g_CameraBuffer = NULL;
 
 static ID3D11DepthStencilState* g_DepthStateEnable;
@@ -128,7 +135,7 @@ static LIGHT_CBUFFER	g_Light;
 static FOG_CBUFFER		g_Fog;
 
 static FUCHI			g_Fuchi;
-
+static CHIP				g_Chip;
 static ID3D11SamplerState* g_SamplerState = NULL;
 static D3D11_VIEWPORT g_ViewPort;
 static LIGHT g_LightMat;
@@ -418,6 +425,11 @@ void SetFuchi(int flag)
 	GetDeviceContext()->UpdateSubresource(g_FuchiBuffer, 0, NULL, &g_Fuchi, 0, 0);
 }
 
+void SetChip(int flag)
+{
+	g_Chip.chip = flag;
+	GetDeviceContext()->UpdateSubresource(g_ChipBuffer, 0, NULL, &g_Chip, 0, 0);
+}
 
 void SetShaderCamera(XMFLOAT3 pos)
 {
@@ -744,15 +756,15 @@ HRESULT InitRenderer(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	pPSBlob->Release();
 
-	// 水面ピクセルシェーダコンパイル・生成
+	// フィールドチップシェーダコンパイル・生成
 	pPSBlob = NULL;
-	hr = D3DX11CompileFromFile("shader.hlsl", NULL, NULL, "PixelShaderSpecularPolygon", "ps_4_0", shFlag, 0, NULL, &pPSBlob, &pErrorBlob, NULL);
+	hr = D3DX11CompileFromFile("shader.hlsl", NULL, NULL, "PixelShaderFieldChipPolygon", "ps_4_0", shFlag, 0, NULL, &pPSBlob, &pErrorBlob, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, (char*)pErrorBlob->GetBufferPointer(), "PS", MB_OK | MB_ICONERROR);
 	}
 
-	g_D3DDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), NULL, &g_PixelSpecularShader);
+	g_D3DDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), NULL, &g_PixelFieldChip);
 
 	pPSBlob->Release();
 
@@ -796,6 +808,10 @@ HRESULT InitRenderer(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//カメラ
 	hBufferDesc.ByteWidth = sizeof(XMFLOAT4);
 	g_D3DDevice->CreateBuffer(&hBufferDesc, NULL, &g_CameraBuffer);
+
+	//フィールドチップ
+	hBufferDesc.ByteWidth = sizeof(CHIP);
+	g_D3DDevice->CreateBuffer(&hBufferDesc, NULL, &g_ChipBuffer);
 
 	//ライト初期化
 	ZeroMemory(&g_Light, sizeof(LIGHT_CBUFFER));
@@ -843,6 +859,7 @@ void UninitRenderer(void)
 	if (g_MaterialBuffer)		g_MaterialBuffer->Release();
 	if (g_LightBuffer)			g_LightBuffer->Release();
 	if (g_FogBuffer)			g_FogBuffer->Release();
+	if (g_ChipBuffer)			g_ChipBuffer->Release();
 
 	if (g_VertexLayout)			g_VertexLayout->Release();
 	if (g_VertexShader)			g_VertexShader->Release();
@@ -853,7 +870,7 @@ void UninitRenderer(void)
 	if (g_PixelMonoShader)		g_PixelMonoShader->Release();
 	if (g_VertexWaterLayout)	g_VertexWaterLayout->Release();
 	if (g_VertexSpecularShader) g_VertexSpecularShader->Release();
-	if (g_PixelSpecularShader)  g_PixelSpecularShader->Release();
+	if (g_PixelFieldChip)  g_PixelFieldChip->Release();
 
 	if (g_ImmediateContext)		g_ImmediateContext->ClearState();
 	if (g_RenderTargetView)		g_RenderTargetView->Release();
@@ -896,6 +913,9 @@ void SetRenderer(void)
 
 	g_ImmediateContext->VSSetConstantBuffers(9, 1, &g_LightProjectionBuffer);
 	g_ImmediateContext->PSSetConstantBuffers(9, 1, &g_LightProjectionBuffer);
+
+	g_ImmediateContext->VSSetConstantBuffers(10, 1, &g_ChipBuffer);
+	g_ImmediateContext->PSSetConstantBuffers(10, 1, &g_ChipBuffer);
 
 	g_ImmediateContext->OMSetRenderTargets(1, &g_RenderTargetView, g_DepthStencilView);
 	g_ImmediateContext->OMSetDepthStencilState(g_DepthStateEnable, NULL);
@@ -1002,10 +1022,10 @@ void SwapShader(int flag)
 		g_ImmediateContext->PSSetShader(g_PixelMonoShader, NULL, 0);
 		g_ImmediateContext->IASetInputLayout(g_VertexMonoLayout);
 		break;
-	case MODE_SPECULAR:
-		//水面描画
-		g_ImmediateContext->VSSetShader(g_VertexSpecularShader, NULL, 0);
-		g_ImmediateContext->PSSetShader(g_PixelSpecularShader, NULL, 0);
+	case MODE_FIELD_CHIP:
+		//マップチップ描画
+		g_ImmediateContext->VSSetShader(g_VertexShader, NULL, 0);
+		g_ImmediateContext->PSSetShader(g_PixelFieldChip, NULL, 0);
 		g_ImmediateContext->IASetInputLayout(g_VertexWaterLayout);
 		break;
 	}

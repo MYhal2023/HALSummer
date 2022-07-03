@@ -51,6 +51,7 @@ void DrawGame0(void);
 void DrawGame1(void);
 void SetPlayMode(int playMode);
 int GetPlayMode(void);
+void SetSlowMode(BOOL flag);
 //void SetPlayStage(int stageNum);
 //int GetPlayStage(void);
 void SetViewPortType(int viewport);
