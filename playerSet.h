@@ -39,9 +39,11 @@ public:
 	XMFLOAT3			scl;	//セットする先の座標
 	float				size;		// 攻撃範囲の大きさ
 	// 階層アニメーション用のメンバー変数
-	INTERPOLATION_DATA	*tbl_adr;	// アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrA;	// 攻撃アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrM;	// 待機アニメデータのテーブル先頭アドレス
 
-	int					tbl_size;	// 登録したテーブルのレコード総数
+	int					tbl_sizeA;	// 登録したテーブルのレコード総数
+	int					tbl_sizeM;	// 登録したテーブルのレコード総数
 	float				move_time;	// 実行時間
 	int					partsNum;
 	int					startNum;	// パーツの添え字開始番号。これを保存しておけば特定のパーツだけ処理させられる
@@ -64,8 +66,10 @@ public:
 	DX11_MODEL			model;		// モデル情報
 	XMFLOAT4			diffuse[MODEL_MAX_MATERIAL];	// モデルの色
 	// 階層アニメーション用のメンバー変数
-	INTERPOLATION_DATA	*tbl_adr;	// アニメデータのテーブル先頭アドレス
-	int					tbl_size;	// 登録したテーブルのレコード総数
+	INTERPOLATION_DATA	*tbl_adrA;	// アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrM;	// アニメデータのテーブル先頭アドレス
+	int					tbl_sizeA;	// 登録したテーブルのレコード総数
+	int					tbl_sizeM;	// 登録したテーブルのレコード総数
 	float				move_time;	// 実行時間
 };
 

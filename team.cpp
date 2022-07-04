@@ -68,8 +68,10 @@ void SetMember(int i)
 	//アニメーションデータのセット
 	INTERPOLATION_DATA* tbl = GetData(0);	//何を使いたいか添え字で決める
 	int *size = GetDataSize();
-	g_Team[i].tbl_adr = &tbl[0];	//先頭アドレスの指定なため、添え字はi
-	g_Team[i].tbl_size = size[0];	//データサイズ
+	g_Team[i].tbl_adrA = &tbl[0];	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeA = size[0];	//データサイズ
+	g_Team[i].tbl_adrM = NULL;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeM = 0;	//データサイズ
 	//パーツ情報の初期化処理
 	for (int k = g_Team[i].startNum; k < g_Team[i].partsNum; k++)
 	{
@@ -78,12 +80,13 @@ void SetMember(int i)
 		//GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
 
 		// 階層アニメーション用のメンバー変数
-		g_Parts[k].tbl_adr = NULL;	// アニメデータのテーブル先頭アドレス
-		g_Parts[k].tbl_size = 0;	// 登録したテーブルのレコード総数
+		g_Parts[k].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[k].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
+		g_Parts[k].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[k].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
 		g_Parts[k].move_time = 0;	// 実行時間
 		SetPlayerNum(1);
 	}
-
 }
 
 PlayerStatus* GetTeam(void)

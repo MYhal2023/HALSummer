@@ -19,9 +19,11 @@ public:
 	BOOL				use;
 
 	// 階層アニメーション用のメンバー変数
-	INTERPOLATION_DATA	*tbl_adr;	// アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrA;	// 攻撃アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrM;	// 移動アニメデータのテーブル先頭アドレス
 
-	int					tbl_size;	// 登録したテーブルのレコード総数
+	int					tbl_sizeA;	// 登録したテーブルのレコード総数
+	int					tbl_sizeM;	// 登録したテーブルのレコード総数
 	float				move_time;	// 実行時間
 	int					partsNum;
 	int					startNum;	// パーツの添え字開始番号。これを保存しておけば特定のパーツだけ処理させられる

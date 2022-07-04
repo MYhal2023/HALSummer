@@ -42,6 +42,15 @@ public:
 	void StateCheck(int i);			//配列の添え字を引数に持ってくる
 };
 
+//プレイヤーの線形補間データを保存
+class Playerliner
+{
+public:
+	XMFLOAT3			pos;		// ポリゴンの位置
+	XMFLOAT3			rot;		// ポリゴンの向き(回転)
+	XMFLOAT3			scl;		// ポリゴンの大きさ(スケール)
+};
+
 struct PlayerParts
 {
 	XMFLOAT3			pos;		// ポリゴンの位置
@@ -54,8 +63,10 @@ struct PlayerParts
 	DX11_MODEL			model;		// モデル情報
 	XMFLOAT4			diffuse[MODEL_MAX_MATERIAL];	// モデルの色
 	// 階層アニメーション用のメンバー変数
-	INTERPOLATION_DATA	*tbl_adr;	// アニメデータのテーブル先頭アドレス
-	int					tbl_size;	// 登録したテーブルのレコード総数
+	INTERPOLATION_DATA	*tbl_adrA;	// アニメデータのテーブル先頭アドレス
+	int					tbl_sizeA;	// 登録したテーブルのレコード総数
+	INTERPOLATION_DATA	*tbl_adrM;	// アニメデータのテーブル先頭アドレス
+	int					tbl_sizeM;	// 登録したテーブルのレコード総数
 	float				move_time;	// 実行時間
 	PLAYER				*parent;	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
 };
@@ -84,6 +95,7 @@ void BlockEnemy(void);
 PLAYER *GetPlayer(void);
 PlayerParts *GetPlayerParts(void);
 INTERPOLATION_DATA *GetInterPorationData(void);
+void PlayerStandLiner(int i);
 void PlayerInterPoration(int i);
 void CheckEnemyTarget(int i);
 void SetPlayer(XMFLOAT3 pos);

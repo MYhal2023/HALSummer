@@ -19,6 +19,7 @@
 #include "time.h"
 #include "enemy.h"
 #include "base.h"
+#include "fieldchip.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -54,25 +55,26 @@ static char* g_TextureName[] = {
 };
 static PLAYER_VAR	g_PlayerVar;
 static PLAYER		g_Player[MAX_PLAYER];						// プレイヤー
-static PlayerParts	g_Parts[MAX_PLAYER_PARTS];						// プレイヤー
+static Playerliner  g_Playerline[MAX_PLAYER];					//プレイヤーの線形補間データ
+static PlayerParts	g_Parts[MAX_PLAYER_PARTS];					// プレイヤー
 static BOOL			g_Load = FALSE;
 static int			playerNum;
 static int			partsNum;
 // 階層アニメーションデータ
 static INTERPOLATION_DATA neutro_Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
 };
 static INTERPOLATION_DATA neutro_Attack2[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
 };
 static INTERPOLATION_DATA neutro_Attack3[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(2.0f, 2.0f, 2.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
 };
 static INTERPOLATION_DATA* data[3] = { neutro_Attack ,neutro_Attack2 ,neutro_Attack3 };
 static char name[2][64];
@@ -129,8 +131,11 @@ HRESULT InitPlayer(void)
 		g_Player[i].startNum = 0;
 		// 階層アニメーション用の初期化処理
 		g_Player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
+		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
 	}
-
+	
 	for (int i = 0; i < MAX_PLAYER_PARTS; i++)
 	{
 		g_Parts[i].load = FALSE;
@@ -190,16 +195,32 @@ void UpdatePlayer(void)
 	{
 		if (g_Player[i].use != TRUE)continue;
 
-		//体力が無くなったキャラの処理。消去する
+		//体力が無くなったキャラの処理。消去する。そこのマップチップを開ける
 		if (g_Player[i].life <= 0 && g_Player[i].use) {
 			g_Player[i].use = FALSE;
+			int x = (int)(g_Player[i].pos.x / CHIP_SIZE);
+			int z = (int)(g_Player[i].pos.z / CHIP_SIZE);
+			SetMapChipUse(FALSE, z, x);
 			continue;
 		}
+		int oldState = g_Player[i].state;
 		g_Player[i].StateCheck(i);
+		if (oldState != g_Player[i].state)
+		{
+			g_Player[i].move_time = 0.0f;
+			g_Player[i].atCount = 0;
+			g_Player[i].attackUse = FALSE;
+			g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+			g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+			g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
+			for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+				g_Parts[k].move_time = 0.0f;
+		}
 		CheckEnemyTarget(i);
 		switch (g_Player[i].state)
 		{
 		case Standby:
+			PlayerStandLiner(i);
 			break;
 
 		case Deffend:
@@ -238,15 +259,15 @@ void DrawPlayer(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Player[i].scl.x, g_Player[i].scl.y, g_Player[i].scl.z);
+		mtxScl = XMMatrixScaling(g_Player[i].scl.x + g_Playerline[i].scl.x, g_Player[i].scl.y + g_Playerline[i].scl.y, g_Player[i].scl.z + g_Playerline[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Player[i].rot.x, g_Player[i].rot.y + XM_PI, g_Player[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(g_Player[i].rot.x + g_Playerline[i].rot.x, g_Player[i].rot.y + XM_PI + g_Playerline[i].rot.y, g_Player[i].rot.z + g_Playerline[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Player[i].pos.x, g_Player[i].pos.y, g_Player[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(g_Player[i].pos.x + g_Playerline[i].pos.x, g_Player[i].pos.y + g_Playerline[i].pos.y, g_Player[i].pos.z + g_Playerline[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
@@ -301,19 +322,98 @@ void DrawPlayer(void)
 	SetCullingMode(CULL_MODE_BACK);
 }
 
+//待機ﾓｰｼｮﾝ処理
+void PlayerStandLiner(int i)
+{
+	if (g_Player[i].tbl_adrM == NULL)return;	// 線形補間を実行する？
+
+//
+// 線形補間の処理
+// 移動処理
+	int		index = (int)g_Player[i].move_time;
+	float	time = g_Player[i].move_time - index;
+	int		size = g_Player[i].tbl_sizeM;
+
+	float dt = 1.0f / g_Player[i].tbl_adrM[index].frame;	// 1フレームで進める時間
+	g_Player[i].move_time += dt;							// アニメーションの合計時間に足す
+
+	if (index > (size - 2))	// ゴールをオーバーしていたら、データを最初に戻して攻撃を終了
+	{
+		g_Player[i].move_time = 0.0f;
+		index = 0;
+		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
+	}
+
+	// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
+	XMVECTOR p1 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 1].pos);	// 次の場所
+	XMVECTOR p0 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 0].pos);	// 現在の場所
+	XMVECTOR vec = p1 - p0;
+	XMStoreFloat3(&g_Playerline[i].pos, p0 + vec * time);
+
+	// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
+	XMVECTOR r1 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 1].rot);	// 次の角度
+	XMVECTOR r0 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 0].rot);	// 現在の角度
+	XMVECTOR rot = r1 - r0;
+	XMStoreFloat3(&g_Playerline[i].rot, r0 + rot * time);
+
+	// scaleを求める S = StartX + (EndX - StartX) * 今の時間
+	XMVECTOR s1 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 1].scl);	// 次のScale
+	XMVECTOR s0 = XMLoadFloat3(&g_Player[i].tbl_adrM[index + 0].scl);	// 現在のScale
+	XMVECTOR scl = s1 - s0;
+	XMStoreFloat3(&g_Playerline[i].scl, s0 + scl * time);
+
+	for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+	{
+		if (g_Parts[k].tbl_adrM == NULL)continue;;	// 線形補間を実行する？
+
+		int		index = (int)g_Parts[k].move_time;
+		float	time = g_Parts[k].move_time - index;
+		int		size = g_Parts[k].tbl_sizeM;
+
+		float dt = 1.0f / g_Parts[k].tbl_adrM[index].frame;	// 1フレームで進める時間
+		g_Parts[k].move_time += dt;							// アニメーションの合計時間に足す
+
+		if (index > (size - 2))	// ゴールをオーバーしていたら、データを最初に戻して攻撃を終了
+		{
+			g_Parts[k].move_time = 0.0f;
+			index = 0;
+		}
+
+		// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].pos);	// 次の場所
+		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 0].pos);	// 現在の場所
+		XMVECTOR vec = p1 - p0;
+		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+
+		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].rot);	// 次の角度
+		XMVECTOR r0 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 0].rot);	// 現在の角度
+		XMVECTOR rot = r1 - r0;
+		XMStoreFloat3(&g_Parts[k].rot, r0 + rot * time);
+
+		// scaleを求める S = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR s1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].scl);	// 次のScale
+		XMVECTOR s0 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 0].scl);	// 現在のScale
+		XMVECTOR scl = s1 - s0;
+		XMStoreFloat3(&g_Parts[k].scl, s0 + scl * time);
+	}
+}
+
 //プレイヤーの線形補間。攻撃モーション中にここに来たらダメージ処理も行う
 void PlayerInterPoration(int i)
 {
-	if (g_Player[i].tbl_adr == NULL)return;	// 線形補間を実行する？
+	if (g_Player[i].tbl_adrA == NULL)return;	// 線形補間を実行する？
 
 	//
 	// 線形補間の処理
 	// 移動処理
 	int		index = (int)g_Player[i].move_time;
 	float	time = g_Player[i].move_time - index;
-	int		size = g_Player[i].tbl_size;
+	int		size = g_Player[i].tbl_sizeA;
 
-	float dt = 1.0f / g_Player[i].tbl_adr[index].frame;	// 1フレームで進める時間
+	float dt = 1.0f / g_Player[i].tbl_adrA[index].frame;	// 1フレームで進める時間
 	g_Player[i].move_time += dt;							// アニメーションの合計時間に足す
 
 	if (index > (size - 2))	// ゴールをオーバーしていたら、データを最初に戻して攻撃を終了
@@ -323,25 +423,64 @@ void PlayerInterPoration(int i)
 		g_Player[i].atCount = 0;
 		g_Player[i].state = Standby;
 		g_Player[i].attackUse = FALSE;
+		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
 	}
 
 	// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
-	XMVECTOR p1 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 1].pos);	// 次の場所
-	XMVECTOR p0 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 0].pos);	// 現在の場所
+	XMVECTOR p1 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 1].pos);	// 次の場所
+	XMVECTOR p0 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 0].pos);	// 現在の場所
 	XMVECTOR vec = p1 - p0;
-	XMStoreFloat3(&g_Player[i].pos, XMLoadFloat3(&g_Player[i].pos) + p0 + vec * time);
+	XMStoreFloat3(&g_Playerline[i].pos, p0 + vec * time);
 
 	// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
-	XMVECTOR r1 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 1].rot);	// 次の角度
-	XMVECTOR r0 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 0].rot);	// 現在の角度
+	XMVECTOR r1 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 1].rot);	// 次の角度
+	XMVECTOR r0 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 0].rot);	// 現在の角度
 	XMVECTOR rot = r1 - r0;
-	XMStoreFloat3(&g_Player[i].rot, XMLoadFloat3(&g_Player[i].rot) + r0 + rot * time);
+	XMStoreFloat3(&g_Playerline[i].rot, r0 + rot * time);
 
 	// scaleを求める S = StartX + (EndX - StartX) * 今の時間
-	XMVECTOR s1 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 1].scl);	// 次のScale
-	XMVECTOR s0 = XMLoadFloat3(&g_Player[i].tbl_adr[index + 0].scl);	// 現在のScale
+	XMVECTOR s1 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 1].scl);	// 次のScale
+	XMVECTOR s0 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 0].scl);	// 現在のScale
 	XMVECTOR scl = s1 - s0;
-	XMStoreFloat3(&g_Player[i].scl, s0 + scl * time);
+	XMStoreFloat3(&g_Playerline[i].scl, s0 + scl * time);
+
+	for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+	{
+		if (g_Parts[k].tbl_adrA == NULL)continue;;	// 線形補間を実行する？
+
+		int		index = (int)g_Parts[k].move_time;
+		float	time = g_Parts[k].move_time - index;
+		int		size = g_Parts[k].tbl_sizeA;
+
+		float dt = 1.0f / g_Parts[k].tbl_adrA[index].frame;	// 1フレームで進める時間
+		g_Parts[k].move_time += dt;							// アニメーションの合計時間に足す
+
+		if (index > (size - 2))	// ゴールをオーバーしていたら、データを最初に戻して攻撃を終了
+		{
+			g_Parts[k].move_time = 0.0f;
+			index = 0;
+		}
+
+		// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].pos);	// 次の場所
+		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 0].pos);	// 現在の場所
+		XMVECTOR vec = p1 - p0;
+		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+
+		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].rot);	// 次の角度
+		XMVECTOR r0 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 0].rot);	// 現在の角度
+		XMVECTOR rot = r1 - r0;
+		XMStoreFloat3(&g_Parts[k].rot, r0 + rot * time);
+
+		// scaleを求める S = StartX + (EndX - StartX) * 今の時間
+		XMVECTOR s1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].scl);	// 次のScale
+		XMVECTOR s0 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 0].scl);	// 現在のScale
+		XMVECTOR scl = s1 - s0;
+		XMStoreFloat3(&g_Parts[k].scl, s0 + scl * time);
+	}
 
 	//ここから攻撃処理
 	if (g_Player[i].target == 99 || g_Player[i].attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？
@@ -463,8 +602,10 @@ void SetPlayer(XMFLOAT3 pos)
 		g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
 
 		// 階層アニメーション用のメンバー変数
-		g_Parts[partsNum].tbl_adr = NULL;	// アニメデータのテーブル先頭アドレス
-		g_Parts[partsNum].tbl_size = 0;	// 登録したテーブルのレコード総数
+		g_Parts[partsNum].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[partsNum].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
+		g_Parts[partsNum].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[partsNum].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
 		g_Parts[partsNum].move_time = 0;	// 実行時間
 		g_Parts[partsNum].parent = &g_Player[playerNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
 		partsNum++;
@@ -503,8 +644,8 @@ void SetNeutrophils(XMFLOAT3 pos)
 	g_Player[playerNum].atFrame = 20;
 	g_Player[playerNum].startNum = partsNum;
 	g_Player[playerNum].partsNum = 0;
-	g_Player[playerNum].tbl_adr = neutro_Attack;	// アニメデータのテーブル先頭アドレス
-	g_Player[playerNum].tbl_size = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Player[playerNum].tbl_adrA = neutro_Attack;	// アニメデータのテーブル先頭アドレス
+	g_Player[playerNum].tbl_sizeA = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Player[playerNum].move_time = 0.0f;	// 実行時間
 
 	// 階層アニメーション用の初期化処理
@@ -524,8 +665,10 @@ void SetNeutrophils(XMFLOAT3 pos)
 		g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
 
 		// 階層アニメーション用のメンバー変数
-		g_Parts[partsNum].tbl_adr = NULL;	// アニメデータのテーブル先頭アドレス
-		g_Parts[partsNum].tbl_size = 0;	// 登録したテーブルのレコード総数
+		g_Parts[partsNum].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[partsNum].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
+		g_Parts[partsNum].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
+		g_Parts[partsNum].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
 		g_Parts[partsNum].move_time = 0;	// 実行時間
 		g_Parts[partsNum].parent = &g_Player[playerNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
 		partsNum++;

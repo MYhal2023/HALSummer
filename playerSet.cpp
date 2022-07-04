@@ -120,9 +120,25 @@ void SetModeChange(int i)
 {
 	if (g_PlayerSet.use[i] == FALSE)return;	//編成に登録されていないため返す
 
-	g_PlayerSet.setMode = TRUE;
-	g_PlayerSet.setPlayer = i;
-	SetSlowMode(TRUE);
+	//セットモードに初めて移行
+	if (g_PlayerSet.setMode == FALSE)
+	{
+		g_PlayerSet.setMode = TRUE;
+		g_PlayerSet.setPlayer = i;
+		SetSlowMode(TRUE);
+	}
+	//セットモードに移行済みだが、セットする編成番号だけ変更された
+	else if (g_PlayerSet.setMode == TRUE && g_PlayerSet.setPlayer != i)
+	{
+		g_PlayerSet.setPlayer = i;
+	}
+	//セットモードに移行済みで同キャラが選択されたため、セットモードを解除する
+	else if(g_PlayerSet.setMode == TRUE && g_PlayerSet.setPlayer == i)
+	{
+		g_PlayerSet.setMode = FALSE;
+		g_PlayerSet.setPlayer = 99;
+		SetSlowMode(FALSE);
+	}
 }
 
 //プレイヤーをセットする座標を十字キーで変更できる
@@ -209,8 +225,8 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].startNum = GetPlayerPartsNum();;
 		player[i].partsNum = member->partsNum;
 		player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
-		player[i].tbl_adr = member->tbl_adr;
-		player[i].tbl_size = member->tbl_size;
+		player[i].tbl_adrA = member->tbl_adrA;
+		player[i].tbl_sizeA = member->tbl_sizeA;
 		player[i].move_time = 0.0f;
 		SetPlayerNum(1);
 
@@ -227,8 +243,10 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 			parts[k].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
 
 			// 階層アニメーション用のメンバー変数
-			parts[k].tbl_adr = memberParts[k].tbl_adr;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_size = sizeof(memberParts[k].tbl_adr) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
+			parts[k].tbl_adrA = memberParts[k].tbl_adrA;	// アニメデータのテーブル先頭アドレス
+			parts[k].tbl_sizeA = sizeof(memberParts[k].tbl_adrA) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
+			parts[k].tbl_adrM = memberParts[k].tbl_adrM;	// アニメデータのテーブル先頭アドレス
+			parts[k].tbl_sizeM = sizeof(memberParts[k].tbl_adrM) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
 			parts[k].move_time = 0;			// 実行時間
 			parts[k].parent = &player[i];	// 自分が親ならNULL、自分が子供なら親のアドレス
 			SetPlayerPartsNum(1);

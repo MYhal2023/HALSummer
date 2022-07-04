@@ -60,6 +60,14 @@ public:
 	int					type;
 	int					atInterval;
 };
+//プレイヤーの線形補間データを保存
+class Enemyliner
+{
+public:
+	XMFLOAT3			pos;		// ポリゴンの位置
+	XMFLOAT3			rot;		// ポリゴンの向き(回転)
+	XMFLOAT3			scl;		// ポリゴンの大きさ(スケール)
+};
 
 struct EnemyParts
 {
@@ -73,8 +81,10 @@ struct EnemyParts
 	DX11_MODEL			model;		// モデル情報
 	XMFLOAT4			diffuse[MODEL_MAX_MATERIAL];	// モデルの色
 	// 階層アニメーション用のメンバー変数
-	INTERPOLATION_DATA	*tbl_adr;	// アニメデータのテーブル先頭アドレス
-	int					tbl_size;	// 登録したテーブルのレコード総数
+	INTERPOLATION_DATA	*tbl_adrA;	// 攻撃アニメデータのテーブル先頭アドレス
+	INTERPOLATION_DATA	*tbl_adrM;	// 移動アニメデータのテーブル先頭アドレス
+	int					tbl_sizeA;	// 登録したテーブルのレコード総数
+	int					tbl_sizeM;	// 登録したテーブルのレコード総数
 	float				move_time;	// 実行時間
 	ENEMY				*parent;	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
 };
@@ -91,6 +101,7 @@ ENEMY *GetEnemy(void);
 void SetGrape(float time);
 int StateCheck(int i);
 void SetEnemyTime(int i);
+void EnemyMoveLiner(int i);
 void EnemyInterPoration(int i);
 void EnemyMove(int i);
 void CheckTarget(int i);
