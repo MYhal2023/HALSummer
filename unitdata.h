@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include "model.h"
+#define MAX_BATTLE_MODEL (50)
 class Unit
 {
 public:
@@ -40,4 +41,10 @@ public:
 	int				lifeMax;		//ƒvƒŒƒCƒ„[Å‘åHP
 	int				power;
 	int				diffend;
+};
+
+struct UnitFade
+{
+	float alpha;
+	BOOL use;
 };

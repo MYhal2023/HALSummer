@@ -157,6 +157,7 @@
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="team.cpp" />
     <ClCompile Include="ui.cpp" />
+    <ClCompile Include="unitdata.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.h" />

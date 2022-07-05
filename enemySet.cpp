@@ -12,7 +12,6 @@ void SetGrape(float time, int life, int power, int deffend)
 	LoadModel(MODEL_GRAPE, &g_Enemy[GetEnemyNum()].model);
 	// モデルのディフューズを保存しておく。色変え対応の為。
 	GetModelDiffuse(&g_Enemy[GetEnemyNum()].model, &g_Enemy[GetEnemyNum()].diffuse[0]);
-
 	g_Enemy[GetEnemyNum()].load = TRUE;
 
 	g_Enemy[GetEnemyNum()].pos = { moveTbl[0].start.x, 0.0f, moveTbl[0].start.z };
