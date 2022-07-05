@@ -17,7 +17,7 @@
 #define	MODEL_GRAPE_PARTS001		"data/MODEL/grape_parts001.obj"			// 読み込むモデル名
 #define	MODEL_GRAPE_PARTS002		"data/MODEL/grape_parts002.obj"			// 読み込むモデル名
 #define	MODEL_GRAPE_PARTS003		"data/MODEL/grape_parts003.obj"			// 読み込むモデル名
-#define MAX_ENEMY		(5)					// エネミーの数
+#define MAX_ENEMY		(15)					// エネミーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ
 
@@ -98,7 +98,8 @@ void UpdateEnemy(void);
 void DrawEnemy(void);
 
 ENEMY *GetEnemy(void);
-void SetGrape(float time);
+EnemyParts *GetEnemyParts(void);
+//void SetGrape(float time);
 int StateCheck(int i);
 void SetEnemyTime(int i);
 void EnemyMoveLiner(int i);
@@ -106,6 +107,9 @@ void EnemyInterPoration(int i);
 void EnemyMove(int i);
 void CheckTarget(int i);
 int GetEnemyNum(void);
+int GetEnemyPartsNum(void);
+void SetEnemyNum(void);
+void SetEnemyPartsNum(void);
 void DrawEnemyLife(void);
 HRESULT MakeVertexEnemyVar(void);
 #endif

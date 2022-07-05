@@ -27,6 +27,7 @@
 #include "team.h"
 #include "gameover.h"
 #include "ui.h"
+#include "enemySet.h"
 
 
 //*****************************************************************************
@@ -109,11 +110,9 @@ void InitSystem(void)
 
 	InitUI();
 	SetBattleMap(g_DebugMap, MAX_CHIP_HEIGHT, MAX_CHIP_WIDTH);
-	//SetGrape(5.0f);
-	//SetGrape(50.0f);
-	SetGrape(90.0f);
-	SetGrape(120.0f);
-	SetGrape(180.0f);
+	SetGrape(30.0f,20,5,1);
+	SetGrape(180.0f,20,5,1);
+	SetGrape(240.0f,20,5,1);
 	XMFLOAT3 pos[2];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	pos[1] = { 25.0f, 0.0f, 300.0f };

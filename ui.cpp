@@ -10,12 +10,13 @@
 #include "game.h"
 #include "playerSet.h"
 #include "ui.h"
+#include "base.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(1)				// テクスチャの数
-#define CHAR_TEXTURE_MAX	(2)		// キャラテクスチャの数
+#define TEXTURE_MAX			(2)				// テクスチャの数
+#define CHAR_TEXTURE_MAX	(2)				// キャラテクスチャの数
 
 //*****************************************************************************
 // グローバル変数
@@ -25,6 +26,7 @@ static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチ
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static char* g_TextureName[] = {
 	"data/TEXTURE/box.png",
+	"data/TEXTURE/HP_UI.png",
 };
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
@@ -73,6 +75,10 @@ HRESULT InitUI(void)
 		g_UI[i].size = { 50.0f, 50.0f };
 		g_UI[i].use = TRUE;
 	}
+
+	g_UI[baseLife].pos = { 250.0f, 50.0f };
+	g_UI[baseLife].size = { 100.0f, 100.0f };
+
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -147,6 +153,7 @@ void DrawUI(void)
 	SetMaterial(material);
 
 	DrawCharBox();
+	DrawLife();
 
 	SetDepthEnable(TRUE);
 
@@ -197,3 +204,16 @@ void DrawCharBox(void)
 	}
 }
 
+void DrawLife(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[baseLife]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[baseLife].pos.x, g_UI[baseLife].pos.y, g_UI[baseLife].size.x, g_UI[baseLife].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[baseLife].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+}

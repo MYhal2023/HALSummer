@@ -16,6 +16,7 @@
 #include "meshfield.h"
 #include "collision.h"
 #include "time.h"
+#include "enemyLinerData.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -58,22 +59,6 @@ static BOOL			g_Load = FALSE;
 static int			atCount;
 static int			enemyNum = 0;		//何体のエネミーがいるか
 static int			partsNum = 0;		//合計でいくつのパーツを使うのか
-static MOVERINE		moveTbl[] = { XMFLOAT3(300.0f, 0.0f, 150.0f), XMFLOAT3(300.0f, 0.0f, 100.0f), XMFLOAT3(0.0f, 0.0f, 100.0f) };
-// 階層アニメーションデータ
-static INTERPOLATION_DATA grape_Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
-
-};
-// 階層アニメーションデータ
-static INTERPOLATION_DATA grape_Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30, },
-	{ XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
-
-};
-
 
 
 
@@ -348,106 +333,114 @@ ENEMY *GetEnemy(void)
 {
 	return &g_Enemy[0];
 }
-
-//引数1：配列の使用を開始する添え字、引数2：何フレームの時に出すのか
-void SetGrape(float time)
+//=============================================================================
+// プレイヤー情報を取得
+//=============================================================================
+EnemyParts *GetEnemyParts(void)
 {
-	LoadModel(MODEL_GRAPE, &g_Enemy[enemyNum].model);
-	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Enemy[enemyNum].model, &g_Enemy[enemyNum].diffuse[0]);
-
-	g_Enemy[enemyNum].load = TRUE;
-
-	g_Enemy[enemyNum].pos = { moveTbl[0].start.x, ENEMY_OFFSET_Y, moveTbl[0].start.z };
-	g_Enemy[enemyNum].rot = { 0.0f, 0.0f, 0.0f };
-	g_Enemy[enemyNum].scl = { 0.8f, 1.0f, 1.0f };
-
-	g_Enemy[enemyNum].size = ENEMY_SIZE;	// 当たり判定の大きさ
-	g_Enemy[enemyNum].life = ENEMY_LIFE;
-	g_Enemy[enemyNum].lifeMax = g_Enemy[enemyNum].life;
-	g_Enemy[enemyNum].spd = 1.0f;
-	g_Enemy[enemyNum].use = FALSE;
-	g_Enemy[enemyNum].attack = FALSE;
-	g_Enemy[enemyNum].attackUse = FALSE;
-	g_Enemy[enemyNum].atInterval = 180;
-	g_Enemy[enemyNum].atFrame = 20;
-	g_Enemy[enemyNum].atFrameCount = 0;
-	g_Enemy[enemyNum].power = 10;
-	g_Enemy[enemyNum].target = NULL;
-	g_Enemy[enemyNum].atCount = g_Enemy[enemyNum].atInterval;	//最初はノータイムで攻撃モーションへ
-	g_Enemy[enemyNum].type = Proximity;;
-	g_Enemy[enemyNum].start = time;
-	g_Enemy[enemyNum].moveData = moveTbl;
-	g_Enemy[enemyNum].moveCount = 0.0f;
-	g_Enemy[enemyNum].moveTblSize = sizeof(moveTbl) / sizeof(MOVERINE);
-	g_Enemy[enemyNum].nowTbl = 0;
-	g_Enemy[enemyNum].tbl_adrA = grape_Attack;	// アニメデータのテーブル先頭アドレス
-	g_Enemy[enemyNum].tbl_adrM = grape_Move;	// アニメデータのテーブル先頭アドレス
-	g_Enemy[enemyNum].tbl_sizeA = sizeof(grape_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Enemy[enemyNum].tbl_sizeM = sizeof(grape_Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Enemy[enemyNum].move_time = 0.0f;	// 実行時間
-	g_Enemy[enemyNum].partsNum = 3;
-	g_Enemy[enemyNum].startNum = partsNum;
-	// 階層アニメーション用の初期化処理
-	g_Enemy[enemyNum].parent = NULL;			// 本体（親）なのでNULLを入れる
-
-	LoadModel(MODEL_GRAPE_PARTS001, &g_Parts[partsNum].model);
-	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
-	g_Parts[partsNum].load = TRUE;
-
-	g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
-	g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
-	g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
-
-	// 階層アニメーション用のメンバー変数
-	g_Parts[partsNum].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].move_time = 0;	// 実行時間
-	g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
-	partsNum++;
-
-
-	LoadModel(MODEL_GRAPE_PARTS002, &g_Parts[partsNum].model);
-	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
-	g_Parts[partsNum].load = TRUE;
-
-	g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
-	g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
-	g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
-	// 階層アニメーション用のメンバー変数
-	g_Parts[partsNum].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].move_time = 0;	// 実行時間
-	g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
-	partsNum++;
-
-
-	LoadModel(MODEL_GRAPE_PARTS003, &g_Parts[partsNum].model);
-	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
-	g_Parts[partsNum].load = TRUE;
-
-	g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
-	g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
-	g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
-
-		// 階層アニメーション用のメンバー変数
-	g_Parts[partsNum].tbl_adrA = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_adrM = NULL;	// アニメデータのテーブル先頭アドレス
-	g_Parts[partsNum].tbl_sizeA = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].tbl_sizeM = 0;	// 登録したテーブルのレコード総数
-	g_Parts[partsNum].move_time = 0;	// 実行時間
-	g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
-	partsNum++;
-
-	enemyNum++;
+	return &g_Parts[0];
 }
+
+////引数1：配列の使用を開始する添え字、引数2：何フレームの時に出すのか
+//void SetGrape(float time)
+//{
+//	LoadModel(MODEL_GRAPE, &g_Enemy[enemyNum].model);
+//	// モデルのディフューズを保存しておく。色変え対応の為。
+//	GetModelDiffuse(&g_Enemy[enemyNum].model, &g_Enemy[enemyNum].diffuse[0]);
+//
+//	g_Enemy[enemyNum].load = TRUE;
+//
+//	g_Enemy[enemyNum].pos = { moveTbl[0].start.x, ENEMY_OFFSET_Y, moveTbl[0].start.z };
+//	g_Enemy[enemyNum].rot = { 0.0f, 0.0f, 0.0f };
+//	g_Enemy[enemyNum].scl = { 0.8f, 1.0f, 1.0f };
+//
+//	g_Enemy[enemyNum].size = ENEMY_SIZE;	// 当たり判定の大きさ
+//	g_Enemy[enemyNum].life = ENEMY_LIFE;
+//	g_Enemy[enemyNum].lifeMax = g_Enemy[enemyNum].life;
+//	g_Enemy[enemyNum].spd = 1.0f;
+//	g_Enemy[enemyNum].use = FALSE;
+//	g_Enemy[enemyNum].attack = FALSE;
+//	g_Enemy[enemyNum].attackUse = FALSE;
+//	g_Enemy[enemyNum].atInterval = 180;
+//	g_Enemy[enemyNum].atFrame = 20;
+//	g_Enemy[enemyNum].atFrameCount = 0;
+//	g_Enemy[enemyNum].power = 10;
+//	g_Enemy[enemyNum].target = NULL;
+//	g_Enemy[enemyNum].atCount = g_Enemy[enemyNum].atInterval;	//最初はノータイムで攻撃モーションへ
+//	g_Enemy[enemyNum].type = Proximity;;
+//	g_Enemy[enemyNum].start = time;
+//	g_Enemy[enemyNum].moveData = moveTbl;
+//	g_Enemy[enemyNum].moveCount = 0.0f;
+//	g_Enemy[enemyNum].moveTblSize = sizeof(moveTbl) / sizeof(MOVERINE);
+//	g_Enemy[enemyNum].nowTbl = 0;
+//	g_Enemy[enemyNum].tbl_adrA = grape_Attack;	// アニメデータのテーブル先頭アドレス
+//	g_Enemy[enemyNum].tbl_adrM = grape_Move;	// アニメデータのテーブル先頭アドレス
+//	g_Enemy[enemyNum].tbl_sizeA = sizeof(grape_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//	g_Enemy[enemyNum].tbl_sizeM = sizeof(grape_Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//	g_Enemy[enemyNum].move_time = 0.0f;	// 実行時間
+//	g_Enemy[enemyNum].partsNum = 3;
+//	g_Enemy[enemyNum].startNum = partsNum;
+//	// 階層アニメーション用の初期化処理
+//	g_Enemy[enemyNum].parent = NULL;			// 本体（親）なのでNULLを入れる
+//	{
+//		LoadModel(MODEL_GRAPE_PARTS001, &g_Parts[partsNum].model);
+//		// モデルのディフューズを保存しておく。色変え対応の為。
+//		GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+//		g_Parts[partsNum].load = TRUE;
+//
+//		g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
+//		g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
+//		g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
+//
+//		// 階層アニメーション用のメンバー変数
+//		g_Parts[partsNum].tbl_adrA = grape_Parts001Attack;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_adrM = grape_Parts001Move;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_sizeA = sizeof(grape_Parts001Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].tbl_sizeM = sizeof(grape_Parts001Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].move_time = 0;	// 実行時間
+//		g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
+//		partsNum++;
+//	}
+//
+//	{
+//		LoadModel(MODEL_GRAPE_PARTS002, &g_Parts[partsNum].model);
+//		// モデルのディフューズを保存しておく。色変え対応の為。
+//		GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+//		g_Parts[partsNum].load = TRUE;
+//
+//		g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
+//		g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
+//		g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
+//		// 階層アニメーション用のメンバー変数
+//		g_Parts[partsNum].tbl_adrA = grape_Parts002Attack;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_adrM = grape_Parts002Move;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_sizeA = sizeof(grape_Parts002Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].tbl_sizeM = sizeof(grape_Parts002Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].move_time = 0;	// 実行時間
+//		g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
+//		partsNum++;
+//	}
+//	{
+//		LoadModel(MODEL_GRAPE_PARTS003, &g_Parts[partsNum].model);
+//		// モデルのディフューズを保存しておく。色変え対応の為。
+//		GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+//		g_Parts[partsNum].load = TRUE;
+//
+//		g_Parts[partsNum].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
+//		g_Parts[partsNum].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
+//		g_Parts[partsNum].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
+//
+//			// 階層アニメーション用のメンバー変数
+//		g_Parts[partsNum].tbl_adrA = grape_Parts003Attack;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_adrM = grape_Parts003Move;	// アニメデータのテーブル先頭アドレス
+//		g_Parts[partsNum].tbl_sizeA = sizeof(grape_Parts003Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].tbl_sizeM = sizeof(grape_Parts003Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+//		g_Parts[partsNum].move_time = 0;	// 実行時間
+//		g_Parts[partsNum].parent = &g_Enemy[enemyNum];	// 自分が親ならNULL、自分が子供なら親のenemyアドレス
+//		partsNum++;
+//	}
+//	enemyNum++;
+//}
 
 //添え字を引数に持ってくる
 void SetEnemyTime(int i)
@@ -524,7 +517,7 @@ void EnemyMoveLiner(int i)
 		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].pos);	// 次の場所
 		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 0].pos);	// 現在の場所
 		XMVECTOR vec = p1 - p0;
-		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+		XMStoreFloat3(&g_Parts[k].pos, p0 + vec * time);
 
 		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
 		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].rot);	// 次の角度
@@ -606,7 +599,7 @@ void EnemyInterPoration(int i)
 		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].pos);	// 次の場所
 		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 0].pos);	// 現在の場所
 		XMVECTOR vec = p1 - p0;
-		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+		XMStoreFloat3(&g_Parts[k].pos, p0 + vec * time);
 
 		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
 		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].rot);	// 次の角度
@@ -721,6 +714,19 @@ int GetEnemyNum(void)
 	return enemyNum;
 }
 
+int GetEnemyPartsNum(void)
+{
+	return partsNum;
+}
+void SetEnemyNum(void)
+{
+	enemyNum++;
+}
+
+void SetEnemyPartsNum(void)
+{
+	partsNum++;
+}
 //プレイヤーキャラの体力バーの表示処理
 void DrawEnemyLife(void)
 {

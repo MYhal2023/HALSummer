@@ -18,6 +18,7 @@ public:
 enum UI_TEXTURE
 {
 	charBox,
+	baseLife,
 };
 
 HRESULT InitUI(void);
@@ -25,3 +26,4 @@ void UninitUI(void);
 void UpdateUI(void);
 void DrawUI(void);
 void DrawCharBox(void);
+void DrawLife(void);

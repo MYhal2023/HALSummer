@@ -209,7 +209,6 @@ void UpdatePlayer(void)
 		{
 			g_Player[i].move_time = 0.0f;
 			g_Player[i].atCount = 0;
-			g_Player[i].attackUse = FALSE;
 			g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
 			g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
 			g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
@@ -385,7 +384,7 @@ void PlayerStandLiner(int i)
 		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].pos);	// 次の場所
 		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 0].pos);	// 現在の場所
 		XMVECTOR vec = p1 - p0;
-		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+		XMStoreFloat3(&g_Parts[k].pos, p0 + vec * time);
 
 		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
 		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrM[index + 1].rot);	// 次の角度
@@ -467,7 +466,7 @@ void PlayerInterPoration(int i)
 		XMVECTOR p1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].pos);	// 次の場所
 		XMVECTOR p0 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 0].pos);	// 現在の場所
 		XMVECTOR vec = p1 - p0;
-		XMStoreFloat3(&g_Parts[k].pos, XMLoadFloat3(&g_Parts[k].pos) + p0 + vec * time);
+		XMStoreFloat3(&g_Parts[k].pos, p0 + vec * time);
 
 		// 回転を求める	R = StartX + (EndX - StartX) * 今の時間
 		XMVECTOR r1 = XMLoadFloat3(&g_Parts[k].tbl_adrA[index + 1].rot);	// 次の角度
@@ -715,6 +714,7 @@ INTERPOLATION_DATA *GetInterPorationData(void)
 //現在は最初に登場した敵を優先してターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)
 {
+	if (g_Player[i].state == Deffend)return;
 	g_Player[i].state = Standby;	//とりあえず待機状態にセット
 	ENEMY *enemy = GetEnemy();
 	g_Player[i].count = 0;

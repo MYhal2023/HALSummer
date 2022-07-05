@@ -6,7 +6,7 @@
 //=============================================================================
 #include "team.h"
 #include "player.h"
-#include "interporationdata.h"
+#include "playerLinerData.h"
 #include <string>
 static PlayerStatus g_Team[MAX_PLAYER_SET];
 static PlayerPartsStatus g_Parts [ MAX_PLAYER_SET * 2];
@@ -66,12 +66,10 @@ void SetMember(int i)
 	g_Team[i].partsNum = 0;
 	g_Team[i].atFrame = 20;
 	//アニメーションデータのセット
-	INTERPOLATION_DATA* tbl = GetData(0);	//何を使いたいか添え字で決める
-	int *size = GetDataSize();
-	g_Team[i].tbl_adrA = &tbl[0];	//先頭アドレスの指定なため、添え字はi
-	g_Team[i].tbl_sizeA = size[0];	//データサイズ
-	g_Team[i].tbl_adrM = NULL;	//先頭アドレスの指定なため、添え字はi
-	g_Team[i].tbl_sizeM = 0;	//データサイズ
+	g_Team[i].tbl_adrA = neutro_Attack;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeA = sizeof(neutro_Attack)/sizeof(INTERPOLATION_DATA);	//データサイズ
+	g_Team[i].tbl_adrM = neutro_Standby;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeM = sizeof(neutro_Standby) / sizeof(INTERPOLATION_DATA);;	//データサイズ
 	//パーツ情報の初期化処理
 	for (int k = g_Team[i].startNum; k < g_Team[i].partsNum; k++)
 	{
@@ -88,6 +86,15 @@ void SetMember(int i)
 		SetPlayerNum(1);
 	}
 }
+
+void SetChara(int charID)
+{
+	switch (charID)
+	{
+
+	}
+}
+
 
 PlayerStatus* GetTeam(void)
 {
