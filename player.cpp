@@ -61,22 +61,6 @@ static BOOL			g_Load = FALSE;
 static int			playerNum;
 static int			partsNum;
 // 階層アニメーションデータ
-static INTERPOLATION_DATA neutro_Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
-};
-static INTERPOLATION_DATA neutro_Attack2[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
-};
-static INTERPOLATION_DATA neutro_Attack3[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
-};
-static INTERPOLATION_DATA* data[3] = { neutro_Attack ,neutro_Attack2 ,neutro_Attack3 };
 static char name[2][64];
 
 //=============================================================================
@@ -643,8 +627,6 @@ void SetNeutrophils(XMFLOAT3 pos)
 	g_Player[playerNum].atFrame = 20;
 	g_Player[playerNum].startNum = partsNum;
 	g_Player[playerNum].partsNum = 0;
-	g_Player[playerNum].tbl_adrA = neutro_Attack;	// アニメデータのテーブル先頭アドレス
-	g_Player[playerNum].tbl_sizeA = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Player[playerNum].move_time = 0.0f;	// 実行時間
 
 	// 階層アニメーション用の初期化処理
@@ -706,10 +688,6 @@ PlayerParts *GetPlayerParts(void)
 	return &g_Parts[0];
 }
 
-INTERPOLATION_DATA *GetInterPorationData(void)
-{
-	return data[0];
-}
 
 //現在は最初に登場した敵を優先してターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)

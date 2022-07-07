@@ -47,4 +47,10 @@ struct UnitFade
 {
 	float alpha;
 	BOOL use;
+	int type;
+	DX11_MODEL* character;
 };
+
+void InitCharFade(void);
+void UpdateCharFade(void);
+void FadeCharacter(DX11_MODEL *character, int type);

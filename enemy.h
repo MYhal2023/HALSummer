@@ -17,6 +17,10 @@
 #define	MODEL_GRAPE_PARTS001		"data/MODEL/grape_parts001.obj"			// 読み込むモデル名
 #define	MODEL_GRAPE_PARTS002		"data/MODEL/grape_parts002.obj"			// 読み込むモデル名
 #define	MODEL_GRAPE_PARTS003		"data/MODEL/grape_parts003.obj"			// 読み込むモデル名
+#define	MODEL_STREPT		"data/MODEL/streptococcus_pyogenes.obj"			// 読み込むモデル名
+#define	MODEL_STREPT_HEAD		"data/MODEL/streptococcus_pyogenes_head.obj"			// 読み込むモデル名
+#define	MODEL_STREPT_NECK		"data/MODEL/streptococcus_pyogenes_neck.obj"			// 読み込むモデル名
+#define	MODEL_STREPT_TAIL		"data/MODEL/streptococcus_pyogenes_tail.obj"			// 読み込むモデル名
 #define MAX_ENEMY		(15)					// エネミーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ

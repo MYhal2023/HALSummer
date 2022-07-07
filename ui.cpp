@@ -15,7 +15,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(2)				// テクスチャの数
+#define TEXTURE_MAX			(8)				// テクスチャの数
 #define CHAR_TEXTURE_MAX	(2)				// キャラテクスチャの数
 
 //*****************************************************************************
@@ -26,7 +26,13 @@ static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチ
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static char* g_TextureName[] = {
 	"data/TEXTURE/box.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/number.png",
 	"data/TEXTURE/HP_UI.png",
+	"data/TEXTURE/ENEMY_UI.png",
+	"data/TEXTURE/button_normal.png",
+	"data/TEXTURE/button_double.png",
+	"data/TEXTURE/button_stop.png",
 };
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
@@ -76,8 +82,20 @@ HRESULT InitUI(void)
 		g_UI[i].use = TRUE;
 	}
 
-	g_UI[baseLife].pos = { 250.0f, 50.0f };
-	g_UI[baseLife].size = { 100.0f, 100.0f };
+	g_UI[var_bg].pos = { SCREEN_CENTER_X, 50.0f };
+	g_UI[var_bg].size = { 500.0f, 80.0f };
+	g_UI[var_bg].color = { 0.0f, 0.0f, 0.0f, 0.6f };
+	g_UI[baseLife].pos = { g_UI[var_bg].pos.x + 50.0f, 50.0f };
+	g_UI[baseLife].size = { 60.0f, 60.0f };
+	g_UI[enemyNum].pos = { g_UI[var_bg].pos.x - 200.0f, 50.0f };
+	g_UI[enemyNum].size = { 60.0f, 60.0f };
+	const float mnp = 0.15f;
+	g_UI[button_n].pos = { 1600.0f, 60.0f };
+	g_UI[button_n].size = { 1000.0f * mnp, 600.0f * mnp };
+	g_UI[button_d].pos = { 1600.0f, 60.0f };
+	g_UI[button_d].size = { 1000.0f * mnp, 600.0f * mnp };
+	g_UI[button_s].pos = { 1800.0f, 60.0f };
+	g_UI[button_s].size = { 1000.0f * mnp, 600.0f * mnp };
 
 	g_Load = TRUE;
 	return S_OK;
@@ -153,8 +171,11 @@ void DrawUI(void)
 	SetMaterial(material);
 
 	DrawCharBox();
+	DrawUIbg();
 	DrawLife();
-
+	DrawEnemyNum();
+	DrawButtonNorD();
+	DrawButtonStop();
 	SetDepthEnable(TRUE);
 
 	// ライティングを無効
@@ -204,6 +225,56 @@ void DrawCharBox(void)
 	}
 }
 
+void DrawUIbg(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[var_bg]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[var_bg].pos.x, g_UI[var_bg].pos.y, g_UI[var_bg].size.x, g_UI[var_bg].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[var_bg].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+}
+
+//引数:表示したい数字、表示座標(x,y)、表示サイズ(x方向,y方向)
+void DrawNumber(int numb, float px, float py, float sx, float sy)
+{
+	int digit = 0;
+	int clock = numb;
+	if (clock != 0)
+	{
+		while (clock != 0)
+		{
+			clock /= 10;
+			digit++;
+		}
+	}
+	else
+		digit = 1;
+
+	for (int i = 0; i < digit; i++)
+	{
+		px = px - sx * i;
+		float x = (float)(numb % 10);		//今回表示する数字
+		float tx = x * 0.1f;			// テクスチャの左上X座標
+
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[number]);
+
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteColor(g_VertexBuffer, px, py, sx, sy, tx, 0.0f, 0.1f, 1.0f,
+			g_UI[number].color);
+
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+		numb /= 10;
+	}
+}
+
+
 void DrawLife(void)
 {
 	// テクスチャ設定
@@ -216,4 +287,59 @@ void DrawLife(void)
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
+}
+
+void DrawEnemyNum(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[enemyNum]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[enemyNum].pos.x, g_UI[enemyNum].pos.y, g_UI[enemyNum].size.x, g_UI[enemyNum].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[enemyNum].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+}
+
+void DrawButtonNorD(void)
+{
+	if (GetSpeedMode() == 1)
+	{
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[button_n]);
+
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteColor(g_VertexBuffer, g_UI[button_n].pos.x, g_UI[button_n].pos.y, g_UI[button_n].size.x, g_UI[button_n].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+			g_UI[button_n].color);
+
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+	}
+	else if (GetSpeedMode() == 2)
+	{
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[button_d]);
+
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteColor(g_VertexBuffer, g_UI[button_d].pos.x, g_UI[button_d].pos.y, g_UI[button_d].size.x, g_UI[button_d].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+			g_UI[button_d].color);
+
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+	}
+}
+
+void DrawButtonStop(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[button_s]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[button_s].pos.x, g_UI[button_s].pos.y, g_UI[button_s].size.x, g_UI[button_s].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[button_s].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
 }

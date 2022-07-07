@@ -17,6 +17,7 @@
 #include "collision.h"
 #include "time.h"
 #include "enemyLinerData.h"
+#include "unitdata.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -263,7 +264,7 @@ void DrawEnemy(void)
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Enemy[i].rot.x + g_Enemyline[i].rot.x, g_Enemy[i].rot.y + XM_PI + g_Enemyline[i].rot.y, g_Enemy[i].rot.z + g_Enemyline[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(g_Enemy[i].rot.x + g_Enemyline[i].rot.x, g_Enemy[i].rot.y + g_Enemyline[i].rot.y, g_Enemy[i].rot.z + g_Enemyline[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
@@ -350,7 +351,12 @@ void SetEnemyTime(int i)
 
 		g_Enemy[i].start -= 1.0f;
 		if (g_Enemy[i].start <= 0.0f)//エネミーを出現させる
+		{
 			g_Enemy[i].use = TRUE;
+			FadeCharacter(&g_Enemy[i].model, 0);
+			for (int k = g_Enemy[i].startNum; k < g_Enemy[i].startNum + g_Enemy[i].partsNum; k++)
+				FadeCharacter(&g_Parts[k].model, 0);
+		}
 	}
 }
 
@@ -537,6 +543,10 @@ void EnemyMove(int i)
 	XMVECTOR v1 = XMLoadFloat3(&moveTbl[tbl + 1].start) - XMLoadFloat3(&moveTbl[tbl].start);
 	XMVECTOR nor = XMVector3Normalize(v1);
 	XMStoreFloat3(&g_Enemy[i].pos, XMLoadFloat3(&g_Enemy[i].pos) + nor * g_Enemy[i].spd);
+	XMFLOAT3 angle;
+	XMStoreFloat3(&angle, nor);
+	g_Enemy[i].rot.y = atan2f(angle.x, angle.z);
+
 
 	//データの移動量と現在の移動量をfloat値に変換して比較
 	XMFLOAT3 countData;

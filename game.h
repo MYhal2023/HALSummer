@@ -60,3 +60,4 @@ float FloatClamp(float x, float a, float b);
 float FloatCompare(BOOL flag, float a, float b);
 BOOL CheckGameover(void);
 int DamageFunc(int attacker, int diffender);
+BOOL GetSpeedMode(void);

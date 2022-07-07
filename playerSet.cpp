@@ -227,6 +227,8 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 		player[i].tbl_adrA = member->tbl_adrA;
 		player[i].tbl_sizeA = member->tbl_sizeA;
+		player[i].tbl_adrM = member->tbl_adrM;
+		player[i].tbl_sizeM = member->tbl_sizeM;
 		player[i].move_time = 0.0f;
 		SetPlayerNum(1);
 
