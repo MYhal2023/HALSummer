@@ -53,15 +53,26 @@ static BOOL g_Slow = FALSE;
 static int s_mode = FALSE;
 static int	g_PlayMode = MAIN_GAME;
 static int mode = 1;
-//ここで使用するマップチップナンバーを設定
-int g_DebugMap[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1]
+//ここで使用するマップチップナンバーを設定。横幅配列だけ、最大数で揃える。
+//間違えて上下逆になっちゃった…左右は逆じゃないよ
+int g_DebugMap[][MAX_CHIP_WIDTH + 1]
 {
 	{1,1,1,1,1,1,1,1},
-	{0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0},
-	{1,1,1,1,1,1,1,1},
+	{2,2,0,0,0,0,2,2},
 	{0,0,0,0,0,0,0,0},
 	{1,1,1,1,1,1,1,1},
+	{0,0,0,0,0,0,0,0},
+	{3,3,3,3,1,1,1,1},
+};
+
+int g_DebugMapObject[][MAX_CHIP_WIDTH + 1]
+{
+	{9,9,9,9,9,9,9,1},
+	{9,9,9,9,9,9,9,1},
+	{9,9,9,9,9,9,9,1},
+	{1,9,9,9,9,9,9,1},
+	{0,0,9,9,9,9,9,9},
+	{3,3,3,3,9,9,0,0},
 };
 
 //=============================================================================
@@ -97,8 +108,6 @@ void InitSystem(void)
 	// フィールドの初期化
 	InitMeshField(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), FIELD_X, FIELD_Z, BLOCK_SIZE, BLOCK_SIZE, WATER);
 
-	InitMapChip();
-
 	InitCost();
 
 	InitOver();
@@ -112,7 +121,7 @@ void InitSystem(void)
 	InitPlayerSet();
 
 	InitUI();
-	SetBattleMap(g_DebugMap, MAX_CHIP_HEIGHT, MAX_CHIP_WIDTH);
+	InitMapChip(g_DebugMap, g_DebugMapObject, 6, MAX_CHIP_WIDTH);
 	SetGrape(30.0f,20,5,1);
 	SetGrape(180.0f,20,5,1);
 	SetStrept(240.0f,20,5,1);
@@ -209,8 +218,6 @@ void UpdateGame(void)
 
 		UpdateSound();
 
-		BaseDamage();
-
 		UpdateUI();
 	}
 }
@@ -267,7 +274,7 @@ void DrawGame0(void)
 
 
 //=============================================================================
-// 描画処理(ライト目線。生成したい影に関するオブジェクトだけを指定)
+// 描画処理(ライト目線。生成したい影のオブジェクトだけを指定)
 //=============================================================================
 void DrawGame1(void)
 {
@@ -287,11 +294,20 @@ void DrawGame(void)
 
 	// プレイヤー視点
 	//pos = GetPlayer()->pos;
+	CAMERA *cam = GetCamera();
+	PlayerSet *ps = GetSetPos();
+	PLAYER *player = GetPlayer();
 	float center_w = CHIP_SIZE * (MAX_CHIP_WIDTH - 1) * 0.5f;
 	float center_h = CHIP_SIZE * MAX_CHIP_HEIGHT * 0.5f;
+	XMFLOAT3 x = player[ps->setPlayer].pos;
+
 	pos = { center_w, 0.0f, center_h };
-	//pos = GetEnemy()->pos;	//デバッグ用
-	SetCameraAT(pos);
+
+	if (!ps->setCheckMode)
+		SetCameraAT(pos);
+	else
+		SetCharaCamera(x);
+
 	SetCamera();
 	switch(g_ViewPortType_Game)
 	{

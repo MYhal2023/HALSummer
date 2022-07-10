@@ -261,18 +261,34 @@ int GetViewPortType(void)
 }
 
 
-
-// カメラの視点と注視点をセット
+// カメラの視点と注視点セット
 void SetCameraAT(XMFLOAT3 pos)
 {
+	XMVECTOR v1 = XMLoadFloat3(&pos) - XMLoadFloat3(&g_Cam.at);
+	XMVECTOR nor = XMVector3Normalize(v1);
+	XMStoreFloat3(&g_Cam.at, XMLoadFloat3(&g_Cam.at) + nor * 1.0f);
+
 	//引数の座標に変更量を加算。
 	pos.x += g_Cam.atPos.x;
 	pos.y += g_Cam.atPos.y;
 	pos.z += g_Cam.atPos.z;
 	// カメラの注視点をセット
 	g_Cam.at = { pos.x,pos.y,pos.z };
+	g_Cam.rot = { 0.0f, 0.0f, 0.0f };
 
 	// カメラの視点をカメラのY軸回転に対応させている
 	g_Cam.pos.x = g_Cam.at.x - sinf(g_Cam.rot.y) * g_Cam.len;
 	g_Cam.pos.z = g_Cam.at.z - cosf(g_Cam.rot.y) * g_Cam.len;
+}
+
+void SetCharaCamera(XMFLOAT3 pos)
+{
+	// カメラの注視点をセット
+	g_Cam.at = { pos.x,pos.y,pos.z };
+
+	XMVECTOR v1 = XMLoadFloat3(&pos) - XMLoadFloat3(&g_Cam.pos);
+	XMFLOAT3 fpos;
+	XMStoreFloat3(&fpos, v1);
+	float angle = atan2f(fpos.z, fpos.x);
+	g_Cam.rot.y = angle;
 }

@@ -118,7 +118,7 @@ void SetStrept(float time, int life, int power, int deffend)
 	GetModelDiffuse(&g_Enemy[GetEnemyNum()].model, &g_Enemy[GetEnemyNum()].diffuse[0]);
 	g_Enemy[GetEnemyNum()].load = TRUE;
 
-	g_Enemy[GetEnemyNum()].pos = { moveTbl[0].start.x, -8.0f, moveTbl[0].start.z };
+	g_Enemy[GetEnemyNum()].pos = { moveTbl[0].start.x, 0.0f, moveTbl[0].start.z };
 	g_Enemy[GetEnemyNum()].rot = { 0.0f, 0.0f, 0.0f };
 	g_Enemy[GetEnemyNum()].scl = { 0.25f, 0.25f, 0.25f };
 

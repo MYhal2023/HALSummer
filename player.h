@@ -23,8 +23,14 @@ enum PLAYER_STATE
 {
 	Standby,	//待機中
 	Deffend,	//迎撃中
+	Skill,		//スキル使用中
 };
 
+enum SKILL_TYPE
+{
+	neutro_skill,	//好中球のスキル
+	skill_max,		//スキル最大数
+};
 //*****************************************************************************
 // 構造体定義
 //*****************************************************************************
@@ -39,6 +45,15 @@ public:
 	int				target;			//ターゲット無しは99で
 	int				targetable[MAX_TARGET];	//ターゲット可能な敵の配列添え字を保存しておくもの。このリストの内から、target変数に引き渡される
 	int				count;					//現在ターゲットにしている数
+	int				keyNum;			//数字キーのどこに対応しているかを保存
+	int				skillID;		//どんなスキルを持っているのか(事前にスキルごとにID振りを行う)
+	int				skillPoint;		//保有しているスキルポイント
+	int				increaseSP;		//一回で増えるsp量
+	int				skillPointMax;	//保有できるスキルポイント。ここまで溜まればスキルが使える
+	int				intervalSP;		//spを増やす間隔を図る為の変数
+	BOOL			skillUse;		//スキルを使っているか否か
+	BOOL			skillAble;		//スキルを使えるか否か
+
 	void StateCheck(int i);			//配列の添え字を引数に持ってくる
 };
 
@@ -98,6 +113,7 @@ INTERPOLATION_DATA *GetInterPorationData(void);
 void PlayerStandLiner(int i);
 void PlayerInterPoration(int i);
 void CheckEnemyTarget(int i);
+void IncreaseSP(int i);
 void SetPlayer(XMFLOAT3 pos);
 void SetNeutrophils(XMFLOAT3 pos);
 int GetPlayerNum(void);

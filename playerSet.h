@@ -84,6 +84,7 @@ public:
 	PlayerPartsStatus *setPlayerParts;
 	XMFLOAT3 setPos;	//セットする先の座標
 	BOOL setMode;		//セットモードに移行したか否か
+	BOOL setCheckMode;
 };
 HRESULT InitPlayerSet(void);
 void PlayerSetMap(void);
@@ -91,4 +92,5 @@ void SetModeChange(int i);
 void SetPosition(void);
 void SetPlayerInfo(PlayerStatus* member, PlayerPartsStatus* memberParts);
 BOOL CheckPlayerAble(PlayerStatus *member);
+void CharaStateCheck(int num);
 PlayerSet *GetSetPos(void);

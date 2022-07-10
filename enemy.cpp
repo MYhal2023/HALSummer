@@ -18,6 +18,7 @@
 #include "time.h"
 #include "enemyLinerData.h"
 #include "unitdata.h"
+#include "base.h"
 
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`
@@ -59,6 +60,7 @@ static EnemyParts	g_Parts[MAX_ENEMY_PARTS];					// ƒGƒlƒ~[‚Ìƒp[ƒcB—]—T‚ğ‚à‚Á‚
 static BOOL			g_Load = FALSE;
 static int			atCount;
 static int			enemyNum = 0;		//‰½‘Ì‚ÌƒGƒlƒ~[‚ª‚¢‚é‚©
+static int			banishEnemy = 0;		//‰½‘Ì‚ÌƒGƒlƒ~[‚ª€‚ñ‚¾‚Ì‚©
 static int			partsNum = 0;		//‡Œv‚Å‚¢‚­‚Â‚Ìƒp[ƒc‚ğg‚¤‚Ì‚©
 
 
@@ -141,6 +143,7 @@ HRESULT InitEnemy(void)
 		g_Enemyline[i].scl = { 0.0f, 0.0f, 0.0f };
 	}
 	enemyNum = 0;
+	banishEnemy = 0;
 	partsNum = 0;
 	g_Load = TRUE;
 	atCount = 0;
@@ -193,8 +196,10 @@ void UpdateEnemy(void)
 
 		SetEnemyTime(i);	//ƒGƒlƒ~[‚ÌoŒ»ƒ`ƒFƒbƒN
 
+		//“|‚³‚ê‚½ƒGƒlƒ~[‚ÌXV
 		if (g_Enemy[i].life <= 0 && g_Enemy[i].use) {
 			g_Enemy[i].use = FALSE;
+			banishEnemy++;
 			continue;
 		}
 
@@ -228,6 +233,7 @@ void UpdateEnemy(void)
 			break;
 		}
 
+		BaseDamage(i);
 	}
 #ifdef _DEBUG
 	PrintDebugProc("ƒGƒlƒ~[‘Ì—Í:%d\n", g_Enemy[0].life);
@@ -619,9 +625,29 @@ void CheckTarget(int i)
 	}
 }
 
+void BaseDamage(int i)
+{
+	Base *base = GetBase();
+	for (int k = 0; k < base->baseNum; k++)
+	{
+			if (g_Enemy[i].use != TRUE)continue;
+			if (!CollisionBC(g_Enemy[i].pos, base->pos[k], 10.0f, 10.0f))continue;
+
+			base->life--;
+			banishEnemy++;
+			g_Enemy[i].use = FALSE;
+	}
+
+}
+
 int GetEnemyNum(void)
 {
 	return enemyNum;
+}
+
+int GetBanishEnemy(void)
+{
+	return banishEnemy;
 }
 
 int GetEnemyPartsNum(void)

@@ -40,7 +40,7 @@ void InitLight(void)
 	//ライト初期化
 	for (int i = 0; i < LIGHT_MAX; i++)
 	{
-		g_Light[i].Position = XMFLOAT3(100.0f, 500.0f, 100.0f);
+		g_Light[i].Position = XMFLOAT3(150.0f, 500.0f, 100.0f);
 		g_Light[i].Direction = XMFLOAT3(1.0f, 1.0f, 1.0f);
 		g_Light[i].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		g_Light[i].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -51,8 +51,8 @@ void InitLight(void)
 	}
 
 	// 光源の設定（世界を照らす光）
-	g_Light[0].Position = XMFLOAT3(100.0f, 300.0f, 100.0f);
-	g_Light[0].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	g_Light[0].Position = XMFLOAT3(300.0f, 300.0f, 300.0f);
+	g_Light[0].Direction = XMFLOAT3(-0.5f, -1.0f, 0.5f);
 	float diffuse = 1.0f;
 	g_Light[0].Diffuse = XMFLOAT4(diffuse, diffuse, diffuse, 1.0f);
 	g_Light[0].Type = LIGHT_TYPE_DIRECTIONAL;					// 並行光源
@@ -98,6 +98,26 @@ void SetFogData(FOG *fog)
 //ライトの調整
 void UpdateLight(void)
 {
+#ifdef _DEBUG
+	if (GetKeyboardPress(DIK_Z))
+	{
+		g_Light[0].Position.x += 1.0f;
+	}
+	else if (GetKeyboardPress(DIK_X))
+	{
+		g_Light[0].Position.x -= 1.0f;
+	}
+	else if (GetKeyboardPress(DIK_C))
+	{
+		g_Light[0].Position.z += 1.0f;
+	}
+	else if (GetKeyboardPress(DIK_V))
+	{
+		g_Light[0].Position.z -= 1.0f;
+	}
+	SetLight(0, &g_Light[0]);									// これで設定している
+	PrintDebugProc("ライトX:%f、Z:%f", g_Light[0].Position.x, g_Light[0].Position.z);
+#endif
 }
 
 void UpdateFog(void)

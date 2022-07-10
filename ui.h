@@ -25,6 +25,7 @@ enum UI_TEXTURE
 	button_n,
 	button_d,
 	button_s,
+	costbox,
 };
 
 HRESULT InitUI(void);
@@ -33,8 +34,9 @@ void UpdateUI(void);
 void DrawUI(void);
 void DrawCharBox(void);
 void DrawUIbg(void);
-void DrawNumber(int numb, float x, float y, float sx, float sy);
+void DrawNumber(int numb, float px, float py, float sx, float sy, XMFLOAT4 color);
 void DrawLife(void);
 void DrawEnemyNum(void);
 void DrawButtonNorD(void);
 void DrawButtonStop(void);
+void DrawCost(void);

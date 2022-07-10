@@ -1,6 +1,6 @@
 //=============================================================================
 //
-// プレイヤーセット処理 [playerSet.cpp]
+// プレイヤーセット(設置、スキル使用)処理 [playerSet.cpp]
 // Author : 
 //
 //=============================================================================
@@ -29,6 +29,8 @@ HRESULT InitPlayerSet(void)
 {
 	g_PlayerSet.setPos = XMFLOAT3(0.0f, 15.0f, 0.0f);
 	g_PlayerSet.setMode = FALSE;
+	g_PlayerSet.setCheckMode = FALSE;
+	g_PlayerSet.setPlayer = 99;
 	PlayerStatus *member = GetTeam();
 	//編成情報から、セット可能な配列箇所を読み込む
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
@@ -118,12 +120,16 @@ void PlayerSetMap(void)
 
 void SetModeChange(int i)
 {
-	if (g_PlayerSet.use[i] == FALSE)return;	//編成に登録されていないため返す
+	if (!g_PlayerSet.setMode)
+		CharaStateCheck(i);	//編成に登録されていないためキャラ詳細関数へ
+	if (g_PlayerSet.setCheckMode)return;
 
+	if (!g_PlayerSet.use[i])return;
 	//セットモードに初めて移行
 	if (g_PlayerSet.setMode == FALSE)
 	{
 		g_PlayerSet.setMode = TRUE;
+		g_PlayerSet.setCheckMode = FALSE;
 		g_PlayerSet.setPlayer = i;
 		SetSlowMode(TRUE);
 	}
@@ -131,11 +137,13 @@ void SetModeChange(int i)
 	else if (g_PlayerSet.setMode == TRUE && g_PlayerSet.setPlayer != i)
 	{
 		g_PlayerSet.setPlayer = i;
+		g_PlayerSet.setCheckMode = FALSE;
 	}
 	//セットモードに移行済みで同キャラが選択されたため、セットモードを解除する
 	else if(g_PlayerSet.setMode == TRUE && g_PlayerSet.setPlayer == i)
 	{
 		g_PlayerSet.setMode = FALSE;
+		g_PlayerSet.setCheckMode = FALSE;
 		g_PlayerSet.setPlayer = 99;
 		SetSlowMode(FALSE);
 	}
@@ -230,6 +238,7 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].tbl_adrM = member->tbl_adrM;
 		player[i].tbl_sizeM = member->tbl_sizeM;
 		player[i].move_time = 0.0f;
+		player[i].keyNum = g_PlayerSet.setPlayer;	//スキル発動のショトカの為に保存
 		SetPlayerNum(1);
 
 		//パーツの初期化処理
@@ -268,6 +277,27 @@ BOOL CheckPlayerAble(PlayerStatus *member)
 
 	return ans;
 }
+//配置済みのキャラの数字キーが再び押されたらこれが呼ばれる
+void CharaStateCheck(int num)
+{
+	PLAYER *player = GetPlayer();
+	for (int k = 0; k < MAX_PLAYER; k++)
+	{
+		if (player[k].keyNum == num && g_PlayerSet.setPlayer != k)
+		{
+			g_PlayerSet.setCheckMode = TRUE;	//キャラ詳細モードへ
+			g_PlayerSet.setPlayer = k;
+			return;
+		}
+		else if (player[k].keyNum == num && g_PlayerSet.setPlayer == k)
+		{
+			g_PlayerSet.setCheckMode = FALSE;
+			g_PlayerSet.setPlayer = 99;
+			return;
+		}
+	}
+}
+
 PlayerSet *GetSetPos(void)
 {
 	return &g_PlayerSet;

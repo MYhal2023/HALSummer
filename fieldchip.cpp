@@ -41,15 +41,18 @@ static char* g_TextureName[] = {
 	"data/TEXTURE/title_bg2.png",
 };
 static MAP_CHIP		g_MapChip[MAX_CHIP_NUM];						// プレイヤー
+static MAP_CHIP		g_MapChipObj[MAX_CHIP_NUM];						// プレイヤー
 static MAP_CHIP		g_MapSet[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1];
+static MAP_CHIP		g_MapSetObj[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1];
 static FIELD_BG		g_bg[BG_MAX];
 static BOOL			g_Load = FALSE;
-static int width, height;
+static int m_width, m_height;
 int g_BattleMap[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1];
+int g_BattleMapObj[MAX_CHIP_HEIGHT][MAX_CHIP_WIDTH + 1];
 //=============================================================================
-// 初期化処理
+// 初期化処理(マップチップセットと背景の用意、マップセットまで)
 //=============================================================================
-HRESULT InitMapChip(void)
+HRESULT InitMapChip(int map[][MAX_CHIP_WIDTH + 1], int mapObj[][MAX_CHIP_WIDTH + 1], int height, int width)
 {
 	ID3D11Device *pDevice = GetDevice();
 	MakeVertexBG();
@@ -63,15 +66,23 @@ HRESULT InitMapChip(void)
 			&g_Texture[i],
 			NULL);
 	}
+	for (int i = 0; i < MAX_CHIP_HEIGHT; i++)
+	{
+		for (int k = 0; k < MAX_CHIP_WIDTH; k++)
+		{
+			g_BattleMap[i][k] = 99;	//全マップチップ場所をリセット(99は配置しない番号)
+			g_BattleMapObj[i][k] = 9;	//全マップチップ場所をリセット(9は配置しない番号)
+		}
+	}
 
-	width = MAX_CHIP_WIDTH;
-	height = MAX_CHIP_HEIGHT;
+	m_width = width;
+	m_height = height;
 	//背景設定
 	for (int i = 0; i < BG_MAX; i++)
 	{
 		ZeroMemory(&g_bg[i].material, sizeof(g_bg[i].material));
 		g_bg[i].material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		g_bg[i].pos = { width * CHIP_SIZE * 0.5f - 25.0f, 0.0f, height * CHIP_SIZE };
+		g_bg[i].pos = { m_width * CHIP_SIZE * 0.5f - 25.0f, 0.0f, m_height * CHIP_SIZE -25.0f};
 		g_bg[i].rot = { XM_PI * -0.5f, 0.0f, 0.0f };
 		g_bg[i].scl = { 1.0f, 1.0f, 1.0f };
 		g_bg[i].load = TRUE;
@@ -87,6 +98,12 @@ HRESULT InitMapChip(void)
 		case HIGH:
 			LoadModel(MODEL_FIELD002, &g_MapChip[i].model);
 			break;
+		case ROW_BLOOD:
+			LoadModel(MODEL_FIELD003, &g_MapChip[i].model);
+			break;
+		case HIGH_BLOOD:
+			LoadModel(MODEL_FIELD004, &g_MapChip[i].model);
+			break;
 		case MAX_VAL:
 			break;
 		}
@@ -101,25 +118,58 @@ HRESULT InitMapChip(void)
 
 		g_MapChip[i].size = CHIP_SIZE;	// 当たり判定の大きさ
 	}
-	//マップチップ情報のセット
+	//マップチップオブジェクトモデル用意
+	for (int i = 0; i < MAX_OBJ_NUM; i++)
+	{
+		switch (i)
+		{
+		case Building:
+			LoadModel(MODEL_OBJECT001, &g_MapChipObj[i].model);
+			break;
+		case Container:
+			LoadModel(MODEL_OBJECT002, &g_MapChipObj[i].model);
+			break;
+		case MAX_VAL:
+			break;
+		}
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_MapChipObj[i].model, &g_MapChipObj[i].diffuse[0]);
+
+		g_MapChipObj[i].load = TRUE;
+
+		g_MapChipObj[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_MapChipObj[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_MapChipObj[i].scl = { 1.0f, 1.0f, 1.0f };
+
+		g_MapChipObj[i].size = CHIP_SIZE;	// 当たり判定の大きさ
+	}
+	//マップチップ情報のリセット
 	for (int i = 0; i < MAX_CHIP_HEIGHT; i++)
 	{
 		for (int k = 0; k < MAX_CHIP_WIDTH; k++)
 		{
-			g_MapSet[i][k].pos = { 0.0f + CHIP_SIZE * k, -1.0f,  0.0f + CHIP_SIZE * i };
+			g_MapSet[i][k].pos = { 0.0f + CHIP_SIZE * k, 0.0f,  0.0f + CHIP_SIZE * i };
 			g_MapSet[i][k].rot = { 0.0f, 0.0f, 0.0f };
 			g_MapSet[i][k].scl = { 1.7f, 1.0f, 1.7f };
 			g_MapSet[i][k].type = LowPlaces;
 			g_MapSet[i][k].use = FALSE;
 		}
 	}
+	//マップチップオブジェ情報のリセット
 	for (int i = 0; i < MAX_CHIP_HEIGHT; i++)
 	{
 		for (int k = 0; k < MAX_CHIP_WIDTH; k++)
 		{
-			g_BattleMap[i][k] = 99;	//全マップチップ場所をリセット(99は配置しない番号)
+			g_MapSetObj[i][k].pos = { 0.0f + CHIP_SIZE * k, 0.0f,  0.0f + CHIP_SIZE * i };
+			g_MapSetObj[i][k].rot = { 0.0f, 0.0f, 0.0f };
+			g_MapSetObj[i][k].scl = { 2.0f, 2.0f, 2.0f };
+			g_MapSetObj[i][k].type = LowPlaces;
+			g_MapSetObj[i][k].use = FALSE;
 		}
 	}
+
+	SetBattleMap(map, height, width);	//ここでマップをセットしている
+	SetBattleMapObj(mapObj, height, width);	//ここでマップをセットしている
 
 	g_Load = TRUE;
 	return S_OK;
@@ -148,6 +198,15 @@ void UninitMapChip(void)
 			g_MapChip[i].load = FALSE;
 		}
 	}
+	for (int i = 0; i < MAX_CHIP_NUM; i++)
+	{
+		// モデルの解放処理
+		if (g_MapChipObj[i].load)
+		{
+			UnloadModel(&g_MapChipObj[i].model);
+			g_MapChip[i].load = FALSE;
+		}
+	}
 	g_Load = FALSE;
 }
 
@@ -169,9 +228,9 @@ void DrawMapChip(void)
 	//選択されているチップは色が変わる
 	SwapShader(MODE_FIELD_CHIP);
 	PlayerSet *ps = GetSetPos();
-	for (int i = 0; i < MAX_CHIP_HEIGHT; i++)
+	for (int i = 0; i < m_height; i++)
 	{
-		for (int k = 0; k < MAX_CHIP_WIDTH; k++)
+		for (int k = 0; k < m_width; k++)
 		{
 			if (ps->setPos.x == g_MapSet[i][k].pos.x &&
 				ps->setPos.z == g_MapSet[i][k].pos.z &&
@@ -207,9 +266,9 @@ void DrawMapChip(void)
 		}
 	}
 
-
-
 	SwapShader(MODE_PLANE);
+
+	DrawMapObject();
 
 	// カリング設定を戻す
 	SetCullingMode(CULL_MODE_BACK);
@@ -219,6 +278,8 @@ void DrawBG(void)
 {
 	// Z比較なし
 	SetDepthEnable(FALSE);
+	// ライティングを無効
+	SetLightEnable(FALSE);
 
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
@@ -261,7 +322,48 @@ void DrawBG(void)
 	}
 	// Z比較あり
 	SetDepthEnable(TRUE);
+	// ライティングを無効
+	SetLightEnable(TRUE);
+
 }
+
+void DrawMapObject(void)
+{
+	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
+	for (int i = 0; i < m_height; i++)
+	{
+		for (int k = 0; k < m_width; k++)
+		{
+			int m = g_BattleMapObj[i][k];
+			if (m == 9)continue;	//マップチップ無し。描画不要
+			// ワールドマトリックスの初期化
+			mtxWorld = XMMatrixIdentity();
+
+			// スケールを反映
+			mtxScl = XMMatrixScaling(g_MapSetObj[i][k].scl.x, g_MapSetObj[i][k].scl.y, g_MapSetObj[i][k].scl.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+			// 回転を反映
+			mtxRot = XMMatrixRotationRollPitchYaw(g_MapSetObj[i][k].rot.x, g_MapSetObj[i][k].rot.y + XM_PI, g_MapSetObj[i][k].rot.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+			// 移動を反映
+			mtxTranslate = XMMatrixTranslation(g_MapSetObj[i][k].pos.x, g_MapSetObj[i][k].pos.y, g_MapSetObj[i][k].pos.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+			// ワールドマトリックスの設定
+			SetWorldMatrix(&mtxWorld);
+
+			XMStoreFloat4x4(&g_MapSetObj[i][k].mtxWorld, mtxWorld);
+
+			// モデル描画
+			//ここだけ事前に用意したマップチップナンバーを参照
+			DrawModel(&g_MapChipObj[m].model);
+		}
+	}
+
+}
+
 HRESULT MakeVertexBG(void)
 {
 	// 頂点バッファ生成
@@ -320,13 +422,38 @@ void SetBattleMap(int map[][MAX_CHIP_WIDTH + 1], int height, int width)
 			g_BattleMap[i][k] = map[i][k];
 			switch (g_BattleMap[i][k])
 			{
-			case LowPlaces:
+			case ROW:
+			case ROW_BLOOD:
 				g_MapSet[i][k].type = LowPlaces;
 				break;
-			case HighPlaces:
+			case HIGH:
+			case HIGH_BLOOD:
 				g_MapSet[i][k].type = HighPlaces;
 				break;
 			}
+		}
+	}
+}
+//バトルマップセット。マップ配列と縦横の長さを引数に渡す。ついでにチップタイプもセット
+void SetBattleMapObj(int map[][MAX_CHIP_WIDTH + 1], int height, int width)
+{
+	for (int i = 0; i < height; i++)
+	{
+		for (int k = 0; k < width; k++)
+		{
+			g_BattleMapObj[i][k] = map[i][k];
+
+			switch (g_MapSet[i][k].type)
+			{
+			case LowPlaces:
+				g_MapSetObj[i][k].pos.y = 12.0f;
+				break;
+			case HighPlaces:
+				g_MapSetObj[i][k].pos.y = 22.0f;
+				break;
+			}
+			if(map[i][k] != 9)
+			g_MapSet[i][k].type = NoEntry;	//何かしらがあるなら進入禁止で上書き
 		}
 	}
 }
@@ -357,9 +484,9 @@ BOOL GetMapChipUse(int i, int k)
 
 float GetMapWidth(void)
 {
-	return width * CHIP_SIZE;
+	return m_width * CHIP_SIZE;
 }
 float GetMapHeight(void)
 {
-	return height * CHIP_SIZE;
+	return m_height * CHIP_SIZE;
 }

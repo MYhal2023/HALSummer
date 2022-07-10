@@ -11,12 +11,15 @@
 #include "playerSet.h"
 #include "ui.h"
 #include "base.h"
+#include "cost.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(8)				// テクスチャの数
+#define TEXTURE_MAX			(9)				// テクスチャの数
 #define CHAR_TEXTURE_MAX	(2)				// キャラテクスチャの数
+#define NUMBER_SIZE			(30.0f)			// x方向のサイズ
+#define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 
 //*****************************************************************************
 // グローバル変数
@@ -33,6 +36,7 @@ static char* g_TextureName[] = {
 	"data/TEXTURE/button_normal.png",
 	"data/TEXTURE/button_double.png",
 	"data/TEXTURE/button_stop.png",
+	"data/TEXTURE/costbox.png",
 };
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
@@ -85,10 +89,10 @@ HRESULT InitUI(void)
 	g_UI[var_bg].pos = { SCREEN_CENTER_X, 50.0f };
 	g_UI[var_bg].size = { 500.0f, 80.0f };
 	g_UI[var_bg].color = { 0.0f, 0.0f, 0.0f, 0.6f };
-	g_UI[baseLife].pos = { g_UI[var_bg].pos.x + 50.0f, 50.0f };
-	g_UI[baseLife].size = { 60.0f, 60.0f };
-	g_UI[enemyNum].pos = { g_UI[var_bg].pos.x - 200.0f, 50.0f };
-	g_UI[enemyNum].size = { 60.0f, 60.0f };
+	g_UI[baseLife].pos = { g_UI[var_bg].pos.x + 80.0f, 50.0f };
+	g_UI[baseLife].size = { 642.0f * 0.065f, 990.0f*0.065f };
+	g_UI[enemyNum].pos = { g_UI[var_bg].pos.x - 190.0f, 50.0f };
+	g_UI[enemyNum].size = { 65.0f, 65.0f };
 	const float mnp = 0.15f;
 	g_UI[button_n].pos = { 1600.0f, 60.0f };
 	g_UI[button_n].size = { 1000.0f * mnp, 600.0f * mnp };
@@ -96,6 +100,8 @@ HRESULT InitUI(void)
 	g_UI[button_d].size = { 1000.0f * mnp, 600.0f * mnp };
 	g_UI[button_s].pos = { 1800.0f, 60.0f };
 	g_UI[button_s].size = { 1000.0f * mnp, 600.0f * mnp };
+	g_UI[costbox].size = { 160.0f, 160.0f };
+	g_UI[costbox].pos = { SCREEN_WIDTH - g_UI[costbox].size.x*0.5f , SCREEN_HEIGHT - g_UI[costbox].size.y * 0.5f };
 
 	g_Load = TRUE;
 	return S_OK;
@@ -176,6 +182,7 @@ void DrawUI(void)
 	DrawEnemyNum();
 	DrawButtonNorD();
 	DrawButtonStop();
+	DrawCost();
 	SetDepthEnable(TRUE);
 
 	// ライティングを無効
@@ -197,7 +204,7 @@ void DrawCharBox(void)
 		if (ps->use[i] != TRUE)continue;	//未使用編成枠はスルー
 
 		//右から順番に、編成の最後尾から描画
-		g_UI[charBox].pos = { SCREEN_WIDTH - k * g_UI[charBox].size.x, SCREEN_HEIGHT - g_UI[charBox].size.y * 0.5f };
+		g_UI[charBox].pos = { (SCREEN_WIDTH * 0.8f) - k * g_UI[charBox].size.x, SCREEN_HEIGHT - g_UI[charBox].size.y * 0.5f };
 		k++;
 		//キャラIDを抽出してキャラクターを最初に描画
 		int id = ps->setCharID;
@@ -240,7 +247,7 @@ void DrawUIbg(void)
 }
 
 //引数:表示したい数字、表示座標(x,y)、表示サイズ(x方向,y方向)
-void DrawNumber(int numb, float px, float py, float sx, float sy)
+void DrawNumber(int numb, float px, float py, float sx, float sy, XMFLOAT4 color)
 {
 	int digit = 0;
 	int clock = numb;
@@ -266,7 +273,7 @@ void DrawNumber(int numb, float px, float py, float sx, float sy)
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		SetSpriteColor(g_VertexBuffer, px, py, sx, sy, tx, 0.0f, 0.1f, 1.0f,
-			g_UI[number].color);
+			color);
 
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
@@ -277,6 +284,7 @@ void DrawNumber(int numb, float px, float py, float sx, float sy)
 
 void DrawLife(void)
 {
+	DrawNumber(GetBaseLife(), g_UI[baseLife].pos.x + g_UI[baseLife].size.x * 1.1f, g_UI[baseLife].pos.y, NUMBER_SIZE, NUMBER_SIZE * 1.5f, XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 	// テクスチャ設定
 	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[baseLife]);
 
@@ -291,6 +299,9 @@ void DrawLife(void)
 
 void DrawEnemyNum(void)
 {
+	int life = GetEnemyNum() - GetBanishEnemy();
+	DrawNumber(life, g_UI[enemyNum].pos.x + g_UI[enemyNum].size.x * 2.0f, g_UI[enemyNum].pos.y, NUMBER_SIZE, NUMBER_SIZE * 1.5f, XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+
 	// テクスチャ設定
 	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[enemyNum]);
 
@@ -342,4 +353,33 @@ void DrawButtonStop(void)
 
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
+}
+
+void DrawCost(void)
+{
+	Cost *cost = GetCostNum();
+	float per = (float)(cost->time) / (float)(cost->costMaxTime);
+
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[costbox]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[costbox].pos.x, g_UI[costbox].pos.y, g_UI[costbox].size.x, g_UI[costbox].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[costbox].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[var_bg]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[costbox].pos.x, g_UI[costbox].pos.y - (g_UI[costbox].size.y * per) * 0.5f + g_UI[costbox].size.y * 0.5f, g_UI[costbox].size.x, g_UI[costbox].size.y * per, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(0.0f, 1.0f, 0.0f, 0.7f));
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+	DrawNumber(GetCost(), g_UI[costbox].pos.x, g_UI[costbox].pos.y, COST_NUMBER_SIZE, COST_NUMBER_SIZE * 1.5f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }

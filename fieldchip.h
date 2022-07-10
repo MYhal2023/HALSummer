@@ -12,7 +12,13 @@
 //*****************************************************************************
 #define	MODEL_FIELD001		"data/MODEL/shortrange2.obj"			// 読み込むモデル名
 #define	MODEL_FIELD002		"data/MODEL/longrange2.obj"			// 読み込むモデル名
-#define MAX_CHIP_NUM		(2)					// フィールドチップ種類
+#define	MODEL_FIELD003		"data/MODEL/shortrange3.obj"			// 読み込むモデル名
+#define	MODEL_FIELD004		"data/MODEL/longrange3.obj"			// 読み込むモデル名
+
+#define	MODEL_OBJECT001		"data/MODEL/obstacle000.obj"			// 読み込むモデル名
+#define	MODEL_OBJECT002		"data/MODEL/container001.obj"			// 読み込むモデル名
+#define MAX_CHIP_NUM		(4)					// フィールドチップ種類
+#define MAX_OBJ_NUM			(2)					// フィールドチップ種類
 #define MAX_CHIP_WIDTH		(8)					// 横のセット数
 #define MAX_CHIP_HEIGHT		(6)					// 縦のセット数
 
@@ -22,13 +28,21 @@ enum CHIP_VAL
 {
 	ROW,
 	HIGH,
+	ROW_BLOOD,
+	HIGH_BLOOD,
 	MAX_VAL
 };
 
+enum CHIP_OBJ
+{
+	Building,
+	Container,
+};
 enum CHIP_TYPE
 {
 	LowPlaces,
 	HighPlaces,
+	NoEntry,
 };
 //*****************************************************************************
 // 構造体定義
@@ -64,13 +78,15 @@ struct FIELD_BG
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitMapChip(void);
+HRESULT InitMapChip(int map[][MAX_CHIP_WIDTH + 1], int mapObj[][MAX_CHIP_WIDTH + 1], int height, int width);
 void UninitMapChip(void);
 void UpdateMapChip(void);
 void DrawMapChip(void);
+void DrawMapObject(void);
 void DrawBG(void);
 HRESULT MakeVertexBG(void);
 void SetBattleMap(int map[][MAX_CHIP_WIDTH + 1], int height, int width);
+void SetBattleMapObj(int map[][MAX_CHIP_WIDTH + 1], int height, int width);
 MAP_CHIP *GetMapChip(void);
 int GetMapChiptype(int i, int k);
 void SetMapChipUse(BOOL flag, int i, int k);

@@ -18,6 +18,5 @@ struct Base
 };
 
 HRESULT InitBase(int life, XMFLOAT3 pos[], int baseNum);
-void BaseDamage(void);
 int GetBaseLife(void);
 Base *GetBase(void);

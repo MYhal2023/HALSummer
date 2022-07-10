@@ -10,6 +10,7 @@ struct Cost
 {
 	int cost;
 	int time;
+	int costMaxTime;
 };
 void InitCost(void);		//イニシャライザ
 void IncreaseCost(int increase);	//コストを増やす関数

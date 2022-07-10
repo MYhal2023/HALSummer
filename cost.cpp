@@ -13,6 +13,7 @@ void InitCost(void)
 {
 	g_Cost.cost = 0;
 	g_Cost.time = 0;
+	g_Cost.costMaxTime = 60;
 }
 
 //コストを一気に増やしたい時に
@@ -35,17 +36,12 @@ void DecreaseCost(int decrease)
 //時間経過でコストが増えるようにする
 void IncTimeCost(void)
 {
-	const int MaxTime = 180;
 	g_Cost.time++;
-	if (g_Cost.time >= MaxTime)
+	if (g_Cost.time >= g_Cost.costMaxTime)
 	{
 		g_Cost.time = 0;
 		IncreaseCost(1);
 	}
-#ifdef _DEBUG
-	PrintDebugProc("コスト:%d\n", g_Cost.cost);
-
-#endif
 }
 
 Cost *GetCostNum(void)

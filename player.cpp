@@ -20,6 +20,7 @@
 #include "enemy.h"
 #include "base.h"
 #include "fieldchip.h"
+#include "neutro.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -38,6 +39,7 @@
 
 #define PLAYER_PARTS_MAX	(1)								// プレイヤーのパーツの数
 #define PLAYER_AT_FLAME		(30.0f)							// プレイヤーの攻撃フレーム
+#define PLAYER_SP_FLAME		(30.0f)							// プレイヤーのSPが増える間隔
 #define PLAYER_INVINC_FLAME	(120.0f)						// プレイヤー無敵フレーム
 #define MAX_PLAYER_PARTS (MAX_PLAYER * 2)
 //*****************************************************************************
@@ -113,6 +115,7 @@ HRESULT InitPlayer(void)
 		g_Player[i].blockNum = 0;
 		g_Player[i].partsNum = 0;
 		g_Player[i].startNum = 0;
+		g_Player[i].keyNum = 99;
 		// 階層アニメーション用の初期化処理
 		g_Player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
@@ -187,6 +190,7 @@ void UpdatePlayer(void)
 			SetMapChipUse(FALSE, z, x);
 			continue;
 		}
+		IncreaseSP(i);
 		int oldState = g_Player[i].state;
 		g_Player[i].StateCheck(i);
 		if (oldState != g_Player[i].state)
@@ -209,8 +213,11 @@ void UpdatePlayer(void)
 		case Deffend:
 			PlayerInterPoration(i);
 			break;
+		case Skill:
+			PlayerSkill(i);
+			break;
 		}
-
+			
 	}
 #ifdef _DEBUG
 	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[0].pos.x);
@@ -477,6 +484,18 @@ void PlayerInterPoration(int i)
 	}
 }
 
+//スキル処理(ここではスキルタイプの判別を行い、それに基づいた関数を呼び出す)
+void PlayerSkill(int i)
+{
+	//ポリモーフィズム使えよ！って言いたいけどめんどくさい…
+	//スキル関数先でスキル発動を切ること(skillUse,state)
+	switch (g_Player[i].skillID)
+	{
+	case neutro_skill:
+		NeutroSkill(&g_Player[i]);
+		break;
+	}
+}
 void BlockEnemy(void)
 {
 	ENEMY *enemy = GetEnemy();
@@ -538,6 +557,20 @@ void CheckEnemyTarget(int i)
 	}
 }
 
+//スキルポイントに関する処理
+void IncreaseSP(int i)
+{
+	//一定フレームごとにSPを加算していく
+	if (g_Player[i].intervalSP < PLAYER_SP_FLAME)
+	g_Player[i].intervalSP++;
+
+	if(g_Player[i].intervalSP >= PLAYER_SP_FLAME &&
+	g_Player[i].skillPoint < g_Player[i].skillPointMax)
+		g_Player[i].skillPoint += g_Player[i].increaseSP;
+
+	if (g_Player[i].skillPoint >= g_Player[i].skillPointMax)
+		g_Player[i].skillAble = TRUE;
+}
 
 void SetPlayer(XMFLOAT3 pos)
 {
@@ -692,7 +725,7 @@ PlayerParts *GetPlayerParts(void)
 //現在は最初に登場した敵を優先してターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)
 {
-	if (g_Player[i].state == Deffend)return;
+	if (g_Player[i].state == Deffend || g_Player[i].state == Skill)return;
 	g_Player[i].state = Standby;	//とりあえず待機状態にセット
 	ENEMY *enemy = GetEnemy();
 	g_Player[i].count = 0;
@@ -784,7 +817,6 @@ void DrawPlayerLife(void)
 	SetLightEnable(TRUE);
 
 }
-
 
 
 HRESULT MakeVertexPlayerVar(void)
