@@ -22,60 +22,65 @@
 // 本体攻撃モーション
 ////
 static INTERPOLATION_DATA grape_Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
-
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f), 70 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f), 15 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
 };
 // パーツ1の攻撃モーション
 static INTERPOLATION_DATA grape_Parts001Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(10.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
-
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 35 },
+	{ XMFLOAT3(13.5f,-3.0f,  5.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 40 },
+	{ XMFLOAT3(13.5f,-3.0f,  5.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 5 },
+	{ XMFLOAT3(13.5f,-3.0f, 25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.5f, 1.5f, 1.5f), 5 },
+	{ XMFLOAT3(13.5f,-3.0f,  5.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 };
 //パーツ2
 static INTERPOLATION_DATA grape_Parts002Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 10.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 35 },
+	{ XMFLOAT3(3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 40 },
+	{ XMFLOAT3(3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 5 },
+	{ XMFLOAT3(3.5f,-5.0f, 20.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.5f, 1.5f, 1.5f), 5 },
+	{ XMFLOAT3(3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
 //パーツ3
 static INTERPOLATION_DATA grape_Parts003Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
-
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 35 },
+	{ XMFLOAT3(-3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 40 },
+	{ XMFLOAT3(-3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.25f, 0.25f, 0.25f), 5 },
+	{ XMFLOAT3(-3.5f,-5.0f, 20.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.5f, 1.5f, 1.5f), 5 },
+	{ XMFLOAT3(-3.5f,-5.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f,  0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 };
 ////
 // 本体移動時モーション
 ////
 static INTERPOLATION_DATA grape_Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 30, },
-	{ XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 0 },
-
+	{ XMFLOAT3(0.0f,  0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
+	{ XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f), 30 },
+	{ XMFLOAT3(0.0f,  0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
 };
 // パーツ1
 static INTERPOLATION_DATA grape_Parts001Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 30, },
-	{ XMFLOAT3(10.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 0 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, -2.0f*XM_PI, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
 // パーツ2
 static INTERPOLATION_DATA grape_Parts002Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 30, },
-	{ XMFLOAT3(0.0f, 20.0f, 10.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 0 },
+	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, -20.0f, 0.0f), XMFLOAT3(0.0f, XM_PI, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 2.0f*XM_PI, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
 // パーツ3
 static INTERPOLATION_DATA grape_Parts003Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 30, },
-	{ XMFLOAT3(10.0f, 20.0f, 10.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 0 },
+	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, -20.0f, 0.0f), XMFLOAT3(0.0f, XM_PI, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 2.0f*XM_PI, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
 ////////////////////////////////////

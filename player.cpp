@@ -220,7 +220,6 @@ void UpdatePlayer(void)
 			
 	}
 #ifdef _DEBUG
-	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[0].pos.x);
 	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[0].pos.z);
 	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[1].pos.x);
 	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[1].pos.z);
@@ -229,6 +228,8 @@ void UpdatePlayer(void)
 	PrintDebugProc("プレイヤー体力:%d\n", g_Player[1].life);
 	PrintDebugProc("プレイヤー状態:%d\n", g_Player[1].state);
 	PrintDebugProc("プレイヤーターゲット:%d\n", g_Player[1].target);
+	PrintDebugProc("プレイヤーSP:%d\n", g_Player[0].skillPoint);
+
 #endif
 }
 
@@ -564,12 +565,16 @@ void IncreaseSP(int i)
 	if (g_Player[i].intervalSP < PLAYER_SP_FLAME)
 	g_Player[i].intervalSP++;
 
-	if(g_Player[i].intervalSP >= PLAYER_SP_FLAME &&
-	g_Player[i].skillPoint < g_Player[i].skillPointMax)
+	if (g_Player[i].intervalSP >= PLAYER_SP_FLAME &&
+		g_Player[i].skillPoint < g_Player[i].skillPointMax) {
 		g_Player[i].skillPoint += g_Player[i].increaseSP;
+		g_Player[i].intervalSP = 0;
+	}
 
 	if (g_Player[i].skillPoint >= g_Player[i].skillPointMax)
 		g_Player[i].skillAble = TRUE;
+	else
+		g_Player[i].skillAble = FALSE;
 }
 
 void SetPlayer(XMFLOAT3 pos)
@@ -725,7 +730,7 @@ PlayerParts *GetPlayerParts(void)
 //現在は最初に登場した敵を優先してターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)
 {
-	if (g_Player[i].state == Deffend || g_Player[i].state == Skill)return;
+	if (g_Player[i].state == Deffend)return;
 	g_Player[i].state = Standby;	//とりあえず待機状態にセット
 	ENEMY *enemy = GetEnemy();
 	g_Player[i].count = 0;
@@ -736,7 +741,7 @@ void PLAYER::StateCheck(int i)
 	for (int k = 0; k < MAX_ENEMY; k++)
 	{
 		if (enemy[k].use != TRUE)continue;
-		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る
+		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る。ターゲット情報も保存
 		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size, 10.0f))
 		{
 			g_Player[i].state = Deffend;
@@ -744,6 +749,9 @@ void PLAYER::StateCheck(int i)
 			g_Player[i].count++;
 		}
 	}
+	//スキル使用中ならステートを上書き(ターゲット情報は取りたいため)
+	if(g_Player[i].skillUse)
+		g_Player[i].state = Skill;
 }
 
 //プレイヤーキャラの体力バーの表示処理

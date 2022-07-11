@@ -55,9 +55,21 @@ void UpdatePlayerSet(void)
 {
 	PlayerSetMap();
 	SetPosition();
+	//スキル使用の為の操作処理
+	PLAYER *player = GetPlayer();
+	if (g_PlayerSet.setCheckMode && 
+		player[g_PlayerSet.setPlayer].skillAble && 
+		GetKeyboardTrigger(DIK_RETURN))
+	{
+		player[g_PlayerSet.setPlayer].skillPoint = 0;
+		player[g_PlayerSet.setPlayer].skillUse = TRUE;
+		g_PlayerSet.setCheckMode = FALSE;
+		g_PlayerSet.setPlayer = 99;
+	}
+
 #ifdef _DEBUG
-	PrintDebugProc("カーソル座標:X:%f Z:%f", g_PlayerSet.setPos.x, g_PlayerSet.setPos.z);
-	PrintDebugProc("セットモード:%d", g_PlayerSet.setMode);
+	PrintDebugProc("カーソル引数:%d\n", g_PlayerSet.setPlayer);
+	PrintDebugProc("セットモード:%d\n", g_PlayerSet.setMode);
 #endif
 }
 
@@ -122,7 +134,10 @@ void SetModeChange(int i)
 {
 	if (!g_PlayerSet.setMode)
 		CharaStateCheck(i);	//編成に登録されていないためキャラ詳細関数へ
-	if (g_PlayerSet.setCheckMode)return;
+	if (g_PlayerSet.setCheckMode)
+	{
+		return;
+	}
 
 	if (!g_PlayerSet.use[i])return;
 	//セットモードに初めて移行
@@ -153,7 +168,7 @@ void SetModeChange(int i)
 void SetPosition(void)
 {
 	//セットモードに移行してなければ座標変更できない
-	if (!g_PlayerSet.setMode)return;
+	if (!g_PlayerSet.setMode || g_PlayerSet.setCheckMode)return;
 
 	//マップ限界の中のみカーソル移動可
 	if (GetKeyboardTrigger(DIK_LEFT))
@@ -193,6 +208,7 @@ void SetPosition(void)
 			g_PlayerSet.setMode = FALSE;					//セットモード解除
 			SetMapChipUse(TRUE, z, x);
 			SetSlowMode(FALSE);
+			g_PlayerSet.setPlayer = 99;
 		}
 	}
 }
@@ -227,6 +243,13 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].blockMax = member->blockMax;
 		player[i].blockNum = 0;
 		player[i].target = 99;
+		player[i].skillAble = FALSE;
+		player[i].skillID = neutro_skill;
+		player[i].skillPoint = 0;
+		player[i].skillPointMax = 5;
+		player[i].increaseSP = 1;
+		player[i].skillUse = FALSE;
+		player[i].intervalSP = 0;
 		for (int k = 0; k < MAX_TARGET; k++)
 			player[i].targetable[k] = 99;
 		player[i].count = 0;

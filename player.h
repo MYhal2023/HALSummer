@@ -112,6 +112,7 @@ PlayerParts *GetPlayerParts(void);
 INTERPOLATION_DATA *GetInterPorationData(void);
 void PlayerStandLiner(int i);
 void PlayerInterPoration(int i);
+void PlayerSkill(int i);
 void CheckEnemyTarget(int i);
 void IncreaseSP(int i);
 void SetPlayer(XMFLOAT3 pos);

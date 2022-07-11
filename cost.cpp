@@ -13,7 +13,7 @@ void InitCost(void)
 {
 	g_Cost.cost = 0;
 	g_Cost.time = 0;
-	g_Cost.costMaxTime = 60;
+	g_Cost.costMaxTime = 120;
 }
 
 //コストを一気に増やしたい時に
