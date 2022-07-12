@@ -418,7 +418,6 @@ void PlayerInterPoration(int i)
 		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
 		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
 	}
-
 	// 座標を求める	X = StartX + (EndX - StartX) * 今の時間
 	XMVECTOR p1 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 1].pos);	// 次の場所
 	XMVECTOR p0 = XMLoadFloat3(&g_Player[i].tbl_adrA[index + 0].pos);	// 現在の場所
@@ -514,7 +513,7 @@ void BlockEnemy(void)
 			if (g_Player[i].blockNum >= g_Player[i].blockMax ||
 				enemy[k].type != Proximity ||
 				enemy[k].use != TRUE)continue;
-			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 10.0f, 10.0f)) {
+			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 20.0f, 1.0f)) {
 				//ここでエネミーを被ブロック状態へ変更する。攻撃先も自分へ
 				g_Player[i].blockNum++;
 				enemy[k].blocked = TRUE;
@@ -552,7 +551,15 @@ void CheckEnemyTarget(int i)
 				g_Player[i].target = g_Player[i].targetable[k];	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…
 				XMVECTOR v2 = XMLoadFloat3(&enemy[g_Player[i].targetable[k]].pos) - XMLoadFloat3(&g_Player[i].pos);
 				XMStoreFloat3(&countData, v2);
-				g_Player[i].rot.y = atan2f(countData.x, countData.z);
+				float angle = atan2f(countData.x, countData.z);
+				for (int d = 0; d < g_Player[i].tbl_sizeA; d++)
+				{
+					float buffx = g_Player[i].tbl_adrA[d].pos.x;
+					float buffz = g_Player[i].tbl_adrA[d].pos.z;
+					g_Player[i].tbl_adrA[d].pos.x = buffx * cosf(angle - g_Player[i].rot.y) + buffz * sinf(angle - g_Player[i].rot.y);
+					g_Player[i].tbl_adrA[d].pos.z = buffz * cosf(angle - g_Player[i].rot.y) + buffx * -sinf(angle - g_Player[i].rot.y);
+				}
+				g_Player[i].rot.y = angle;
 			}
 		}
 	}
@@ -727,7 +734,7 @@ PlayerParts *GetPlayerParts(void)
 }
 
 
-//現在は最初に登場した敵を優先してターゲットテーブルに入れる
+//現在は最初に登場した敵から順にターゲットテーブルに入れる
 void PLAYER::StateCheck(int i)
 {
 	if (g_Player[i].state == Deffend)return;

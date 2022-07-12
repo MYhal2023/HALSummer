@@ -21,7 +21,7 @@ void SetGrape(float time, int life, int power, int deffend)
 	g_Enemy[GetEnemyNum()].size = ENEMY_SIZE;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Enemy[GetEnemyNum()].life = life;
 	g_Enemy[GetEnemyNum()].lifeMax = g_Enemy[GetEnemyNum()].life;
-	g_Enemy[GetEnemyNum()].spd = 1.0f;
+	g_Enemy[GetEnemyNum()].spd = 0.5f;
 	g_Enemy[GetEnemyNum()].use = FALSE;
 	g_Enemy[GetEnemyNum()].attack = FALSE;
 	g_Enemy[GetEnemyNum()].attackUse = FALSE;
@@ -125,7 +125,7 @@ void SetStrept(float time, int life, int power, int deffend)
 	g_Enemy[GetEnemyNum()].size = ENEMY_SIZE;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Enemy[GetEnemyNum()].life = life;
 	g_Enemy[GetEnemyNum()].lifeMax = g_Enemy[GetEnemyNum()].life;
-	g_Enemy[GetEnemyNum()].spd = 1.0f;
+	g_Enemy[GetEnemyNum()].spd = 0.5f;
 	g_Enemy[GetEnemyNum()].use = FALSE;
 	g_Enemy[GetEnemyNum()].attack = FALSE;
 	g_Enemy[GetEnemyNum()].attackUse = FALSE;

@@ -28,6 +28,7 @@ static BOOL g_Load = FALSE;
 HRESULT InitPlayerSet(void)
 {
 	g_PlayerSet.setPos = XMFLOAT3(0.0f, 15.0f, 0.0f);
+	g_PlayerSet.setRot = XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f);
 	g_PlayerSet.setMode = FALSE;
 	g_PlayerSet.setCheckMode = FALSE;
 	g_PlayerSet.setPlayer = 99;
@@ -232,7 +233,7 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].atCount = 0;
 		player[i].atFrameCount = 0;
 		player[i].atFrame = member->atFrame;
-		player[i].size = member->size;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+		player[i].size = member->size;	// UŒ‚’T’m‚Ì“–‚½‚è”»’è‚Ì‘å‚«‚³
 		player[i].state = Standby;
 		player[i].life = member->life;
 		player[i].lifeMax = member->lifeMax;

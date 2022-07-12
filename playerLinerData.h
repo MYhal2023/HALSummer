@@ -19,15 +19,18 @@
 ////好中球攻撃モーションデータ
 //////////////////////////
 static INTERPOLATION_DATA neutro_Attack[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 10, },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(1.0f, 1.0f, 1.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.0f, 0.0f, 0.0f), 0 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),				XMFLOAT3(0.5f, 0.5f, 0.5f), 40 },
+	{ XMFLOAT3(-10.0f, 0.0f, 0.0f), XMFLOAT3(XM_PI*0.125f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f),  5 },
+	{ XMFLOAT3(10.0f, 0.0f, 0.0f), XMFLOAT3(-XM_PI * 0.125f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f), 15 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),				XMFLOAT3(0.5f, 0.5f, 0.5f),  0 },
 };
 //////////////////////////
 ////好中球待機モーションデータ
 static INTERPOLATION_DATA neutro_Standby[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(1.0f, 1.0f, 1.0f), 10, },
-	{ XMFLOAT3(0.0f, 50.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	   XMFLOAT3(3.0f, 3.0f, 3.0f), 50 },
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),      XMFLOAT3(0.8f, 1.0f, 1.0f), 0 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f), 15 },
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f), 15 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f), 15 },
+	{ XMFLOAT3(0.0f,-5.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f), 15 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(0.5f, 0.5f, 0.5f),  0 },
 };
 ////////////////////////////////////

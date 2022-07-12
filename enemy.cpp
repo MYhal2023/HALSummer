@@ -551,7 +551,15 @@ void EnemyMove(int i)
 	XMStoreFloat3(&g_Enemy[i].pos, XMLoadFloat3(&g_Enemy[i].pos) + nor * g_Enemy[i].spd);
 	XMFLOAT3 angle;
 	XMStoreFloat3(&angle, nor);
-	g_Enemy[i].rot.y = atan2f(angle.x, angle.z);
+	float yangle = atan2f(angle.x, angle.z);
+	for (int d = 0; d < g_Enemy[i].tbl_sizeM; d++)
+	{
+		float buffx = g_Enemy[i].tbl_adrM[d].pos.x;
+		float buffz = g_Enemy[i].tbl_adrM[d].pos.z;
+		g_Enemy[i].tbl_adrM[d].pos.x = buffx * cosf(yangle - g_Enemy[i].rot.y) + buffz * sinf(yangle - g_Enemy[i].rot.y);
+		g_Enemy[i].tbl_adrM[d].pos.z = buffz * cosf(yangle - g_Enemy[i].rot.y) + buffx * -sinf(yangle - g_Enemy[i].rot.y);
+	}
+	g_Enemy[i].rot.y = yangle;
 
 
 	//データの移動量と現在の移動量をfloat値に変換して比較
@@ -623,6 +631,19 @@ void CheckTarget(int i)
 			g_Enemy[i].target = &player[k];
 		}
 	}
+	XMVECTOR v2 = XMLoadFloat3(&g_Enemy[i].target->pos) - XMLoadFloat3(&g_Enemy[i].pos);
+	XMFLOAT3 countData;
+	XMStoreFloat3(&countData, v2);
+	float angle = atan2f(countData.x, countData.z);
+	for (int d = 0; d < g_Enemy[i].tbl_sizeA; d++)
+	{
+		float buffx = g_Enemy[i].tbl_adrA[d].pos.x;
+		float buffz = g_Enemy[i].tbl_adrA[d].pos.z;
+		g_Enemy[i].tbl_adrA[d].pos.x = buffx * cosf(angle - g_Enemy[i].rot.y) + buffz * sinf(angle - g_Enemy[i].rot.y);
+		g_Enemy[i].tbl_adrA[d].pos.z = buffz * cosf(angle - g_Enemy[i].rot.y) + buffx * -sinf(angle - g_Enemy[i].rot.y);
+	}
+	g_Enemy[i].rot.y = angle;
+
 }
 
 void BaseDamage(int i)

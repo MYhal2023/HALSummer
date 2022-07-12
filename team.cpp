@@ -55,7 +55,7 @@ void SetMember(int i)
 	g_Team[i].charID = ID_Neutro;
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 25.0f;	// 当たり判定の大きさ
 	g_Team[i].life = 100;
 	g_Team[i].lifeMax = g_Team[i].life;
 	g_Team[i].power = 5;
@@ -64,7 +64,7 @@ void SetMember(int i)
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = GetPlayerPartsNum();
 	g_Team[i].partsNum = 0;
-	g_Team[i].atFrame = 20;
+	g_Team[i].atFrame = 50;
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = neutro_Attack;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeA = sizeof(neutro_Attack)/sizeof(INTERPOLATION_DATA);	//データサイズ
