@@ -17,6 +17,7 @@ enum PLAYER_CHAR
 {
 	ID_MainPlayer,
 	ID_Neutro,
+	ID_Macro,
 };
 //*****************************************************************************
 // プロトタイプ宣言
@@ -79,7 +80,7 @@ public:
 	XMFLOAT3 setRot;	//セットする先の座標
 	BOOL use[MAX_PLAYER_SET];			//この編成番号は有効か否か
 	int setPlayer;	//セットするプレイヤー番号テーブル(添え字？)
-	int setCharID;	//セットしようとしてるキャラが何なのか？
+	int setCharID[MAX_PLAYER_SET];	//セットしようとしてるキャラが何なのか？
 	PlayerStatus *setPlayerNum;
 	PlayerPartsStatus *setPlayerParts;
 	XMFLOAT3 setPos;	//セットする先の座標

@@ -14,10 +14,14 @@
 //*****************************************************************************
 #define	MODEL_PLAYER		"data/MODEL/dendritic_cells.obj"			// 読み込むモデル名
 #define	MODEL_NEUTROPHILS	"data/MODEL/neutrophils.obj"			// 読み込むモデル名
+#define	MODEL_MACRO			"data/MODEL/Macrophages.obj"			// 読み込むモデル名
+#define	MODEL_MACRO_ARM			"data/MODEL/Macrophages_arm.obj"			// 読み込むモデル名
+#define	MODEL_MACRO_LEG			"data/MODEL/Macrophages_leg.obj"			// 読み込むモデル名
 #define MAX_PLAYER		(10)					// プレイヤーの数
 #define MAX_TARGET		(10)					// プレイヤーの数
+#define MAX_PLAYER_PARTS (MAX_PLAYER * 2)
 
-#define	PLAYER_SIZE		(10.0f)				// 当たり判定の大きさ
+#define	PLAYER_SIZE		(25.0f)				// 当たり判定の大きさ
 
 enum PLAYER_STATE
 {
@@ -75,6 +79,7 @@ struct PlayerParts
 	XMFLOAT4X4			mtxWorld;	// ワールドマトリックス
 
 	BOOL				load;
+	BOOL				use;
 	DX11_MODEL			model;		// モデル情報
 	XMFLOAT4			diffuse[MODEL_MAX_MATERIAL];	// モデルの色
 	// 階層アニメーション用のメンバー変数
@@ -94,8 +99,9 @@ struct PLAYER_VAR
 
 	XMFLOAT4X4			mtxWorld;	// ワールドマトリックス
 	MATERIAL			material;
+	float				pardiff;	//読み取らせるほうの変数
+	float				parpolar;	//加算してくほうの変数
 	BOOL				load;
-
 };
 
 //*****************************************************************************
@@ -122,5 +128,6 @@ void SetPlayerNum(int s);
 int GetPlayerPartsNum(void);
 void SetPlayerPartsNum(int s);
 void DrawPlayerLife(void);
+void DrawPlayerSP(void);
 HRESULT MakeVertexPlayerVar(void);
 #endif

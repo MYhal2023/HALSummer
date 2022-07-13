@@ -17,7 +17,7 @@
 // マクロ定義
 //*****************************************************************************
 #define TEXTURE_MAX			(9)				// テクスチャの数
-#define CHAR_TEXTURE_MAX	(2)				// キャラテクスチャの数
+#define CHAR_TEXTURE_MAX	(3)				// キャラテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 
@@ -41,6 +41,7 @@ static char* g_TextureName[] = {
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
+	"data/TEXTURE/ENEMY_UI2.png",
 };
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;
@@ -207,7 +208,7 @@ void DrawCharBox(void)
 		g_UI[charBox].pos = { (SCREEN_WIDTH * 0.8f) - k * g_UI[charBox].size.x, SCREEN_HEIGHT - g_UI[charBox].size.y * 0.5f };
 		k++;
 		//キャラIDを抽出してキャラクターを最初に描画
-		int id = ps->setCharID;
+		int id = ps->setCharID[i];
 		// テクスチャ設定
 		GetDeviceContext()->PSSetShaderResources(0, 1, &g_CharTexture[id]);
 

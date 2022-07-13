@@ -39,7 +39,7 @@ HRESULT InitPlayerSet(void)
 		g_PlayerSet.use[i] = FALSE;
 		if (member[i].use == FALSE)continue;	//編成枠未使用
 		g_PlayerSet.use[i] = TRUE;	//セット可能であることを表している
-		g_PlayerSet.setCharID = member[i].charID;
+		g_PlayerSet.setCharID[i] = member[i].charID;
 	}
 	g_Load = TRUE;
 	return S_OK;
@@ -204,7 +204,7 @@ void SetPosition(void)
 		//設置可能マスで、まだ使われてないマスなら設置
 		if (CheckPlayerAble(&member[g_PlayerSet.setPlayer]) && !GetMapChipUse(z,x))
 		{
-			SetPlayerInfo(&member[g_PlayerSet.setPlayer], &parts[g_PlayerSet.setPlayer]);
+			SetPlayerInfo(&member[g_PlayerSet.setPlayer], &parts[member[g_PlayerSet.setPlayer].startNum]);
 			g_PlayerSet.use[g_PlayerSet.setPlayer] = FALSE;	//セット不可状態にする
 			g_PlayerSet.setMode = FALSE;					//セットモード解除
 			SetMapChipUse(TRUE, z, x);
@@ -254,7 +254,7 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		for (int k = 0; k < MAX_TARGET; k++)
 			player[i].targetable[k] = 99;
 		player[i].count = 0;
-		player[i].startNum = GetPlayerPartsNum();;
+		player[i].startNum = member->startNum;
 		player[i].partsNum = member->partsNum;
 		player[i].parent = NULL;			// 本体（親）なのでNULLを入れる
 		player[i].tbl_adrA = member->tbl_adrA;
@@ -265,13 +265,16 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].keyNum = g_PlayerSet.setPlayer;	//スキル発動のショトカの為に保存
 		SetPlayerNum(1);
 
+		if (player[i].partsNum == 0)return;	//パーツがないならこれ以降の処理は不要
 		//パーツの初期化処理
-		//使用する配列場所は、member->startNumとpartsNumによって事前に決められている
-		for (int k = player[i].startNum; k < player[i].partsNum + player[i].startNum; k++)
+		for (int k = member->startNum; k < member->startNum + member->partsNum; k++)
 		{
+			if (parts[k].load != FALSE)continue;	//未使用配列までスキップ
+
 			parts[k].model = memberParts[k].model;
 			GetModelDiffuse(&memberParts[k].model, &memberParts[k].diffuse[0]);
 			parts[k].load = TRUE;
+			parts[k].use = TRUE;
 
 			parts[k].pos = { 0.0f, 0.0f, 0.0f };		// ポリゴンの位置
 			parts[k].rot = { 0.0f, 0.0f, 0.0f };		// ポリゴンの向き(回転)
@@ -284,7 +287,6 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 			parts[k].tbl_sizeM = sizeof(memberParts[k].tbl_adrM) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
 			parts[k].move_time = 0;			// 実行時間
 			parts[k].parent = &player[i];	// 自分が親ならNULL、自分が子供なら親のアドレス
-			SetPlayerPartsNum(1);
 		}
 		return;	//セットしきったので処理終了
 	}

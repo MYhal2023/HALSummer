@@ -19,3 +19,4 @@ void SetMember(int i);
 PlayerStatus* GetTeam(void);
 PlayerPartsStatus* GetTeamParts(void);
 void SetNeutro(int i);
+void SetMacrophages(int i);

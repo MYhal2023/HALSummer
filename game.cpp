@@ -115,9 +115,9 @@ void InitSystem(void)
 	InitTeam();
 
 	InitCharFade();
-	SetMember(0);
-	SetMember(1);
-	SetMember(2);
+	SetNeutro(0);
+	SetNeutro(1);
+	SetMacrophages(2);
 	InitPlayerSet();
 
 	InitUI();

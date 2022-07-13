@@ -41,7 +41,6 @@
 #define PLAYER_AT_FLAME		(30.0f)							// プレイヤーの攻撃フレーム
 #define PLAYER_SP_FLAME		(30.0f)							// プレイヤーのSPが増える間隔
 #define PLAYER_INVINC_FLAME	(120.0f)						// プレイヤー無敵フレーム
-#define MAX_PLAYER_PARTS (MAX_PLAYER * 2)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -88,6 +87,8 @@ HRESULT InitPlayer(void)
 	g_PlayerVar.pos = { 0.0f, 0.0f, 0.0f };
 	g_PlayerVar.rot = { XM_PI * -0.5f, 0.0f, 0.0f };
 	g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
+	g_PlayerVar.pardiff = 0.0f;
+	g_PlayerVar.parpolar = 0.02f;
 	g_PlayerVar.load = TRUE;
 
 	strcpy(name[0], MODEL_PLAYER);
@@ -130,6 +131,7 @@ HRESULT InitPlayer(void)
 	
 	g_Load = TRUE;
 	playerNum = 0;
+	partsNum = 0;
 	return S_OK;
 }
 
@@ -185,7 +187,11 @@ void UpdatePlayer(void)
 		//体力が無くなったキャラの処理。消去する。そこのマップチップを開ける
 		if (g_Player[i].life <= 0 && g_Player[i].use) {
 			g_Player[i].use = FALSE;
-			int x = (int)(g_Player[i].pos.x / CHIP_SIZE);
+			for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+			{
+				g_Parts[k].use = FALSE;
+			}
+				int x = (int)(g_Player[i].pos.x / CHIP_SIZE);
 			int z = (int)(g_Player[i].pos.z / CHIP_SIZE);
 			SetMapChipUse(FALSE, z, x);
 			continue;
@@ -761,7 +767,7 @@ void PLAYER::StateCheck(int i)
 		g_Player[i].state = Skill;
 }
 
-//プレイヤーキャラの体力バーの表示処理
+//プレイヤーキャラの体力バーの表示処理とSP表示処理
 void DrawPlayerLife(void)
 {
 	// Z比較なし
@@ -788,7 +794,7 @@ void DrawPlayerLife(void)
 		
 		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
 		{
-			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y, g_Player[i].pos.z - 25.0f };
+			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 25.0f };
 			if (k == 0)
 			{
 				g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
@@ -826,6 +832,8 @@ void DrawPlayerLife(void)
 			GetDeviceContext()->Draw(4, 0);
 		}
 	}
+
+	DrawPlayerSP();
 	// Z比較あり
 	SetDepthEnable(TRUE);
 	// ライティングを有効に
@@ -833,6 +841,64 @@ void DrawPlayerLife(void)
 
 }
 
+void DrawPlayerSP(void)
+{
+	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
+	//hpバーを設置
+	for (int i = 0; i < MAX_PLAYER; i++)
+	{
+		if (g_Player[i].use != TRUE)continue;	//使われてないプレイヤーはスルー
+
+		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
+		{
+			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 30.0f };
+			if (k == 0)
+			{
+				g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
+				g_PlayerVar.material.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.7f);
+			}
+			else
+			{
+				float par = (float)(g_Player[i].skillPoint) / (float)(g_Player[i].skillPointMax);
+				g_PlayerVar.scl = { par, 1.0f, 1.0f };
+				g_PlayerVar.pos.x -= (VAR_WIDTH * (1.0f - par)) * 0.5f;
+				if (par < 1.0f)
+					g_PlayerVar.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+				else
+				{
+					g_PlayerVar.material.Diffuse = XMFLOAT4(1.0f, 1.0f, g_PlayerVar.pardiff, 1.0f);
+					g_PlayerVar.pardiff += g_PlayerVar.parpolar;
+					if(g_PlayerVar.pardiff < 0.0f || g_PlayerVar.pardiff > 1.0f)
+					g_PlayerVar.parpolar *= -1.0f;
+				}
+			}
+			// ワールドマトリックスの初期化
+			mtxWorld = XMMatrixIdentity();
+
+			// スケールを反映
+			mtxScl = XMMatrixScaling(g_PlayerVar.scl.x, g_PlayerVar.scl.y, g_PlayerVar.scl.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+			// 回転を反映
+			mtxRot = XMMatrixRotationRollPitchYaw(g_PlayerVar.rot.x, g_PlayerVar.rot.y, g_PlayerVar.rot.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+			// 移動を反映
+			mtxTranslate = XMMatrixTranslation(g_PlayerVar.pos.x, g_PlayerVar.pos.y, g_PlayerVar.pos.z);
+			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+			// ワールドマトリックスの設定
+			SetWorldMatrix(&mtxWorld);
+
+			// マテリアルの設定
+			SetMaterial(g_PlayerVar.material);
+
+			// ポリゴンの描画
+			GetDeviceContext()->Draw(4, 0);
+		}
+	}
+
+}
 
 HRESULT MakeVertexPlayerVar(void)
 {
