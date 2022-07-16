@@ -60,6 +60,7 @@ int g_DebugMap[][MAX_CHIP_WIDTH + 1]
 	{1,1,1,1,1,1,1,1},
 	{2,2,0,0,0,0,2,2},
 	{0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0},
 	{1,1,1,1,1,1,1,1},
 	{0,0,0,0,0,0,0,0},
 	{3,3,3,3,1,1,1,1},
@@ -67,12 +68,13 @@ int g_DebugMap[][MAX_CHIP_WIDTH + 1]
 
 int g_DebugMapObject[][MAX_CHIP_WIDTH + 1]
 {
+	{9,9,9,9,9,9,9,9},
 	{9,9,9,9,9,9,9,1},
 	{9,9,9,9,9,9,9,1},
 	{9,9,9,9,9,9,9,1},
-	{1,9,9,9,9,9,9,1},
-	{0,0,9,9,9,9,9,9},
-	{3,3,3,3,9,9,0,0},
+	{9,9,9,9,9,9,9,9},
+	{0,1,9,9,9,9,9,1},
+	{9,9,9,9,9,9,0,0},
 };
 
 //=============================================================================
@@ -116,13 +118,13 @@ void InitSystem(void)
 
 	InitCharFade();
 	SetNeutro(0);
-	SetNeutro(1);
-	SetMacrophages(2);
+	SetMacrophages(1);
 	InitPlayerSet();
 
 	InitUI();
-	InitMapChip(g_DebugMap, g_DebugMapObject, 6, MAX_CHIP_WIDTH);
-	SetGrape(30.0f,40,5,1);
+	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
+	SetGrape(30.0f, 40, 5, 1);
+	SetGrape(360.0f, 40, 5, 1);
 	SetStrept(240.0f,20,5,1);
 	XMFLOAT3 pos[2];
 	pos[0] = { 25.0f, 0.0f, 100.0f };

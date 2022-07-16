@@ -16,11 +16,11 @@
 #define	MODEL_FIELD004		"data/MODEL/longrange3.obj"			// 読み込むモデル名
 
 #define	MODEL_OBJECT001		"data/MODEL/obstacle000.obj"			// 読み込むモデル名
-#define	MODEL_OBJECT002		"data/MODEL/container001.obj"			// 読み込むモデル名
+#define	MODEL_OBJECT002		"data/MODEL/fence.obj"			// 読み込むモデル名
 #define MAX_CHIP_NUM		(4)					// フィールドチップ種類
 #define MAX_OBJ_NUM			(2)					// フィールドチップ種類
-#define MAX_CHIP_WIDTH		(8)					// 横のセット数
-#define MAX_CHIP_HEIGHT		(6)					// 縦のセット数
+#define MAX_CHIP_WIDTH		(8)					// 横の最大セット数
+#define MAX_CHIP_HEIGHT		(7)					// 縦の最大セット数
 
 #define	CHIP_SIZE		(50.0f)					// チップサイズの大きさ
 

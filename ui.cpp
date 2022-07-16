@@ -41,7 +41,7 @@ static char* g_TextureName[] = {
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
-	"data/TEXTURE/ENEMY_UI2.png",
+	"data/TEXTURE/macro.png",
 };
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;
@@ -381,6 +381,6 @@ void DrawCost(void)
 	// ƒ|ƒŠƒSƒ“•`‰æ
 	GetDeviceContext()->Draw(4, 0);
 
-	DrawNumber(GetCost(), g_UI[costbox].pos.x + COST_NUMBER_SIZE, g_UI[costbox].pos.y, COST_NUMBER_SIZE, COST_NUMBER_SIZE * 1.25f,
+	DrawNumber(GetCost(), g_UI[costbox].pos.x + COST_NUMBER_SIZE * 0.5f, g_UI[costbox].pos.y, COST_NUMBER_SIZE, COST_NUMBER_SIZE * 1.25f,
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }

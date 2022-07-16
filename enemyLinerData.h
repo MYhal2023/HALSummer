@@ -150,6 +150,6 @@ static INTERPOLATION_DATA strept_tailMv[] = {	// pos, rot, scl, frame
 };
 ////////////////////////////////////
 
-static MOVERINE		moveTbl[] = { XMFLOAT3(300.0f, 0.0f, 50.0f), XMFLOAT3(0.0f, 0.0f, 50.0f) };
+static MOVERINE		moveTbl[] = { XMFLOAT3(300.0f, 0.0f, 100.0f), XMFLOAT3(0.0f, 0.0f, 100.0f) };
 
 #pragma once

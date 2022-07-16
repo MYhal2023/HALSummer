@@ -89,10 +89,6 @@ void SetMember(int i)
 
 void SetChara(int charID)
 {
-	switch (charID)
-	{
-
-	}
 }
 
 

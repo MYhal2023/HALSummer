@@ -33,6 +33,7 @@ enum PLAYER_STATE
 enum SKILL_TYPE
 {
 	neutro_skill,	//好中球のスキル
+	macro_skill,	//好中球のスキル
 	skill_max,		//スキル最大数
 };
 //*****************************************************************************
@@ -55,6 +56,8 @@ public:
 	int				increaseSP;		//一回で増えるsp量
 	int				skillPointMax;	//保有できるスキルポイント。ここまで溜まればスキルが使える
 	int				intervalSP;		//spを増やす間隔を図る為の変数
+	int				skillTime;
+	int				skillTimeMax;
 	BOOL			skillUse;		//スキルを使っているか否か
 	BOOL			skillAble;		//スキルを使えるか否か
 

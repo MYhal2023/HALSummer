@@ -125,9 +125,11 @@ HRESULT InitMapChip(int map[][MAX_CHIP_WIDTH + 1], int mapObj[][MAX_CHIP_WIDTH +
 		{
 		case Building:
 			LoadModel(MODEL_OBJECT001, &g_MapChipObj[i].model);
+			g_MapChipObj[i].scl = { 1.0f, 1.0f, 1.0f };
 			break;
 		case Container:
 			LoadModel(MODEL_OBJECT002, &g_MapChipObj[i].model);
+			g_MapChipObj[i].scl = { 0.5f, 0.5f, 0.5f };
 			break;
 		case MAX_VAL:
 			break;
@@ -139,7 +141,6 @@ HRESULT InitMapChip(int map[][MAX_CHIP_WIDTH + 1], int mapObj[][MAX_CHIP_WIDTH +
 
 		g_MapChipObj[i].pos = { 0.0f, 0.0f, 0.0f };
 		g_MapChipObj[i].rot = { 0.0f, 0.0f, 0.0f };
-		g_MapChipObj[i].scl = { 1.0f, 1.0f, 1.0f };
 
 		g_MapChipObj[i].size = CHIP_SIZE;	// 当たり判定の大きさ
 	}
@@ -336,6 +337,16 @@ void DrawMapObject(void)
 		{
 			int m = g_BattleMapObj[i][k];
 			if (m == 9)continue;	//マップチップ無し。描画不要
+			switch (m)
+			{
+			case Building:
+				g_MapSetObj[i][k].scl = { 2.0f, 2.0f, 2.0f };
+				break;
+			case Container:
+				g_MapSetObj[i][k].scl = { 1.2f, 0.8f, 0.8f };
+				g_MapSetObj[i][k].rot = { 0.0f, XM_PI * 0.5f, 0.0f };
+				break;
+			}
 			// ワールドマトリックスの初期化
 			mtxWorld = XMMatrixIdentity();
 
@@ -446,10 +457,10 @@ void SetBattleMapObj(int map[][MAX_CHIP_WIDTH + 1], int height, int width)
 			switch (g_MapSet[i][k].type)
 			{
 			case LowPlaces:
-				g_MapSetObj[i][k].pos.y = 12.0f;
+				g_MapSetObj[i][k].pos.y = 8.0f;
 				break;
 			case HighPlaces:
-				g_MapSetObj[i][k].pos.y = 22.0f;
+				g_MapSetObj[i][k].pos.y = 20.0f;
 				break;
 			}
 			if(map[i][k] != 9)

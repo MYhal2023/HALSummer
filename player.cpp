@@ -20,7 +20,7 @@
 #include "enemy.h"
 #include "base.h"
 #include "fieldchip.h"
-#include "neutro.h"
+#include "skill.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -500,6 +500,8 @@ void PlayerSkill(int i)
 	case neutro_skill:
 		NeutroSkill(&g_Player[i]);
 		break;
+	case macro_skill:
+		break;
 	}
 }
 void BlockEnemy(void)
@@ -535,7 +537,7 @@ void BlockEnemy(void)
 void CheckEnemyTarget(int i)
 {
 	//攻撃中ではないならここでターゲット決定はしない
-	if (g_Player[i].state != Deffend) {
+	if (g_Player[i].state == Standby) {
 		g_Player[i].target = 99;
 		return;
 	}
@@ -794,7 +796,7 @@ void DrawPlayerLife(void)
 		
 		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
 		{
-			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 25.0f };
+			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 35.0f };
 			if (k == 0)
 			{
 				g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };
@@ -851,7 +853,7 @@ void DrawPlayerSP(void)
 
 		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
 		{
-			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 30.0f };
+			g_PlayerVar.pos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z - 40.0f };
 			if (k == 0)
 			{
 				g_PlayerVar.scl = { 1.0f, 1.0f, 1.0f };

@@ -204,6 +204,15 @@ void SetPosition(void)
 		//設置可能マスで、まだ使われてないマスなら設置
 		if (CheckPlayerAble(&member[g_PlayerSet.setPlayer]) && !GetMapChipUse(z,x))
 		{
+			switch (GetMapChiptype(z, x))
+			{
+			case LowPlaces:
+				g_PlayerSet.setPos.y = 20.0f;
+				break;
+			case HighPlaces:
+				g_PlayerSet.setPos.y =32.0f;
+				break;
+			}
 			SetPlayerInfo(&member[g_PlayerSet.setPlayer], &parts[member[g_PlayerSet.setPlayer].startNum]);
 			g_PlayerSet.use[g_PlayerSet.setPlayer] = FALSE;	//セット不可状態にする
 			g_PlayerSet.setMode = FALSE;					//セットモード解除

@@ -148,7 +148,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="meshfield.cpp" />
     <ClCompile Include="model.cpp" />
-    <ClCompile Include="neutro.cpp" />
+    <ClCompile Include="skill.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="playerSet.cpp" />
     <ClCompile Include="renderer.cpp" />
@@ -174,7 +174,7 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gameover.h" />
-    <ClInclude Include="neutro.h" />
+    <ClInclude Include="skill.h" />
     <ClInclude Include="playerLinerData.h" />
     <ClInclude Include="team.h" />
     <ClInclude Include="input.h" />
