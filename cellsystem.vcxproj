@@ -158,6 +158,7 @@
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="team.cpp" />
+    <ClCompile Include="text_texture.cpp" />
     <ClCompile Include="ui.cpp" />
     <ClCompile Include="unitdata.cpp" />
   </ItemGroup>
@@ -191,6 +192,7 @@
     <ClInclude Include="shadow_renderer.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="sprite.h" />
+    <ClInclude Include="text_texture.h" />
     <ClInclude Include="ui.h" />
     <ClInclude Include="unitdata.h" />
   </ItemGroup>

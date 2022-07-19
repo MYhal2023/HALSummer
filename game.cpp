@@ -29,6 +29,7 @@
 #include "ui.h"
 #include "enemySet.h"
 #include "unitdata.h"
+#include "text_texture.h"
 
 
 //*****************************************************************************
@@ -118,6 +119,8 @@ void InitSystem(void)
 
 	InitCharFade();
 
+	InitTexttex();
+
 	SetNeutro(0);
 	SetMacrophages(1);
 	InitPlayerSet();
@@ -125,8 +128,8 @@ void InitSystem(void)
 	InitUI();
 	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
 	SetGrape(30.0f, 40, 5, 1);
-	SetGrape(360.0f, 40, 5, 1);
-	SetStrept(240.0f,20,5,1);
+	//SetGrape(120.0f, 40, 5, 1);
+	//SetStrept(240.0f,20,5,1);
 	XMFLOAT3 pos[2];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	pos[1] = { 25.0f, 0.0f, 300.0f };
@@ -152,6 +155,7 @@ void UninitGame(void)
 
 	UninitUI();
 
+	UninitTexttex();
 }
 
 //=============================================================================
@@ -159,9 +163,6 @@ void UninitGame(void)
 //=============================================================================
 void UpdateGame(void)
 {
-#ifdef _DEBUG
-
-#endif
 	if (GetKeyboardTrigger(DIK_P))
 	{
 		if (g_bPause == TRUE)
@@ -184,6 +185,8 @@ void UpdateGame(void)
 		return;
 
 	UpdateOver();
+
+	UpdateTexttex();
 	if (CheckGameover())return;
 
 	UpdatePlayerSet();
@@ -417,7 +420,15 @@ float FloatCompare(BOOL flag, float a, float b)
 BOOL CheckGameover(void)
 {
 	BOOL ans = FALSE;
-	if (GetBaseLife() <= 0)ans = TRUE;
+	int life = GetEnemyNum() - GetBanishEnemy();
+	if (GetBaseLife() <= 0) { 
+		ans = TRUE;
+		SetOverType(OVER_LOSE);
+	}
+	else if (life <= 0) {
+		ans = TRUE;
+		SetOverType(OVER_WIN);
+	}
 	return ans;
 }
 

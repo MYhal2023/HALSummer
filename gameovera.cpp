@@ -11,10 +11,12 @@
 #include "input.h"
 #include "base.h"
 #include "fade.h"
+#include "text_texture.h"
+#include "debugproc.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(1)				// テクスチャの数
+#define TEXTURE_MAX			(2)				// テクスチャの数
 
 //*****************************************************************************
 // グローバル変数
@@ -27,7 +29,9 @@ static char* g_TextureName[] = {
 };
 
 static Over g_Over[TEXTURE_MAX];
-static BOOL g_Load = FALSE;
+static BOOL g_Load = FALSE; 
+static int g_Overtype = 0;		//この変数は別モードに移行したときも保持したいので初期化処理に入れない
+static XMFLOAT2 pos = { 0.0f, 0.0f };
 HRESULT InitOver(void)
 {
 	ID3D11Device *pDevice = GetDevice();
@@ -58,7 +62,11 @@ HRESULT InitOver(void)
 		g_Over[i].size = { SCREEN_WIDTH, SCREEN_HEIGHT };
 		g_Over[i].use = TRUE;
 	}
+	g_Over[Hazard].pos = { SCREEN_CENTER_X * 0.5f, SCREEN_CENTER_Y };
+	g_Over[Hazard].size = { 350.0f, 350.0f };
+
 	g_Load = TRUE;
+	pos = { -200.0f, 0.0f };
 	return S_OK;
 }
 //=============================================================================
@@ -96,8 +104,23 @@ void UpdateOver(void)
 	Base *base = GetBase();
 	if (!CheckGameover())return;
 	//ここからはゲームオーバーとなった時に入る
-	if (g_Over[FadeRed].color.w < 0.5f)
-		g_Over[FadeRed].color.w += 0.025f;
+	switch (g_Overtype)
+	{
+	case OVER_WIN:
+		if (pos.x <= SCREEN_CENTER_X) {
+			pos.x += 20.0f;
+			pos.y = SCREEN_CENTER_Y;
+		}
+		SetTextpos(TEXT_WIN_RESULT, XMFLOAT3(pos.x, pos.y, 0.0f));
+		break;
+	case OVER_LOSE:
+		if (g_Over[FadeRed].color.w < 0.5f)
+			g_Over[FadeRed].color.w += 0.025f;
+		if (g_Over[Hazard].color.w < 1.0f)
+			g_Over[Hazard].color.w += 0.05f;
+		SetText(TEXT_GAMEOVER, 0, XMFLOAT3(SCREEN_CENTER_X, SCREEN_CENTER_Y, 0.0f));
+		break;
+	}
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
 		SetFade(FADE_OUT, MODE_RESULT);
@@ -146,9 +169,30 @@ void DrawOver(void)
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
 	}
+
+	switch (g_Overtype)
+	{
+	case OVER_WIN:
+		DrawTexttChose(TEXT_WIN_RESULT);
+		break;
+	case OVER_LOSE:
+		DrawTexttChose(TEXT_GAMEOVER);
+		break;
+	}
 	SetDepthEnable(TRUE);
 
 	// ライティングを無効
 	SetLightEnable(TRUE);
 
 }
+
+void SetOverType(int type)
+{
+	g_Overtype = type;
+}
+
+int GetOverType(void)
+{
+	return g_Overtype;
+}
+

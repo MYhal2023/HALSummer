@@ -19,8 +19,17 @@ public:
 enum OVER_TEXT
 {
 	FadeRed,
+	Hazard,
+};
+
+enum OVER_TYPE
+{
+	OVER_WIN,
+	OVER_LOSE,
 };
 HRESULT InitOver(void);
 void UninitOver(void);
 void UpdateOver(void);
 void DrawOver(void);
+void SetOverType(int type);	//ゲームオーバータイプのセット
+int GetOverType(void);	//ゲームオーバータイプを取得
