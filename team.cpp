@@ -122,6 +122,9 @@ void SetNeutro(int i)
 	g_Team[i].startNum = GetPlayerPartsNum();
 	g_Team[i].partsNum = 0;
 	g_Team[i].atFrame = 45;
+	g_Team[i].skillID = neutro_skill;
+	g_Team[i].cost = 10;
+	g_Team[i].setAble = FALSE;
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = neutro_Attack;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeA = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
@@ -149,6 +152,8 @@ void SetMacrophages(int i)
 	g_Team[i].startNum = GetPlayerPartsNum();
 	g_Team[i].partsNum = 2;
 	g_Team[i].atFrame = 20;
+	g_Team[i].cost = 10;
+	g_Team[i].setAble = FALSE;
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = macro_Attack;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeA = sizeof(macro_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ

@@ -14,7 +14,7 @@ struct Cost
 };
 void InitCost(void);		//イニシャライザ
 void IncreaseCost(int increase);	//コストを増やす関数
-int GetCost();					//現在のコストがいくつなのか
+int GetCost(void);					//現在のコストがいくつなのか
 void DecreaseCost(int decrease);	//コストを減らす関数
 void IncTimeCost(void);
 Cost* GetCostNum(void);

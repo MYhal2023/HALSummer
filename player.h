@@ -51,6 +51,7 @@ public:
 	int				targetable[MAX_TARGET];	//ターゲット可能な敵の配列添え字を保存しておくもの。このリストの内から、target変数に引き渡される
 	int				count;					//現在ターゲットにしている数
 	int				keyNum;			//数字キーのどこに対応しているかを保存
+	int				cost;			//設置するために必要なコスト
 	int				skillID;		//どんなスキルを持っているのか(事前にスキルごとにID振りを行う)
 	int				skillPoint;		//保有しているスキルポイント
 	int				increaseSP;		//一回で増えるsp量

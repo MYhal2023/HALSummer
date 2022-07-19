@@ -23,6 +23,7 @@ static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static char* g_TextureName[] = {
 	"data/TEXTURE/fade_red.png",
+	"data/TEXTURE/hazard.png",
 };
 
 static Over g_Over[TEXTURE_MAX];
@@ -99,7 +100,7 @@ void UpdateOver(void)
 		g_Over[FadeRed].color.w += 0.025f;
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
-		SetFade(FADE_OUT, MODE_GAME);
+		SetFade(FADE_OUT, MODE_RESULT);
 	}
 }
 

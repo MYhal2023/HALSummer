@@ -11,7 +11,7 @@ static Cost g_Cost;
 //ƒRƒXƒg‚ÉŠÖ‚·‚é•Ï”‰Šú‰»
 void InitCost(void)
 {
-	g_Cost.cost = 0;
+	g_Cost.cost = 10;
 	g_Cost.time = 0;
 	g_Cost.costMaxTime = 120;
 }
@@ -22,7 +22,7 @@ void IncreaseCost(int increase)
 	g_Cost.cost += increase;
 }
 
-int GetCost()
+int GetCost(void)
 {
 	return g_Cost.cost;
 }

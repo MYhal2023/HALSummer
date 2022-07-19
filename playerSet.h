@@ -56,7 +56,10 @@ public:
 	int				blockNum;		//ブロックしている数
 	int				blockMax;		//ブロック可能数
 	int				charID;			//他のデータに渡すときのキャラ判別用変数
+	int				skillID;
 	int				charType;		//近接キャラか遠距離キャラか。CHIP_TYPEと同じ数字を入れる
+	int				cost;
+	BOOL			setAble;
 	BOOL			use;			//そもそもこの枠を使っているのか
 };
 
@@ -94,4 +97,6 @@ void SetPosition(void);
 void SetPlayerInfo(PlayerStatus* member, PlayerPartsStatus* memberParts);
 BOOL CheckPlayerAble(PlayerStatus *member);
 void CharaStateCheck(int num);
+void SetAbleChar(void);
+void CheckSetChar(void);
 PlayerSet *GetSetPos(void);

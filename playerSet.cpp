@@ -9,6 +9,7 @@
 #include "team.h"
 #include "player.h"
 #include "game.h"
+#include "cost.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -37,6 +38,7 @@ HRESULT InitPlayerSet(void)
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		g_PlayerSet.use[i] = FALSE;
+		member[i].setAble = FALSE;
 		if (member[i].use == FALSE)continue;	//編成枠未使用
 		g_PlayerSet.use[i] = TRUE;	//セット可能であることを表している
 		g_PlayerSet.setCharID[i] = member[i].charID;
@@ -54,24 +56,11 @@ void UninitPlayerSet(void)
 
 void UpdatePlayerSet(void)
 {
+	SetAbleChar();
 	PlayerSetMap();
 	SetPosition();
-	//スキル使用の為の操作処理
-	PLAYER *player = GetPlayer();
-	if (g_PlayerSet.setCheckMode && 
-		player[g_PlayerSet.setPlayer].skillAble && 
-		GetKeyboardTrigger(DIK_RETURN))
-	{
-		player[g_PlayerSet.setPlayer].skillPoint = 0;
-		player[g_PlayerSet.setPlayer].skillUse = TRUE;
-		g_PlayerSet.setCheckMode = FALSE;
-		g_PlayerSet.setPlayer = 99;
-	}
+	CheckSetChar();
 
-#ifdef _DEBUG
-	PrintDebugProc("カーソル引数:%d\n", g_PlayerSet.setPlayer);
-	PrintDebugProc("セットモード:%d\n", g_PlayerSet.setMode);
-#endif
 }
 
 void DrawPlayerSet(void)
@@ -139,8 +128,8 @@ void SetModeChange(int i)
 	{
 		return;
 	}
-
-	if (!g_PlayerSet.use[i])return;
+	PlayerStatus *member = GetTeam();
+	if (!g_PlayerSet.use[i] || !member[i].setAble)return;
 	//セットモードに初めて移行
 	if (g_PlayerSet.setMode == FALSE)
 	{
@@ -218,6 +207,7 @@ void SetPosition(void)
 			g_PlayerSet.setMode = FALSE;					//セットモード解除
 			SetMapChipUse(TRUE, z, x);
 			SetSlowMode(FALSE);
+			DecreaseCost(member[g_PlayerSet.setPlayer].cost);
 			g_PlayerSet.setPlayer = 99;
 		}
 	}
@@ -254,12 +244,13 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].blockNum = 0;
 		player[i].target = 99;
 		player[i].skillAble = FALSE;
-		player[i].skillID = neutro_skill;
+		player[i].skillID = member->skillID;
 		player[i].skillPoint = 0;
 		player[i].skillPointMax = 5;
 		player[i].increaseSP = 1;
 		player[i].skillUse = FALSE;
 		player[i].intervalSP = 0;
+		player[i].cost = member->cost;
 		for (int k = 0; k < MAX_TARGET; k++)
 			player[i].targetable[k] = 99;
 		player[i].count = 0;
@@ -330,6 +321,51 @@ void CharaStateCheck(int num)
 			g_PlayerSet.setPlayer = 99;
 			return;
 		}
+	}
+}
+
+//全キャラの設置可否を常に設定
+void SetAbleChar(void)
+{
+	PlayerStatus *member = GetTeam();
+	Cost *cost = GetCostNum();
+	for (int i = 0; i < MAX_PLAYER_SET; i++)
+	{
+		if (member[i].use == FALSE)continue;
+		if (member[i].cost <= cost->cost)
+			member[i].setAble = TRUE;
+		else
+			member[i].setAble = FALSE;
+	}
+}
+
+//スキル発動とユニット除去に関する処理
+void CheckSetChar(void)
+{
+	PLAYER *player = GetPlayer();
+	PlayerParts *parts = GetPlayerParts();
+	if (g_PlayerSet.setCheckMode &&
+		player[g_PlayerSet.setPlayer].skillAble &&
+		GetKeyboardTrigger(DIK_RETURN))
+	{
+		player[g_PlayerSet.setPlayer].skillPoint = 0;
+		player[g_PlayerSet.setPlayer].skillUse = TRUE;
+		g_PlayerSet.setCheckMode = FALSE;
+		g_PlayerSet.setPlayer = 99;
+	}
+	else if (g_PlayerSet.setCheckMode &&
+		player[g_PlayerSet.setPlayer].skillAble &&
+		GetKeyboardTrigger(DIK_C))
+	{
+		player[g_PlayerSet.setPlayer].use = FALSE;
+		for (int k = player[g_PlayerSet.setPlayer].startNum; k < player[g_PlayerSet.setPlayer].startNum + player[g_PlayerSet.setPlayer].partsNum; k++)
+		{
+			parts[k].use = FALSE;
+		}
+		int x = (int)(player[g_PlayerSet.setPlayer].pos.x / CHIP_SIZE);
+		int z = (int)(player[g_PlayerSet.setPlayer].pos.z / CHIP_SIZE);
+		SetMapChipUse(FALSE, z, x);
+		IncreaseCost(player[g_PlayerSet.setPlayer].cost / 2);
 	}
 }
 

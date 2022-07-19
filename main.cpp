@@ -19,6 +19,7 @@
 
 #include "game.h"
 #include "fade.h"
+#include "result.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -302,6 +303,7 @@ void Update(void)
 		UpdateGame();
 		break;
 	case MODE_RESULT:		// リザルト画面の更新
+		UpdateResult();
 		break;
 	}
 
@@ -362,7 +364,7 @@ void Draw(void)
 
 	case MODE_RESULT:		// リザルト画面の描画
 		SetViewPort(TYPE_FULL_SCREEN);
-
+		DrawResult();
 		// 2Dの物を描画する処理
 		// Z比較なし
 		SetDepthEnable(FALSE);
@@ -424,7 +426,7 @@ void SetMode(int mode)
 
 	// ゲーム画面の終了処理
 	UninitGame();
-
+	UninitResult();
 	g_Mode = mode;	// 次のモードをセットしている
 
 	switch (g_Mode)
@@ -440,6 +442,7 @@ void SetMode(int mode)
 
 	case MODE_RESULT:
 		// リザルト画面の初期化
+		InitResult();
 		break;
 
 		// ゲーム終了時の処理

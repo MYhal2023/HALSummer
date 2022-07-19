@@ -117,6 +117,7 @@ void InitSystem(void)
 	InitTeam();
 
 	InitCharFade();
+
 	SetNeutro(0);
 	SetMacrophages(1);
 	InitPlayerSet();
@@ -150,6 +151,7 @@ void UninitGame(void)
 	UninitMapChip();
 
 	UninitUI();
+
 }
 
 //=============================================================================
@@ -257,6 +259,7 @@ void DrawGame0(void)
 	DrawUI();
 
 	DrawOver();
+
 	//// ÉXÉRÉAÇÃï`âÊèàóù
 	//DrawScore();
 

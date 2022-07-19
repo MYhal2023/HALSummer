@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "base.h"
 #include "cost.h"
+#include "team.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -201,9 +202,14 @@ void DrawCharBox(void)
 	for (int i = MAX_PLAYER_SET - 1; i >= 0; i--)
 	{
 		PlayerSet *ps = GetSetPos();
+		PlayerStatus *member = GetTeam();
 
 		if (ps->use[i] != TRUE)continue;	//未使用編成枠はスルー
 
+		//if (member[i].setAble)
+		//	g_UI[charBox].color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		//else
+		//	g_UI[charBox].color = { 0.3f, 0.3f, 0.3f, 1.0f };
 		//右から順番に、編成の最後尾から描画
 		g_UI[charBox].pos = { (SCREEN_WIDTH * 0.8f) - k * g_UI[charBox].size.x, SCREEN_HEIGHT - g_UI[charBox].size.y * 0.5f };
 		k++;
