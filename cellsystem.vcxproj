@@ -148,6 +148,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="meshfield.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="reserve.cpp" />
     <ClCompile Include="result.cpp" />
     <ClCompile Include="skill.cpp" />
     <ClCompile Include="player.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gameover.h" />
+    <ClInclude Include="reserve.h" />
     <ClInclude Include="result.h" />
     <ClInclude Include="skill.h" />
     <ClInclude Include="playerLinerData.h" />

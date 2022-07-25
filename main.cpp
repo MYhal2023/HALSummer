@@ -20,6 +20,8 @@
 #include "game.h"
 #include "fade.h"
 #include "result.h"
+#include "reserve.h"
+#include "team.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -239,6 +241,16 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// フェードの初期化
 	InitFade();
 
+	//チームに関する変数初期化。上書きは各々のモードで。起動時のこの中身は空
+	InitTeam();
+#ifdef _DEBUG	//デバッグ中なら色々セット
+	SetNeutro(0);
+	SetMacrophages(1);
+	SetNeutro(2);
+	SetMacrophages(3);
+	SetNeutro(4);
+	SetMacrophages(5);
+#endif
 	// 最初のモードをセット
 	SetMode(g_Mode);	// ここはSetModeのままで！
 
@@ -299,6 +311,9 @@ void Update(void)
 	case MODE_TITLE:		// タイトル画面の更新
 		break;
 
+	case MODE_RESERVE:
+		UpdateReserve();
+		break;
 	case MODE_GAME:			// ゲーム画面の更新
 		UpdateGame();
 		break;
@@ -350,7 +365,22 @@ void Draw(void)
 		SetDepthEnable(TRUE);
 		break;
 
+	case MODE_RESERVE:
+		SetDepthEnable(FALSE);
 
+		// ライティングを無効
+		SetLightEnable(FALSE);
+		SetRenderer();		//通常描画
+
+		DrawReserve();
+
+		// ライティングを有効に
+		SetLightEnable(TRUE);
+
+		// Z比較あり
+		SetDepthEnable(TRUE);
+
+		break;
 	case MODE_GAME:			// ゲーム画面の描画
 		SetViewPortType(TYPE_LIGHT_SCREEN);
 		SetSMRenderer();	//シャドウマップセット
@@ -363,15 +393,14 @@ void Draw(void)
 		break;
 
 	case MODE_RESULT:		// リザルト画面の描画
-		SetViewPort(TYPE_FULL_SCREEN);
-		DrawResult();
 		// 2Dの物を描画する処理
 		// Z比較なし
 		SetDepthEnable(FALSE);
 
 		// ライティングを無効
 		SetLightEnable(FALSE);
-
+		SetRenderer();		//通常描画
+		DrawResult();
 
 		// ライティングを有効に
 		SetLightEnable(TRUE);
@@ -433,6 +462,10 @@ void SetMode(int mode)
 	{
 	case MODE_TITLE:
 		// タイトル画面の初期化
+		break;
+	case MODE_RESERVE:
+		// 育成画面の初期化
+		InitReserve();
 		break;
 
 	case MODE_GAME:

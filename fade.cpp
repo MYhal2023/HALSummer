@@ -80,11 +80,11 @@ HRESULT InitFade(void)
 	g_Use   = TRUE;
 	g_w     = TEXTURE_WIDTH;
 	g_h     = TEXTURE_HEIGHT;
-	g_Pos   = { 0.0f, 0.0f, 0.0f };
+	g_Pos   = { SCREEN_CENTER_X, SCREEN_CENTER_Y, 0.0f };
 	g_TexNo = 0;
 
 	g_Fade  = FADE_IN;
-	g_Color = { 1.0, 0.0, 0.0, 1.0 };
+	g_Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	g_Load = TRUE;
 	return S_OK;
@@ -170,6 +170,10 @@ void DrawFade(void)
 
 	// 加算合成に設定
 	//SetBlendState(BLEND_MODE_ADD);
+	SetDepthEnable(FALSE);
+
+	// ライティングを無効
+	SetLightEnable(FALSE);
 
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
@@ -193,13 +197,16 @@ void DrawFade(void)
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		//SetVertex(0.0f, 0.0f, SCREEN_WIDTH, TEXTURE_WIDTH, 0.0f, 0.0f, 1.0f, 1.0f);
-		SetSpriteColor(g_VertexBuffer, SCREEN_WIDTH/2, TEXTURE_WIDTH/2, SCREEN_WIDTH, TEXTURE_WIDTH, 0.0f, 0.0f, 1.0f, 1.0f,
+		SetSpriteColor(g_VertexBuffer, SCREEN_WIDTH/2, SCREEN_HEIGHT /2, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f,
 			g_Color);
 
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
 	}
 
+	SetDepthEnable(TRUE);
+
+	SetLightEnable(TRUE);
 
 
 }

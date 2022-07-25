@@ -30,6 +30,7 @@
 #include "enemySet.h"
 #include "unitdata.h"
 #include "text_texture.h"
+#include "reserve.h"
 
 
 //*****************************************************************************
@@ -85,14 +86,15 @@ HRESULT InitGame(void)
 {
 	g_ViewPortType_Game = TYPE_FULL_SCREEN;
 	InitSystem();
-	switch (GetMode())
+	switch (GetDay())
 	{
-	case MODE_TITLE:
-		break;
-	case MODE_GAME:
+	case 0:	//0はデバッグ用で残しておく？
 		InitSystem();
 		break;
-	case MODE_RESULT:
+	case 1:
+		InitSystem();
+		break;
+	case 2:
 		break;
 	}
 
@@ -115,21 +117,18 @@ void InitSystem(void)
 
 	InitOver();
 
-	InitTeam();
 
 	InitCharFade();
 
 	InitTexttex();
 
-	SetNeutro(0);
-	SetMacrophages(1);
 	InitPlayerSet();
 
 	InitUI();
 	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
 	SetGrape(30.0f, 40, 5, 1);
-	//SetGrape(120.0f, 40, 5, 1);
-	//SetStrept(240.0f,20,5,1);
+	SetGrape(120.0f, 40, 5, 1);
+	SetStrept(240.0f,20,5,1);
 	XMFLOAT3 pos[2];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	pos[1] = { 25.0f, 0.0f, 300.0f };

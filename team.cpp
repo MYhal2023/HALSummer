@@ -11,13 +11,14 @@
 static PlayerStatus g_Team[MAX_PLAYER_SET];
 static PlayerPartsStatus g_Parts [ MAX_PLAYER_SET * 2];
 static char name[2][64];
+static int memberNum;
 static BOOL g_Load = FALSE;
 
 void InitTeam(void)
 {
 	strcpy(name[MainPlayer], MODEL_PLAYER);
 	strcpy(name[Neutrophils], MODEL_NEUTROPHILS);
-
+	memberNum = 0;
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		g_Team[i].use = FALSE;
@@ -85,6 +86,7 @@ void SetMember(int i)
 		g_Parts[k].move_time = 0;	// 実行時間
 		SetPlayerNum(1);
 	}
+	memberNum++;
 }
 
 void SetChara(int charID)
@@ -130,6 +132,7 @@ void SetNeutro(int i)
 	g_Team[i].tbl_sizeA = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
 	g_Team[i].tbl_adrM = neutro_Standby;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeM = sizeof(neutro_Standby) / sizeof(INTERPOLATION_DATA);;	//データサイズ
+	memberNum++;
 }
 
 //デバッグ用。マクロファージをチームメンバーとしてセット
@@ -184,5 +187,10 @@ void SetMacrophages(int i)
 	g_Parts[GetPlayerPartsNum()].tbl_sizeM = sizeof(macro_LegSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Parts[GetPlayerPartsNum()].move_time = 0;	// 実行時間
 	SetPlayerPartsNum(1);
+	memberNum++;
+}
 
+int GetMemberNum(void)
+{
+	return memberNum;
 }

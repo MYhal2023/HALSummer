@@ -31,3 +31,5 @@ HRESULT InitResult(void);
 void UninitResult(void);
 void UpdateResult(void);
 void DrawResult(void);
+void WinResult(void);
+void LoseResult(void);

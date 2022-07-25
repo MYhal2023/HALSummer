@@ -7,9 +7,12 @@
 #include "main.h"
 #include "sprite.h"
 #include "renderer.h"
+#include "input.h"
 #include "game.h"
 #include "result.h"
 #include "gameover.h"
+#include "debugproc.h"
+#include "fade.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -22,8 +25,8 @@
 static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static char* g_TextureName[] = {
-	"data/TEXTURE/win_texture.png"
-	"data/TEXTURE/lose_texture.png"
+	"data/TEXTURE/win_texture.png",
+	"data/TEXTURE/lose_texture.png",
 };
 static Result g_Result;
 static BOOL g_Load = FALSE;
@@ -32,9 +35,10 @@ HRESULT InitResult(void)
 {
 	ID3D11Device *pDevice = GetDevice();
 
-	// テクスチャ生成
+	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
+		g_Texture[i] = NULL;
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
 			g_TextureName[i],
 			NULL,
@@ -42,6 +46,8 @@ HRESULT InitResult(void)
 			&g_Texture[i],
 			NULL);
 	}
+
+
 	// 頂点バッファ生成
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -51,6 +57,11 @@ HRESULT InitResult(void)
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
 
+	g_Result.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	g_Result.pos = { SCREEN_CENTER_X, SCREEN_CENTER_Y };
+	g_Result.size = { SCREEN_WIDTH, SCREEN_HEIGHT };
+	g_Result.textNo = 0;
+	g_Result.type = GetOverType();
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -87,14 +98,21 @@ void UninitResult(void)
 //=============================================================================
 void UpdateResult(void)
 {
-	switch (GetOverType())
+	switch (g_Result.type)
 	{
 	case OVER_WIN:
 		g_Result.textNo = 0;
+		WinResult();
 		break;
 	case OVER_LOSE:
+		g_Result.textNo = 1;
+		LoseResult();
 		break;
 	}
+
+//#ifdef _DEBUG
+//	PrintDebugProc("")
+//#endif
 }
 
 //=============================================================================
@@ -102,11 +120,6 @@ void UpdateResult(void)
 //=============================================================================
 void DrawResult(void)
 {
-	SetDepthEnable(FALSE);
-
-	// ライティングを無効
-	SetLightEnable(FALSE);
-
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -124,19 +137,33 @@ void DrawResult(void)
 	material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
 
-	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Result.textNo]);
+	// リザルトの背景を描画
+	{
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Result.textNo]);
 
-	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, g_Result.pos.x, g_Result.pos.y, g_Result.size.x, g_Result.size.y, 0.0f, 0.0f, 1.0f, 1.0f,
-		g_Result.color);
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f);
 
-	// ポリゴン描画
-	GetDeviceContext()->Draw(4, 0);
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+	}
 
-	SetDepthEnable(TRUE);
 
-	// ライティングを無効
-	SetLightEnable(TRUE);
+}
 
+void WinResult(void)
+{
+	if (GetKeyboardTrigger(DIK_RETURN))
+	{
+		SetFade(FADE_OUT, MODE_RESERVE);	//現状ループするように
+	}
+}
+
+void LoseResult(void)
+{
+	if (GetKeyboardTrigger(DIK_RETURN))
+	{
+		SetFade(FADE_OUT, MODE_RESERVE);	//現状ループするように
+	}
 }

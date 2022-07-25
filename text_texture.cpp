@@ -17,7 +17,7 @@
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`
 //*****************************************************************************
-#define TEXTURE_MAX					(2)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
+#define TEXTURE_MAX					(6)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
 //*****************************************************************************
 // ƒvƒƒgƒ^ƒCƒvéŒ¾
 //*****************************************************************************
@@ -32,6 +32,10 @@ static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// ƒeƒNƒXƒ`ƒ
 static char *g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/t_gameover.png",
 	"data/TEXTURE/t_result.png",
+	"data/TEXTURE/t_confirm.png",
+	"data/TEXTURE/t_day.png",
+	"data/TEXTURE/t_powerup.png",
+	"data/TEXTURE/t_start.png",
 };
 static BOOL						g_Load = FALSE;
 static TEXT_TEXTURE				g_Texttex[TEXTURE_MAX];
@@ -241,7 +245,6 @@ void DrawTexttChose(int k)	//ˆø”‚É•`‰æ‚µ‚½‚¢‚â‚Â‚ð“ü‚ê‚éB
 	material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
 
-	SetAlphaTestEnable(TRUE);
 	float px = g_Texttex[k].pos.x;	// •\Ž¦ˆÊ’uX
 	float py = g_Texttex[k].pos.y;			// •\Ž¦ˆÊ’uY
 	float pw = 0.0f;				// •\Ž¦•
@@ -274,7 +277,6 @@ void DrawTexttChose(int k)	//ˆø”‚É•`‰æ‚µ‚½‚¢‚â‚Â‚ð“ü‚ê‚éB
 
 	// ƒ|ƒŠƒSƒ“•`‰æ
 	GetDeviceContext()->Draw(4, 0);
-	SetAlphaTestEnable(FALSE);
 
 }
 
