@@ -207,7 +207,7 @@ void SetPosition(void)
 			g_PlayerSet.setMode = FALSE;					//セットモード解除
 			SetMapChipUse(TRUE, z, x);
 			SetSlowMode(FALSE);
-			DecreaseCost(member[g_PlayerSet.setPlayer].cost);
+			DecreaseCost(member[g_PlayerSet.setPlayer].cost[member[g_PlayerSet.setPlayer].level - 1]);
 			g_PlayerSet.setPlayer = 99;
 		}
 	}
@@ -234,10 +234,11 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].atFrame = member->atFrame;
 		player[i].size = member->size;	// 攻撃探知の当たり判定の大きさ
 		player[i].state = Standby;
-		player[i].life = member->life;
-		player[i].lifeMax = member->lifeMax;
-		player[i].power = member->power;
-		player[i].diffend = member->diffend;
+		player[i].level = member->level;
+		player[i].lifeMax = member->lifeMax[member->level - 1];
+		player[i].life = player[i].lifeMax;
+		player[i].power = member->power[member->level - 1];
+		player[i].diffend = member->diffend[member->level - 1];
 		player[i].attack = FALSE;
 		player[i].attackUse = FALSE;
 		player[i].blockMax = member->blockMax;
@@ -246,11 +247,11 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].skillAble = FALSE;
 		player[i].skillID = member->skillID;
 		player[i].skillPoint = 0;
-		player[i].skillPointMax = 5;
+		player[i].skillPointMax = member->spMax[member->level - 1];
 		player[i].increaseSP = 1;
 		player[i].skillUse = FALSE;
 		player[i].intervalSP = 0;
-		player[i].cost = member->cost;
+		player[i].cost = member->cost[member->level - 1];
 		for (int k = 0; k < MAX_TARGET; k++)
 			player[i].targetable[k] = 99;
 		player[i].count = 0;
@@ -282,10 +283,10 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 
 			// 階層アニメーション用のメンバー変数
 			parts[k].tbl_adrA = memberParts[k].tbl_adrA;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_sizeA = sizeof(memberParts[k].tbl_adrA) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
+			parts[k].tbl_sizeA = memberParts[k].tbl_sizeA;	// 登録したテーブルのレコード総数
 			parts[k].tbl_adrM = memberParts[k].tbl_adrM;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_sizeM = sizeof(memberParts[k].tbl_adrM) / sizeof(INTERPOLATION_DATA);;	// 登録したテーブルのレコード総数
-			parts[k].move_time = 0;			// 実行時間
+			parts[k].tbl_sizeM = memberParts[k].tbl_sizeM;	// 登録したテーブルのレコード総数
+			parts[k].move_time = 0.0f;			// 実行時間
 			parts[k].parent = &player[i];	// 自分が親ならNULL、自分が子供なら親のアドレス
 		}
 		return;	//セットしきったので処理終了
@@ -332,7 +333,7 @@ void SetAbleChar(void)
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		if (member[i].use == FALSE)continue;
-		if (member[i].cost <= cost->cost)
+		if (member[i].cost[member[i].level] <= cost->cost)
 			member[i].setAble = TRUE;
 		else
 			member[i].setAble = FALSE;

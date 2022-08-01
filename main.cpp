@@ -20,6 +20,7 @@
 #include "game.h"
 #include "fade.h"
 #include "result.h"
+#include "title.h"
 #include "reserve.h"
 #include "team.h"
 
@@ -52,7 +53,7 @@ char	g_DebugStr[2048] = WINDOW_NAME;		// デバッグ文字表示用
 
 #endif
 
-int	g_Mode = MODE_GAME;					// 起動時の画面を設定
+int	g_Mode = MODE_RESERVE;					// 起動時の画面を設定
 
 
 //=============================================================================
@@ -309,6 +310,7 @@ void Update(void)
 	switch (g_Mode)
 	{
 	case MODE_TITLE:		// タイトル画面の更新
+		UpdateTitle();
 		break;
 
 	case MODE_RESERVE:
@@ -356,7 +358,7 @@ void Draw(void)
 		// ライティングを無効
 		SetLightEnable(FALSE);
 		SetRenderer();		//通常描画
-
+		DrawTitle();
 
 		// ライティングを有効に
 		SetLightEnable(TRUE);
@@ -456,12 +458,14 @@ void SetMode(int mode)
 	// ゲーム画面の終了処理
 	UninitGame();
 	UninitResult();
+	UninitTitle();
 	g_Mode = mode;	// 次のモードをセットしている
 
 	switch (g_Mode)
 	{
 	case MODE_TITLE:
 		// タイトル画面の初期化
+		InitTitle();
 		break;
 	case MODE_RESERVE:
 		// 育成画面の初期化

@@ -12,7 +12,6 @@
 #include "reserve.h"
 #include "base.h"
 #include "cost.h"
-#include "team.h"
 #include "ui.h"
 #include "text_texture.h"
 #include "fade.h"
@@ -21,7 +20,9 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(8)				// テクスチャの数
+#define TEXTURE_MAX			(11)				// テクスチャの数
+#define CH_TEXTURE_MAX		(3)				// キャラテクスチャの数
+#define IC_TEXTURE_MAX		(9)				// キャラテクスチャの数
 #define CHAR_TEXTURE_MAX	(3)				// キャラテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
@@ -35,31 +36,49 @@
 static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView		*g_IconTexture[IC_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TextureName[TEXTURE_MAX] = {
 	"data/TEXTURE/var.png",
 	"data/TEXTURE/title_bg.png",
 	"data/TEXTURE/number.png",
 	"data/TEXTURE/costbox.png",
+	"data/TEXTURE/arrow_right.png",
 	"data/TEXTURE/t_confirm.png",
 	"data/TEXTURE/t_day.png",
 	"data/TEXTURE/t_powerup.png",
 	"data/TEXTURE/t_start.png",
+	"data/TEXTURE/t_levelup.png",
+	"data/TEXTURE/t_cancel.png",
 
 };
-static char* g_CharTextureName[] = {
+static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/macro.png",
+};
+static char* g_IconTextureName[IC_TEXTURE_MAX] = {
+	"data/TEXTURE/icon_cost.png",
+	"data/TEXTURE/icon_life.png",
+	"data/TEXTURE/icon_attack.png",
+	"data/TEXTURE/icon_diffend.png",
+	"data/TEXTURE/icon_block.png",
+	"data/TEXTURE/icon_sp.png",
+	"data/TEXTURE/icon_energy.png",
+	"data/TEXTURE/icon_oxygen.png",
+	"data/TEXTURE/icon_iron.png",
 };
 
 static Reserve g_Reserve;
 static TEXT_TEXTURE g_text[TEXTURE_MAX];
 static Button g_Button[BUTTON_MAX];
+static Button g_PwButton[2];	//キャンセルとOKボタン
 static int cursol;
+static int cursolPw;	//パワーアップ画面に使われるカーソル
+static float cursolAlpha;	//カーソル透明度
+static float alphaSpeed;	//カーソル透明度加算量
 static BOOL g_Load = FALSE;
 static BOOL restart = FALSE;
-
 HRESULT InitReserve(void)
 {
 	//起動時、一度だけ初期化
@@ -68,9 +87,16 @@ HRESULT InitReserve(void)
 		g_Reserve.day = 1;
 		g_Reserve.energy = 0;
 		g_Reserve.oxygen = 0;
+		g_Reserve.iron = 0;
 		g_Reserve.mode = 99;
 		g_Reserve.selectPw = 0;
+		g_Reserve.pwMode = FALSE;
 		restart = TRUE;
+#ifdef _DEBUG
+		g_Reserve.energy = 9999;
+		g_Reserve.oxygen = 999;
+		g_Reserve.iron = 9;
+#endif
 	}
 
 	ID3D11Device *pDevice = GetDevice();
@@ -93,6 +119,15 @@ HRESULT InitReserve(void)
 			NULL,
 			NULL,
 			&g_CharTexture[i],
+			NULL);
+	}
+	for (int i = 0; i < IC_TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_IconTextureName[i],
+			NULL,
+			NULL,
+			&g_IconTexture[i],
 			NULL);
 	}
 
@@ -125,7 +160,17 @@ HRESULT InitReserve(void)
 	g_Button[GameStart].pos.y = SCREEN_HEIGHT - 40.0f - BUTTON_SIZE * 0.5f;
 	g_Button[GameStart].pos.x = SCREEN_WIDTH - 16.0f - BUTTON_SIZE * 1.5f;
 
+	g_PwButton[CanselButton].pos.y = SCREEN_HEIGHT * 0.6f;
+	g_PwButton[CanselButton].pos.x = SCREEN_WIDTH * 0.8f;
+	g_PwButton[CanselButton].color = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+	g_PwButton[LevelupButton].pos.y = SCREEN_HEIGHT * 0.75f;
+	g_PwButton[LevelupButton].pos.x = SCREEN_WIDTH * 0.8f;
+	g_PwButton[LevelupButton].color = { 0.0f, 0.5f, 1.0f, 1.0f };
 	cursol = 0;
+	cursolPw = 0;
+	cursolAlpha = 0.5f;
+	alphaSpeed = 0.02f;
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -153,6 +198,24 @@ void UninitReserve(void)
 			g_Texture[i] = NULL;
 		}
 	}
+	// テクスチャの解放
+	for (int i = 0; i < CH_TEXTURE_MAX; i++)
+	{
+		if (g_CharTexture[i])
+		{
+			g_CharTexture[i]->Release();
+			g_CharTexture[i] = NULL;
+		}
+	}
+	// テクスチャの解放
+	for (int i = 0; i < IC_TEXTURE_MAX; i++)
+	{
+		if (g_IconTexture[i])
+		{
+			g_IconTexture[i]->Release();
+			g_IconTexture[i] = NULL;
+		}
+	}
 
 	g_Load = FALSE;
 }
@@ -168,6 +231,7 @@ void UpdateReserve(void)
 		UnitPowerUpMode();
 		break;
 	case UnitConfirm:
+		UnitConfirmMode();
 		break;
 	case 99:
 		NormalRserveMode();
@@ -176,7 +240,7 @@ void UpdateReserve(void)
 }
 
 //=============================================================================
-// 描画処理
+// 描画処理 ここに全部持ってくるので頂点バッファ設定等は個々でいらない
 //=============================================================================
 void DrawReserve(void)
 {
@@ -204,14 +268,53 @@ void DrawReserve(void)
 	NormalRserveModeDraw();	//全体共通部分を描画(共通部はここに入れる。レイヤーに気を付ける事)
 
 	const XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.75f };
+	const XMFLOAT2 pos = { SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f };
+	XMFLOAT2 pos2 = { SCREEN_WIDTH * 0.6f, SCREEN_HEIGHT * 0.25f };
+	PlayerStatus *member = GetTeam();
+	//必要素材関連の変数設定
+	const int nowLevel = member[g_Reserve.selectPw].level;
+	const float size = 100.0f;
+	const float numsize = 60.0f;
+	XMFLOAT4 matColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	int number = 0;
 	switch (g_Reserve.mode)
 	{
 	case UnitPowerUp:
 		DrawButton(color, SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f, SCREEN_WIDTH * 0.75f, SCREEN_HEIGHT* 0.70f);
 		DrawReserveChar();
+		if (g_Reserve.pwMode) {//強化モードになったら、画面の上に色々描画する
+			DrawCharStatus(pos, g_Reserve.selectPw);	//ステータス描画
+			for (int k = 0; k < MAX_MATERIAL; k++) {
+				if (member[g_Reserve.selectPw].material[k].no == 99 || 
+					member[g_Reserve.selectPw].material[k].value[nowLevel - 1] == 0)continue;	//設定されてないならスルー
+				pos2.x += (size * 1.5f) * number;	//座標更新して横続きに描画
+				DrawNeedMaterial(pos2, size, member[g_Reserve.selectPw].material[k].no);//先に画像描画してから必要素材数を描画
+				DrawNumberRe(member[g_Reserve.selectPw].material[k].value[nowLevel - 1], pos2.x + size * 0.25f, pos2.y + size*0.75f, numsize * 0.5f, numsize, matColor);
+				number++;
+			}
+			//ボタン描画
+			DrawButton(g_PwButton[CanselButton].color, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+			DrawTextReserve(TEXT_CANCEL, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+				XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+			//ボタン描画
+			DrawButton(g_PwButton[LevelupButton].color, g_PwButton[LevelupButton].pos.x, g_PwButton[LevelupButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+			DrawTextReserve(TEXT_LUP, g_PwButton[LevelupButton].pos.x, g_PwButton[LevelupButton].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+				XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+			//カーソルに対応して上から透明なボックスを描画
+			if ((cursolAlpha > 0.8f && alphaSpeed > 0.0f) || (cursolAlpha < 0.4f && alphaSpeed < 0.0f))alphaSpeed *= -1;
+			cursolAlpha += alphaSpeed;
+			switch (cursolPw) {
+			case 0:
+				DrawButton(XMFLOAT4{1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			case 1:
+				DrawButton(XMFLOAT4{ 1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[LevelupButton].pos.x, g_PwButton[LevelupButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			}
+		}
 		break;
 	case UnitConfirm:
-		DrawButton(color, SCREEN_WIDTH * 0.25f, SCREEN_HEIGHT * 0.25f, SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT* 0.5f);
+		DrawButton(color, SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f, SCREEN_WIDTH * 0.75f, SCREEN_HEIGHT* 0.70f);
 		DrawReserveChar();
 		break;
 	case 99:
@@ -224,6 +327,8 @@ void DrawReserve(void)
 	SetLightEnable(TRUE);
 
 }
+
+Reserve *GetReserve(void) { return &g_Reserve; };
 
 void DrawButton(XMFLOAT4 color, float px, float py, float sx, float sy)
 {
@@ -254,9 +359,10 @@ void DrawNumberRe(int numb, float px, float py, float sx, float sy, XMFLOAT4 col
 	else
 		digit = 1;
 
+	float psx = px + sx * digit;
 	for (int i = 0; i < digit; i++)
 	{
-		px = px - sx * i;
+		psx -= sx;
 		float x = (float)(numb % 10);		//今回表示する数字
 		float tx = x * 0.1f;			// テクスチャの左上X座標
 
@@ -264,7 +370,7 @@ void DrawNumberRe(int numb, float px, float py, float sx, float sy, XMFLOAT4 col
 		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[re_number]);
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
-		SetSpriteColor(g_VertexBuffer, px, py, sx, sy, tx, 0.0f, 0.1f, 1.0f,
+		SetSpriteColor(g_VertexBuffer, psx, py, sx, sy, tx, 0.0f, 0.1f, 1.0f,
 			color);
 
 		// ポリゴン描画
@@ -333,6 +439,24 @@ void NormalRserveModeDraw(void)
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
+	XMFLOAT2 size = { SCREEN_WIDTH, 130.0f };
+	//保有素材量の描画
+	DrawButton(XMFLOAT4{ 0.0f, 0.0f, 0.0f, 0.7f }, SCREEN_CENTER_X, size.y * 0.5f, size.x, size.y);
+	XMFLOAT2 pos = { SCREEN_WIDTH * 0.45f, size.y * 0.5f };
+	//エネルギー量
+	DrawNeedMaterial(pos, size.y * 0.8f, energy);
+	pos.x += size.y * 0.7f;
+	DrawNumberRe(g_Reserve.energy, pos.x, pos.y, size.y * 0.25f, size.y * 0.5f, XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+	//酸素量
+	pos.x += size.y * 1.8f;
+	DrawNeedMaterial(pos, size.y * 0.8f, oxygen);
+	pos.x += size.y * 0.7f;
+	DrawNumberRe(g_Reserve.oxygen, pos.x, pos.y, size.y * 0.25f, size.y * 0.5f, XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+	//鉄分
+	pos.x += size.y * 1.8f;
+	DrawNeedMaterial(pos, size.y * 0.8f, iron);
+	pos.x += size.y * 0.7f;
+	DrawNumberRe(g_Reserve.iron, pos.x, pos.y, size.y * 0.25f, size.y * 0.5f, XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
 	//日数描画
 	float px = 16.0f + BUTTON_SIZE * 0.25f;
@@ -353,9 +477,70 @@ void NormalRserveModeDraw(void)
 	DrawButton(g_Button[GameStart].color, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
 	DrawTextReserve(TEXT_START, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+
 }
 
 void UnitPowerUpMode(void)
+{
+	//まず強化モードの操作を優先して処理
+	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.pwMode && cursolPw > 0)cursolPw--;
+	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.pwMode && cursolPw <= 0)cursolPw++;
+
+	if ((GetKeyboardTrigger(DIK_RETURN)|| GetKeyboardTrigger(DIK_Z)) && !g_Reserve.pwMode)
+	{
+		g_Reserve.pwMode = TRUE;
+	}
+	else if (GetKeyboardTrigger(DIK_C) && !g_Reserve.pwMode)
+	{
+		g_Reserve.mode = 99;
+	}
+	else if (GetKeyboardTrigger(DIK_C))
+	{
+		g_Reserve.pwMode = FALSE;
+		cursolPw = 0;
+	}
+	else if ((GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_Z) )&& g_Reserve.pwMode)
+	{
+		switch (cursolPw) {
+		case 0:
+			g_Reserve.pwMode = FALSE;
+			break;
+		case 1:
+			PlayerStatus *member = GetTeam();
+			if (CheckPowerUpMaterial(&member[g_Reserve.selectPw]))	//セレクトしているキャラはレベルアップ可能か？
+			{
+				ReduceMaterial(&member[g_Reserve.selectPw]);	//素材量を減らす
+				member[g_Reserve.selectPw].level++;	//レベルアップ！
+			}
+			break;
+		}
+	}
+
+	if (g_Reserve.pwMode)return;//強化中なら他操作を受け付けない
+	
+	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
+	{
+		g_Reserve.selectPw--;
+	}
+	else if (GetKeyboardTrigger(DIK_RIGHT) && g_Reserve.selectPw < GetMemberNum() - 1)
+	{
+		g_Reserve.selectPw++;
+	}
+
+	else if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw >4)
+	{
+		g_Reserve.selectPw -= ROW_NUM;
+	}
+	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.selectPw < GetMemberNum() - 1)
+	{
+		if (g_Reserve.selectPw + ROW_NUM > GetMemberNum() - 1)
+			g_Reserve.selectPw = GetMemberNum() - 1;
+		else
+			g_Reserve.selectPw += ROW_NUM;
+	}
+}
+
+void UnitConfirmMode(void)
 {
 	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
 	{
@@ -366,7 +551,7 @@ void UnitPowerUpMode(void)
 		g_Reserve.selectPw++;
 	}
 
-	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw >4)
+	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw > 4)
 	{
 		g_Reserve.selectPw -= ROW_NUM;
 	}
@@ -468,5 +653,232 @@ void DrawReserveChar(void)
 		}
 		k++;
 
+	}
+}
+
+//引数：表示の中心位置とキャラステータスポインター
+void DrawCharStatus(XMFLOAT2 pos,int k)
+{
+	PlayerStatus *member = GetTeam();
+	//下地の枠を描画
+	const float sizeX = SCREEN_WIDTH * 0.75f;
+	const float sizeY = SCREEN_HEIGHT * 0.70f;
+	XMFLOAT4 color = { 0.5f, 0.5f, 0.5f, 1.0f };
+	DrawButton(color, pos.x, pos.y, sizeX, sizeY);
+
+	//キャラ画像描画
+	const float boxsize = 180.0f;	//ボックスサイズ定義
+	const int id = member[k].charID;
+	float posX = pos.x - sizeX * 0.40f;
+	float posY = pos.y - sizeY * 0.375f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_CharTexture[id]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, boxsize, boxsize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	posX -= boxsize * 0.35f;
+	XMFLOAT2 set = { posX, posY + boxsize * 0.75f };
+	DrawCharAllStatus(set, k);
+
+	const float arrow = 160.0f * 0.25f;
+	for (int i = 0; i < 6; i++) {
+		for (int k = 0; k < 3; k++) {
+			// テクスチャ設定
+			GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[arRight]);
+			// １枚のポリゴンの頂点とテクスチャ座標を設定
+			SetSpriteColor(g_VertexBuffer, posX + boxsize * 1.25f + k * arrow * 0.75f, set.y + i * arrow + i * 52.0f, arrow, arrow, 0.0f, 0.0f, 1.0f, 1.0f,
+				XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+			// ポリゴン描画
+			GetDeviceContext()->Draw(4, 0);
+		}
+	}
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	posX += sizeX * 0.30f;
+	set = { posX , posY + boxsize * 0.75f };
+	member[k].level++;
+	DrawCharAllStatus(set, k);
+	member[k].level--;
+}
+
+void DrawCharAllStatus(XMFLOAT2 pos, int k)
+{
+	PlayerStatus *member = GetTeam();
+	//コスト描画
+	float posX = pos.x;
+	float posY = pos.y;
+	const float iconSize = 75.0f;	//ボックスサイズ定義
+	const float iconBuff = 16.0f;
+	float buffX = iconSize + iconBuff;
+	int level = member[k].level - 1;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icCost]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	float isx = iconSize - 8.0f;
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 0.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].cost[level], posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//ライフ描画
+	posX = pos.x;
+	posY = pos.y + buffX * 1.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icLife]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 1.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].lifeMax[level], posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//攻撃力描画
+	posX = pos.x;
+	posY = pos.y + buffX * 2.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icAttack]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 2.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].power[level], posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//防御力描画
+	posX = pos.x;
+	posY = pos.y + buffX * 3.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icDiffend]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 3.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].diffend[level], posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//ブロック数描画
+	posX = pos.x;
+	posY = pos.y + buffX * 4.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icBlock]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 4.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].blockMax, posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//SP描画
+	posX = pos.x;
+	posY = pos.y + buffX * 5.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icSp]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 5.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumberRe(member[k].spMax[level], posX, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+}
+//needって書いてあるけど、普通に使いまわし可能
+//引数に座標と描画する素材IDを持ってくる
+void DrawNeedMaterial(XMFLOAT2 pos, float size, int no)
+{
+	XMFLOAT2 texSize = { size, size };
+	//とりあえず下地描画
+	XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DrawButton(color, pos.x, pos.y, texSize.x, texSize.y);
+
+	//テクスチャ画像の設定
+	int texNo = 0;
+	switch (no)
+	{
+	case energy:
+		texNo = icEnergy;
+		break;
+	case oxygen:
+		texNo = icOxygen;
+		break;
+	case iron:
+		texNo = icIron;
+		break;
+	}
+	//アイコン描画
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[texNo]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, pos.x, pos.y, texSize.x * 0.9f, texSize.y * 0.9f, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+}
+//引数には強化対象のアドレスをもってくる
+BOOL CheckPowerUpMaterial(PlayerStatus *member)
+{
+	int level = member->level;
+	for (int i = 0; i < MAX_MATERIAL; i++) {
+		//必要量が所持量を上回っていたらFALEを返す
+		switch(member->material[i].no){
+		case energy:
+			if (member->material[i].value[level - 1] > g_Reserve.energy)return FALSE;
+			break;
+		case oxygen:
+			if (member->material[i].value[level - 1] > g_Reserve.oxygen)return FALSE;
+			break;
+		case iron:
+			if (member->material[i].value[level - 1] > g_Reserve.iron)return FALSE;
+			break;
+		}
+	}
+
+	return TRUE;
+}
+
+void ReduceMaterial(PlayerStatus *member)
+{
+	int level = member->level;
+	for (int i = 0; i < MAX_MATERIAL; i++) {
+		//必要量が所持量を上回っていたらFALEを返す
+		switch (member->material[i].no) {
+		case energy:
+			g_Reserve.energy -= member->material[i].value[level - 1];
+			break;
+		case oxygen:
+			g_Reserve.oxygen -= member->material[i].value[level - 1];
+			break;
+		case iron:
+			g_Reserve.iron -= member->material[i].value[level - 1];
+			break;
+		}
 	}
 }

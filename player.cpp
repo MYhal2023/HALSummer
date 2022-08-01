@@ -59,8 +59,8 @@ static PLAYER		g_Player[MAX_PLAYER];						// プレイヤー
 static Playerliner  g_Playerline[MAX_PLAYER];					//プレイヤーの線形補間データ
 static PlayerParts	g_Parts[MAX_PLAYER_PARTS];					// プレイヤー
 static BOOL			g_Load = FALSE;
-static int			playerNum;
-static int			partsNum;
+static int			playerNum = 0;
+static int			partsNum = 0;
 // 階層アニメーションデータ
 static char name[2][64];
 

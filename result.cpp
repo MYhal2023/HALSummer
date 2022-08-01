@@ -13,6 +13,8 @@
 #include "gameover.h"
 #include "debugproc.h"
 #include "fade.h"
+#include "reserve.h"
+#include "playerSet.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -29,6 +31,7 @@ static char* g_TextureName[] = {
 	"data/TEXTURE/lose_texture.png",
 };
 static Result g_Result;
+static Reward g_Reward;
 static BOOL g_Load = FALSE;
 
 HRESULT InitResult(void)
@@ -167,3 +170,39 @@ void LoseResult(void)
 		SetFade(FADE_OUT, MODE_RESERVE);	//現状ループするように
 	}
 }
+
+void InitReward(void)
+{
+	g_Reward.num = 0;
+	for (int i = 0; i < MAX_REWARD; i++) {
+		g_Reward.ID[i] = 99;
+		g_Reward.value[i] = 0;
+	}
+}
+
+void DrawReward(void)
+{
+
+}
+
+
+void IncreaseReward(Reward *reward)
+{
+	Reserve *reserve = GetReserve();
+	for (int i = 0; i < reward->num; i++) {
+		switch (reward->ID[i])
+		{
+		case energy:
+			reserve->energy += reward->value[i];
+			break;
+		case oxygen:
+			reserve->oxygen += reward->value[i];
+			break;
+		case iron:
+			reserve->iron += reward->value[i];
+			break;
+		}
+	}
+}
+
+Reward *GetReward(void) { return &g_Reward; };

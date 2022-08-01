@@ -9,9 +9,15 @@
 #include "playerLinerData.h"
 #include <string>
 static PlayerStatus g_Team[MAX_PLAYER_SET];
+//素材ID、必要量×4(4回までレベルアップするから)の順番。
+static NeedMaterial Neutrovalue[MAX_MATERIAL] = { {(energy), {200, 400, 500, 800}},
+										{(iron),{0, 1, 0, 1} },
+										{(99), {0, 0, 0, 0}}/*ダミ－データ */ };
+
 static PlayerPartsStatus g_Parts [ MAX_PLAYER_SET * 2];
 static char name[2][64];
 static int memberNum;
+static int partsNum;
 static BOOL g_Load = FALSE;
 
 void InitTeam(void)
@@ -19,6 +25,7 @@ void InitTeam(void)
 	strcpy(name[MainPlayer], MODEL_PLAYER);
 	strcpy(name[Neutrophils], MODEL_NEUTROPHILS);
 	memberNum = 0;
+	partsNum = 0;
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		g_Team[i].use = FALSE;
@@ -58,9 +65,6 @@ void SetMember(int i)
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
 	g_Team[i].size = 25.0f;	// 当たり判定の大きさ
 	g_Team[i].life = 100;
-	g_Team[i].lifeMax = g_Team[i].life;
-	g_Team[i].power = 5;
-	g_Team[i].diffend = 3;
 	g_Team[i].blockMax = 2;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = GetPlayerPartsNum();
@@ -115,18 +119,32 @@ void SetNeutro(int i)
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
 	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
-	g_Team[i].life = 100;
-	g_Team[i].lifeMax = g_Team[i].life;
-	g_Team[i].power = 5;
-	g_Team[i].diffend = 3;
+	g_Team[i].level = 1;
+	int Life[MAX_LEVEL] = { 40, 45, 60, 65, 80 };
+	int Power[MAX_LEVEL] = { 6, 7, 10, 12, 15 };
+	int Diffend[MAX_LEVEL] = { 3, 4, 5, 7, 10 };
+	int spMax[MAX_LEVEL] = { 10, 10, 8, 8, 8 };
+	int cost[MAX_LEVEL] = { 8, 8, 7, 7, 6 };
+	for (int k = 0; k < MAX_LEVEL; k++){
+		g_Team[i].lifeMax[k] = Life[k];
+		g_Team[i].power[k] = Power[k];
+		g_Team[i].diffend[k] = Diffend[k];
+		g_Team[i].spMax[k] = spMax[k];
+		g_Team[i].cost[k] = cost[k];
+	}
+	g_Team[i].life = g_Team[i].lifeMax[0];
 	g_Team[i].blockMax = 2;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = GetPlayerPartsNum();
 	g_Team[i].partsNum = 0;
 	g_Team[i].atFrame = 45;
 	g_Team[i].skillID = neutro_skill;
-	g_Team[i].cost = 10;
 	g_Team[i].setAble = FALSE;
+
+	//強化必要素材の保存
+	g_Team[i].material = Neutrovalue;
+
+
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = neutro_Attack;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeA = sizeof(neutro_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
@@ -146,17 +164,31 @@ void SetMacrophages(int i)
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
 	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
-	g_Team[i].life = 100;
-	g_Team[i].lifeMax = g_Team[i].life;
-	g_Team[i].power = 5;
-	g_Team[i].diffend = 3;
+	g_Team[i].level = 1;
+	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
+	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
+	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
+	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	for (int k = 0; k < MAX_LEVEL; k++) {
+		g_Team[i].lifeMax[k] = Life[k];
+		g_Team[i].power[k] = Power[k];
+		g_Team[i].diffend[k] = Diffend[k];
+		g_Team[i].spMax[k] = spMax[k];
+		g_Team[i].cost[k] = cost[k];
+	}
+
+	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
 	g_Team[i].blockMax = 2;
 	g_Team[i].blockNum = 0;
-	g_Team[i].startNum = GetPlayerPartsNum();
+	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 2;
 	g_Team[i].atFrame = 20;
-	g_Team[i].cost = 10;
 	g_Team[i].setAble = FALSE;
+
+	g_Team[i].material = Neutrovalue;
+
+
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = macro_Attack;	//先頭アドレスの指定なため、添え字はi
 	g_Team[i].tbl_sizeA = sizeof(macro_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
@@ -164,29 +196,30 @@ void SetMacrophages(int i)
 	g_Team[i].tbl_sizeM = sizeof(macro_Standby) / sizeof(INTERPOLATION_DATA);	//データサイズ
 	
 																				//パーツ情報の初期化処理
-	LoadModel(MODEL_MACRO_ARM, &g_Parts[GetPlayerPartsNum()].model);
+	LoadModel(MODEL_MACRO_ARM, &g_Parts[partsNum].model);
 	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Parts[GetPlayerPartsNum()].model, &g_Parts[GetPlayerPartsNum()].diffuse[0]);
+	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
 
 	// 階層アニメーション用のメンバー変数
-	g_Parts[GetPlayerPartsNum()].tbl_adrA = macro_ArmAt;	// アニメデータのテーブル先頭アドレス
-	g_Parts[GetPlayerPartsNum()].tbl_sizeA = sizeof(macro_ArmAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Parts[GetPlayerPartsNum()].tbl_adrM = macro_ArmSb;	// アニメデータのテーブル先頭アドレス
-	g_Parts[GetPlayerPartsNum()].tbl_sizeM = sizeof(macro_ArmSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Parts[GetPlayerPartsNum()].move_time = 0;	// 実行時間
-	SetPlayerPartsNum(1);
+	g_Parts[partsNum].tbl_adrA = macro_ArmAt;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeA = sizeof(macro_ArmAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].tbl_adrM = macro_ArmSb;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeM = sizeof(macro_ArmSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].move_time = 0;	// 実行時間
+	partsNum++;
 
-	LoadModel(MODEL_MACRO_LEG, &g_Parts[GetPlayerPartsNum()].model);
+
+	LoadModel(MODEL_MACRO_LEG, &g_Parts[partsNum].model);
 	// モデルのディフューズを保存しておく。色変え対応の為。
-	GetModelDiffuse(&g_Parts[GetPlayerPartsNum()].model, &g_Parts[GetPlayerPartsNum()].diffuse[0]);
+	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
 
 	// 階層アニメーション用のメンバー変数
-	g_Parts[GetPlayerPartsNum()].tbl_adrA = macro_LegAt;	// アニメデータのテーブル先頭アドレス
-	g_Parts[GetPlayerPartsNum()].tbl_sizeA = sizeof(macro_LegAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Parts[GetPlayerPartsNum()].tbl_adrM = macro_LegSb;	// アニメデータのテーブル先頭アドレス
-	g_Parts[GetPlayerPartsNum()].tbl_sizeM = sizeof(macro_LegSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
-	g_Parts[GetPlayerPartsNum()].move_time = 0;	// 実行時間
-	SetPlayerPartsNum(1);
+	g_Parts[partsNum].tbl_adrA = macro_LegAt;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeA = sizeof(macro_LegAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].tbl_adrM = macro_LegSb;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeM = sizeof(macro_LegSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].move_time = 0;	// 実行時間
+	partsNum++;
 	memberNum++;
 }
 

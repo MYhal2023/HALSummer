@@ -5,6 +5,7 @@
 //
 //=============================================================================
 #pragma once
+#define MAX_REWARD	(5)
 struct Result
 {
 	XMFLOAT4 color;
@@ -15,6 +16,12 @@ struct Result
 
 };
 
+struct Reward
+{
+	int num;				//‰½í—Ş‚Ì•ñV‚ª‚ ‚é‚Ì‚©
+	int ID[MAX_REWARD];		//•ñV‚Ì‘fŞID
+	int value[MAX_REWARD];	//•ñV‚Ì‘fŞ—Ê
+};
 enum ResultType
 {
 	Lose,
@@ -33,3 +40,5 @@ void UpdateResult(void);
 void DrawResult(void);
 void WinResult(void);
 void LoseResult(void);
+void IncreaseReward(Reward *reward);
+Reward *GetReward(void);

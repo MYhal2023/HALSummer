@@ -14,6 +14,10 @@ void InitCost(void)
 	g_Cost.cost = 10;
 	g_Cost.time = 0;
 	g_Cost.costMaxTime = 120;
+
+#ifdef _DEBUG
+	g_Cost.cost = 50;
+#endif
 }
 
 //コストを一気に増やしたい時に
