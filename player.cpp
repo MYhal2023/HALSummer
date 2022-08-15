@@ -521,7 +521,7 @@ void BlockEnemy(void)
 			if (g_Player[i].blockNum >= g_Player[i].blockMax ||
 				enemy[k].type != Proximity ||
 				enemy[k].use != TRUE)continue;
-			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 20.0f, 1.0f)) {
+			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 35.0f, 1.0f)) {
 				//ここでエネミーを被ブロック状態へ変更する。攻撃先も自分へ
 				g_Player[i].blockNum++;
 				enemy[k].blocked = TRUE;
@@ -543,7 +543,7 @@ void CheckEnemyTarget(int i)
 	}
 	ENEMY *enemy = GetEnemy();
 	Base *base = GetBase();
-	float cmp = 0.0f;;
+	float cmp = g_Player[i].size * 2.0f;
 	for (int k = 0; k < g_Player[i].count; k++)
 	{
 		if (g_Player[i].targetable[k] == 99)continue;
@@ -553,7 +553,7 @@ void CheckEnemyTarget(int i)
 			XMFLOAT3 countData;
 			XMStoreFloat3(&countData, v1);
 			float dist = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
-			if (dist > cmp)
+			if (dist < cmp)
 			{
 				cmp = dist;
 				g_Player[i].target = g_Player[i].targetable[k];	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…

@@ -126,13 +126,12 @@ void InitSystem(void)
 
 	InitUI();
 	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
-	SetGrape(30.0f, 40, 5, 1);
-	SetGrape(120.0f, 40, 5, 1);
-	SetStrept(240.0f,20,5,1);
-	XMFLOAT3 pos[2];
+	SetGrape(300.0f, 40, 5, 1);
+	SetGrape(1200.0f, 40, 5, 1);
+	SetStrept(8000.0f,20,5,1);
+	XMFLOAT3 pos[1];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
-	pos[1] = { 25.0f, 0.0f, 300.0f };
-	InitBase(3, &pos[0], 2);
+	InitBase(3, &pos[0], 1);
 }
 
 //=============================================================================

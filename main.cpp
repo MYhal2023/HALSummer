@@ -53,7 +53,7 @@ char	g_DebugStr[2048] = WINDOW_NAME;		// デバッグ文字表示用
 
 #endif
 
-int	g_Mode = MODE_RESERVE;					// 起動時の画面を設定
+int	g_Mode = MODE_GAME;					// 起動時の画面を設定
 
 
 //=============================================================================
@@ -247,10 +247,9 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 #ifdef _DEBUG	//デバッグ中なら色々セット
 	SetNeutro(0);
 	SetMacrophages(1);
-	SetNeutro(2);
-	SetMacrophages(3);
-	SetNeutro(4);
-	SetMacrophages(5);
+	SetHelpeerT(2);
+	SetKillerT(3);
+	SetNK(4);
 #endif
 	// 最初のモードをセット
 	SetMode(g_Mode);	// ここはSetModeのままで！

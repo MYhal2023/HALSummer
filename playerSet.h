@@ -20,6 +20,9 @@ enum PLAYER_CHAR
 	ID_MainPlayer,
 	ID_Neutro,
 	ID_Macro,
+	ID_HelperT,
+	ID_KillerT,
+	ID_NK,
 };
 
 //ëfçﬁID

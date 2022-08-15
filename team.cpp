@@ -135,7 +135,7 @@ void SetNeutro(int i)
 	g_Team[i].life = g_Team[i].lifeMax[0];
 	g_Team[i].blockMax = 2;
 	g_Team[i].blockNum = 0;
-	g_Team[i].startNum = GetPlayerPartsNum();
+	g_Team[i].startNum = 0;
 	g_Team[i].partsNum = 0;
 	g_Team[i].atFrame = 45;
 	g_Team[i].skillID = neutro_skill;
@@ -220,6 +220,167 @@ void SetMacrophages(int i)
 	g_Parts[partsNum].tbl_sizeM = sizeof(macro_LegSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Parts[partsNum].move_time = 0;	// 実行時間
 	partsNum++;
+	memberNum++;
+}
+
+//デバッグ用。
+void SetHelpeerT(int i)
+{
+	LoadModel(MODEL_HELPT, &g_Team[i].model);
+	// モデルのディフューズを保存しておく。色変え対応の為。
+	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
+	g_Team[i].use = TRUE;
+	g_Team[i].charID = ID_HelperT;
+	g_Team[i].charType = HighPlaces;
+	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
+	g_Team[i].size = HelperT_SIZE;	// 当たり判定の大きさ
+	g_Team[i].level = 1;
+	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
+	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
+	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
+	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	for (int k = 0; k < MAX_LEVEL; k++) {
+		g_Team[i].lifeMax[k] = Life[k];
+		g_Team[i].power[k] = Power[k];
+		g_Team[i].diffend[k] = Diffend[k];
+		g_Team[i].spMax[k] = spMax[k];
+		g_Team[i].cost[k] = cost[k];
+	}
+
+	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
+	g_Team[i].blockMax = 2;
+	g_Team[i].blockNum = 0;
+	g_Team[i].startNum = partsNum;
+	g_Team[i].partsNum = 1;
+	g_Team[i].atFrame = 20;
+	g_Team[i].setAble = FALSE;
+
+	g_Team[i].material = Neutrovalue;
+
+
+	//アニメーションデータのセット
+	g_Team[i].tbl_adrA = helperT_Attack;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeA = sizeof(helperT_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
+	g_Team[i].tbl_adrM = helperT_Standby;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeM = sizeof(helperT_Standby) / sizeof(INTERPOLATION_DATA);	//データサイズ
+
+																				//パーツ情報の初期化処理
+	LoadModel(MODEL_HELPTTOP, &g_Parts[partsNum].model);
+	// モデルのディフューズを保存しておく。色変え対応の為。
+	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+
+	// 階層アニメーション用のメンバー変数
+	g_Parts[partsNum].tbl_adrA = helperT_TopAt;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeA = sizeof(helperT_TopAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].tbl_adrM = helperT_TopSb;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeM = sizeof(helperT_TopSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].move_time = 0;	// 実行時間
+	partsNum++;
+
+	memberNum++;
+}
+
+//デバッグ用。
+void SetKillerT(int i)
+{
+	LoadModel(MODEL_KILLT, &g_Team[i].model);
+	// モデルのディフューズを保存しておく。色変え対応の為。
+	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
+	g_Team[i].use = TRUE;
+	g_Team[i].charID = ID_KillerT;
+	g_Team[i].charType = LowPlaces;
+	g_Team[i].scl = { 1.2f, 1.2f, 1.2f };
+	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
+	g_Team[i].level = 1;
+	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
+	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
+	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
+	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	for (int k = 0; k < MAX_LEVEL; k++) {
+		g_Team[i].lifeMax[k] = Life[k];
+		g_Team[i].power[k] = Power[k];
+		g_Team[i].diffend[k] = Diffend[k];
+		g_Team[i].spMax[k] = spMax[k];
+		g_Team[i].cost[k] = cost[k];
+	}
+
+	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
+	g_Team[i].blockMax = 2;
+	g_Team[i].blockNum = 0;
+	g_Team[i].startNum = partsNum;
+	g_Team[i].partsNum = 1;
+	g_Team[i].atFrame = 20;
+	g_Team[i].setAble = FALSE;
+
+	g_Team[i].material = Neutrovalue;
+
+
+	//アニメーションデータのセット
+	g_Team[i].tbl_adrA = killerT_Attack;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeA = sizeof(killerT_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
+	g_Team[i].tbl_adrM = killerT_Standby;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeM = sizeof(killerT_Standby) / sizeof(INTERPOLATION_DATA);	//データサイズ
+
+																				//パーツ情報の初期化処理
+	LoadModel(MODEL_KILLAXE, &g_Parts[partsNum].model);
+	// モデルのディフューズを保存しておく。色変え対応の為。
+	GetModelDiffuse(&g_Parts[partsNum].model, &g_Parts[partsNum].diffuse[0]);
+
+	// 階層アニメーション用のメンバー変数
+	g_Parts[partsNum].tbl_adrA = killerT_AxeAt;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeA = sizeof(killerT_AxeAt) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].tbl_adrM = killerT_AxeSb;	// アニメデータのテーブル先頭アドレス
+	g_Parts[partsNum].tbl_sizeM = sizeof(killerT_AxeSb) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
+	g_Parts[partsNum].move_time = 0;	// 実行時間
+	partsNum++;
+
+	memberNum++;
+}
+
+//デバッグ用。
+void SetNK(int i)
+{
+	LoadModel(MODEL_NK, &g_Team[i].model);
+	// モデルのディフューズを保存しておく。色変え対応の為。
+	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
+	g_Team[i].use = TRUE;
+	g_Team[i].charID = ID_NK;
+	g_Team[i].charType = HighPlaces;
+	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
+	g_Team[i].size = NK_SIZE;	// 当たり判定の大きさ
+	g_Team[i].level = 1;
+	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
+	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
+	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
+	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	for (int k = 0; k < MAX_LEVEL; k++) {
+		g_Team[i].lifeMax[k] = Life[k];
+		g_Team[i].power[k] = Power[k];
+		g_Team[i].diffend[k] = Diffend[k];
+		g_Team[i].spMax[k] = spMax[k];
+		g_Team[i].cost[k] = cost[k];
+	}
+
+	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
+	g_Team[i].blockMax = 2;
+	g_Team[i].blockNum = 0;
+	g_Team[i].startNum = partsNum;
+	g_Team[i].partsNum = 0;
+	g_Team[i].atFrame = 20;
+	g_Team[i].setAble = FALSE;
+
+	g_Team[i].material = Neutrovalue;
+
+
+	//アニメーションデータのセット
+	g_Team[i].tbl_adrA = NK_Attack;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeA = sizeof(NK_Attack) / sizeof(INTERPOLATION_DATA);	//データサイズ
+	g_Team[i].tbl_adrM = NK_Standby;	//先頭アドレスの指定なため、添え字はi
+	g_Team[i].tbl_sizeM = sizeof(NK_Standby) / sizeof(INTERPOLATION_DATA);	//データサイズ
+
 	memberNum++;
 }
 

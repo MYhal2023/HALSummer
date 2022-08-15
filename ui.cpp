@@ -18,7 +18,7 @@
 // マクロ定義
 //*****************************************************************************
 #define TEXTURE_MAX			(9)				// テクスチャの数
-#define CHAR_TEXTURE_MAX	(3)				// キャラテクスチャの数
+#define CHAR_TEXTURE_MAX	(6)				// キャラテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 
@@ -43,6 +43,9 @@ static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/macro.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
 };
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;

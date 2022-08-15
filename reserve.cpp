@@ -21,9 +21,9 @@
 // マクロ定義
 //*****************************************************************************
 #define TEXTURE_MAX			(11)				// テクスチャの数
-#define CH_TEXTURE_MAX		(3)				// キャラテクスチャの数
+#define CH_TEXTURE_MAX		(6)				// キャラテクスチャの数
 #define IC_TEXTURE_MAX		(9)				// キャラテクスチャの数
-#define CHAR_TEXTURE_MAX	(3)				// キャラテクスチャの数
+#define CHAR_TEXTURE_MAX	(6)				// キャラテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 #define BUTTON_SIZE			(106.0f)		// ボタンの縦幅サイズ。多分これくらい
@@ -56,6 +56,10 @@ static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/macro.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+
 };
 static char* g_IconTextureName[IC_TEXTURE_MAX] = {
 	"data/TEXTURE/icon_cost.png",

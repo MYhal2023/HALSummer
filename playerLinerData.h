@@ -69,3 +69,66 @@ static INTERPOLATION_DATA macro_LegSb[] = {	// pos, rot, scl, frame
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 15 },
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 15 },
 };
+
+////////////////////////////////////
+//////////////////////////
+////ヘルパーT攻撃モーションデータ
+//////////////////////////
+static INTERPOLATION_DATA helperT_Attack[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};
+static INTERPOLATION_DATA helperT_TopAt[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  5 },
+};
+//////////////////////////
+////ヘルパーT待機モーションデータ
+static INTERPOLATION_DATA helperT_Standby[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 10 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};
+static INTERPOLATION_DATA helperT_TopSb[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 15 },
+};
+////////////////////////////////////
+//////////////////////////
+////キラーT攻撃モーションデータ
+//////////////////////////
+static INTERPOLATION_DATA killerT_Attack[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};
+static INTERPOLATION_DATA killerT_AxeAt[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 40 },
+	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  20 },
+	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
+};
+//////////////////////////
+////キラーT待機モーションデータ
+static INTERPOLATION_DATA killerT_Standby[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 50 },
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 10 },
+	{ XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};
+static INTERPOLATION_DATA killerT_AxeSb[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 10.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 15 },
+};
+////////////////////////////////////
+//////////////////////////
+////NK細胞攻撃モーションデータ
+//////////////////////////
+static INTERPOLATION_DATA NK_Attack[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 60 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};
+//////////////////////////
+////NK細胞待機モーションデータ
+static INTERPOLATION_DATA NK_Standby[] = {	// pos, rot, scl, frame
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 50 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 10 },
+	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),  0 },
+};

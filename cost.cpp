@@ -16,7 +16,7 @@ void InitCost(void)
 	g_Cost.costMaxTime = 120;
 
 #ifdef _DEBUG
-	g_Cost.cost = 50;
+	g_Cost.cost = 90;
 #endif
 }
 

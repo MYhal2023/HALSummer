@@ -272,8 +272,8 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		{
 			if (parts[k].load != FALSE)continue;	//未使用配列までスキップ
 
-			parts[k].model = memberParts[k].model;
-			GetModelDiffuse(&memberParts[k].model, &memberParts[k].diffuse[0]);
+			parts[k].model = memberParts->model;
+			GetModelDiffuse(&memberParts->model, &memberParts->diffuse[0]);
 			parts[k].load = TRUE;
 			parts[k].use = TRUE;
 
@@ -282,12 +282,13 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 			parts[k].scl = { 1.0f, 1.0f, 1.0f };		// ポリゴンの大きさ(スケール)
 
 			// 階層アニメーション用のメンバー変数
-			parts[k].tbl_adrA = memberParts[k].tbl_adrA;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_sizeA = memberParts[k].tbl_sizeA;	// 登録したテーブルのレコード総数
-			parts[k].tbl_adrM = memberParts[k].tbl_adrM;	// アニメデータのテーブル先頭アドレス
-			parts[k].tbl_sizeM = memberParts[k].tbl_sizeM;	// 登録したテーブルのレコード総数
+			parts[k].tbl_adrA = memberParts->tbl_adrA;	// アニメデータのテーブル先頭アドレス
+			parts[k].tbl_sizeA = memberParts->tbl_sizeA;	// 登録したテーブルのレコード総数
+			parts[k].tbl_adrM = memberParts->tbl_adrM;	// アニメデータのテーブル先頭アドレス
+			parts[k].tbl_sizeM = memberParts->tbl_sizeM;	// 登録したテーブルのレコード総数
 			parts[k].move_time = 0.0f;			// 実行時間
 			parts[k].parent = &player[i];	// 自分が親ならNULL、自分が子供なら親のアドレス
+			memberParts++;
 		}
 		return;	//セットしきったので処理終了
 	}
