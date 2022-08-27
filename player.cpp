@@ -21,6 +21,7 @@
 #include "base.h"
 #include "fieldchip.h"
 #include "skill.h"
+#include "sound.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -226,15 +227,8 @@ void UpdatePlayer(void)
 			
 	}
 #ifdef _DEBUG
-	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[0].pos.z);
-	PrintDebugProc("プレイヤー座標X:%f\n", g_Player[1].pos.x);
-	PrintDebugProc("プレイヤー座標Z:%f\n", g_Player[1].pos.z);
-	PrintDebugProc("プレイヤuse:%d\n", g_Player[0].use);
-	PrintDebugProc("プレイヤー体力:%d\n", g_Player[0].life);
-	PrintDebugProc("プレイヤー体力:%d\n", g_Player[1].life);
-	PrintDebugProc("プレイヤー状態:%d\n", g_Player[1].state);
-	PrintDebugProc("プレイヤーターゲット:%d\n", g_Player[1].target);
-	PrintDebugProc("プレイヤーSP:%d\n", g_Player[0].skillPoint);
+	PrintDebugProc("プレイヤー:%d\n", g_Player[0].atFrameCount);
+	PrintDebugProc("プレイヤー:%d\n", g_Player[0].count);
 
 #endif
 }
@@ -487,6 +481,7 @@ void PlayerInterPoration(int i)
 		enemy[g_Player[i].target].life -= DamageFunc(g_Player[i].power, enemy[g_Player[i].target].diffend);
 		g_Player[i].atFrameCount = 0;
 		g_Player[i].attackUse = TRUE;
+		PlaySound(g_Player[i].attackSE);
 	}
 }
 
@@ -520,8 +515,9 @@ void BlockEnemy(void)
 			//ブロックするための前提条件は上へ、ブロックするための条件は下へ記載
 			if (g_Player[i].blockNum >= g_Player[i].blockMax ||
 				enemy[k].type != Proximity ||
-				enemy[k].use != TRUE)continue;
-			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 35.0f, 1.0f)) {
+				enemy[k].use != TRUE ||
+				enemy[k].blocked == TRUE)continue;
+			if (CollisionBC(g_Player[i].pos, enemy[k].pos, 30.0f, 1.0f)) {
 				//ここでエネミーを被ブロック状態へ変更する。攻撃先も自分へ
 				g_Player[i].blockNum++;
 				enemy[k].blocked = TRUE;
@@ -543,7 +539,7 @@ void CheckEnemyTarget(int i)
 	}
 	ENEMY *enemy = GetEnemy();
 	Base *base = GetBase();
-	float cmp = g_Player[i].size * 2.0f;
+	float cmp = 0.0f;
 	for (int k = 0; k < g_Player[i].count; k++)
 	{
 		if (g_Player[i].targetable[k] == 99)continue;
@@ -553,7 +549,7 @@ void CheckEnemyTarget(int i)
 			XMFLOAT3 countData;
 			XMStoreFloat3(&countData, v1);
 			float dist = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
-			if (dist < cmp)
+			if (dist < cmp || cmp <= 0.0f)//初めてここを通る場合は絶対入れるために初期値を参照
 			{
 				cmp = dist;
 				g_Player[i].target = g_Player[i].targetable[k];	//エネミーの配列番号で識別。ポインターで渡したいけど、お互いの構造体にポインターメンバ変数を入れると怒られる…
@@ -753,11 +749,12 @@ void PLAYER::StateCheck(int i)
 	{
 		g_Player[i].targetable[k] = 99;
 	}
+
 	for (int k = 0; k < MAX_ENEMY; k++)
 	{
 		if (enemy[k].use != TRUE)continue;
 		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る。ターゲット情報も保存
-		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size, 10.0f))
+		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size * 0.5f, g_Player[i].size * 0.5f))
 		{
 			g_Player[i].state = Deffend;
 			g_Player[i].targetable[g_Player[i].count] = k;

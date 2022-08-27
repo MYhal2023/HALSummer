@@ -21,6 +21,10 @@
 #define	MODEL_STREPT_HEAD		"data/MODEL/streptococcus_pyogenes_head.obj"			// 読み込むモデル名
 #define	MODEL_STREPT_NECK		"data/MODEL/streptococcus_pyogenes_neck.obj"			// 読み込むモデル名
 #define	MODEL_STREPT_TAIL		"data/MODEL/streptococcus_pyogenes_tail.obj"			// 読み込むモデル名
+#define	MODEL_RYOKU				"data/MODEL/ryokunoukin.obj"			// 読み込むモデル名
+#define	MODEL_RYOKU_LEFT		"data/MODEL/ryokunoukin_left.obj"			// 読み込むモデル名
+#define	MODEL_RYOKU_RIGHT		"data/MODEL/ryokunoukin_right.obj"			// 読み込むモデル名
+
 #define MAX_ENEMY		(15)					// エネミーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ
@@ -36,6 +40,13 @@ enum ENEMY_TYPE
 	Proximity,	//近接攻撃キャラ
 	Remote,		//遠距離攻撃キャラ
 	Abnormal,	//特殊なキャラ。ユニークボスとかに使う
+};
+
+enum ENEMY_ID
+{
+	Grape,
+	Strept,
+	Ryoku,
 };
 //*****************************************************************************
 // 構造体定義
@@ -63,6 +74,7 @@ public:
 	BOOL				blocked;		//ブロックされているか否か
 	int					type;
 	int					atInterval;
+	int					charID;
 };
 //プレイヤーの線形補間データを保存
 class Enemyliner
@@ -103,6 +115,8 @@ void DrawEnemy(void);
 
 ENEMY *GetEnemy(void);
 EnemyParts *GetEnemyParts(void);
+Unit *GetEnemyModel(void);
+Unit *GetPartsModel(void);
 //void SetGrape(float time);
 int StateCheck(int i);
 void SetEnemyTime(int i);

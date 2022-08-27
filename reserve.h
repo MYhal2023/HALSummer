@@ -46,6 +46,7 @@ enum PwButtonType
 enum Reserve_TEXTURE
 {
 	Button_bg,
+	Button_tx,
 	Reserve_bg,
 	re_number,
 	re_box,

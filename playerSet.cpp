@@ -264,6 +264,7 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].tbl_sizeM = member->tbl_sizeM;
 		player[i].move_time = 0.0f;
 		player[i].keyNum = g_PlayerSet.setPlayer;	//スキル発動のショトカの為に保存
+		player[i].attackSE = member->attackSE;
 		SetPlayerNum(1);
 
 		if (player[i].partsNum == 0)return;	//パーツがないならこれ以降の処理は不要

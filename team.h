@@ -23,4 +23,5 @@ void SetMacrophages(int i);
 void SetHelpeerT(int i);
 void SetKillerT(int i);
 void SetNK(int i);
+void SetKouen(int i);
 int GetMemberNum(void);

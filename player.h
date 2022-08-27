@@ -22,12 +22,15 @@
 #define	MODEL_HELPTTOP		"data/MODEL/thelpertop.obj"			// 読み込むモデル名
 #define	MODEL_KILLT			"data/MODEL/tkiller.obj"			// 読み込むモデル名
 #define	MODEL_KILLAXE		"data/MODEL/axe.obj"			// 読み込むモデル名
+#define	MODEL_KOUEN			"data/MODEL/kouenn.obj"			// 読み込むモデル名
+#define	MODEL_KOUEN_ARM001	"data/MODEL/kouenn_arm.obj"			// 読み込むモデル名
+#define	MODEL_KOUEN_ARM002	"data/MODEL/kouenn_arm2.obj"			// 読み込むモデル名
 
 #define MAX_PLAYER		(10)					// プレイヤーの数
 #define MAX_TARGET		(10)					// プレイヤーの数
 #define MAX_PLAYER_PARTS (MAX_PLAYER * 2)
 
-#define	PLAYER_SIZE		(50.0f)				// 当たり判定の大きさ
+#define	PLAYER_SIZE		(70.0f)				// 当たり判定の大きさ
 #define	HelperT_SIZE		(300.0f)				// 当たり判定の大きさ
 #define	NK_SIZE		(200.0f)				// 当たり判定の大きさ
 
@@ -70,7 +73,7 @@ public:
 	int				skillTimeMax;
 	BOOL			skillUse;		//スキルを使っているか否か
 	BOOL			skillAble;		//スキルを使えるか否か
-
+	int				attackSE;		//攻撃時のSE
 	void StateCheck(int i);			//配列の添え字を引数に持ってくる
 };
 

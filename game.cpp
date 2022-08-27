@@ -31,6 +31,7 @@
 #include "unitdata.h"
 #include "text_texture.h"
 #include "reserve.h"
+#include "result.h"
 
 
 //*****************************************************************************
@@ -125,13 +126,20 @@ void InitSystem(void)
 	InitPlayerSet();
 
 	InitUI();
+	InitReward();
+
+	//‚±‚±‚©‚ç“ú•Ê‚²‚Æ‚Ìİ’è‚ÉˆÚ‚éB‚±‚±‚ğŠÖ”‰»‚µ‚Äday–ˆ‚Ìİ’è‚ğ‘S‚Äì¬B
+	SetReward(0, 1000);
+	SetReward(1, 50);
+	SetReward(2, 1);
 	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
-	SetGrape(300.0f, 40, 5, 1);
-	SetGrape(1200.0f, 40, 5, 1);
-	SetStrept(8000.0f,20,5,1);
+	SetGrape(800.0f, 40, 5, 1);
+	SetRyoku(100.0f, 40, 5, 1);
+	SetStrept(1400.0f, 40, 5, 1);
 	XMFLOAT3 pos[1];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	InitBase(3, &pos[0], 1);
+	PlaySound(SOUND_LABEL_BGM_Battle1);
 }
 
 //=============================================================================

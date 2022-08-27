@@ -16,14 +16,15 @@
 #include "text_texture.h"
 #include "fade.h"
 #include "debugproc.h"
+#include "sound.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
 //*****************************************************************************
-#define TEXTURE_MAX			(11)				// ÉeÉNÉXÉ`ÉÉÇÃêî
-#define CH_TEXTURE_MAX		(6)				// ÉLÉÉÉâÉeÉNÉXÉ`ÉÉÇÃêî
-#define IC_TEXTURE_MAX		(9)				// ÉLÉÉÉâÉeÉNÉXÉ`ÉÉÇÃêî
-#define CHAR_TEXTURE_MAX	(6)				// ÉLÉÉÉâÉeÉNÉXÉ`ÉÉÇÃêî
+#define TEXTURE_MAX			(12)				// ÉeÉNÉXÉ`ÉÉÇÃêî
+#define CH_TEXTURE_MAX		(7)				// ÉLÉÉÉâÉeÉNÉXÉ`ÉÉÇÃêî
+#define IC_TEXTURE_MAX		(9)				// ÉAÉCÉRÉìÉeÉNÉXÉ`ÉÉÇÃêî
+#define CHAR_TEXTURE_MAX	(7)				// ÉLÉÉÉâÉeÉNÉXÉ`ÉÉÇÃêî
 #define NUMBER_SIZE			(30.0f)			// xï˚å¸ÇÃÉTÉCÉY
 #define COST_NUMBER_SIZE	(45.0f)			// xï˚å¸ÇÃÉTÉCÉY
 #define BUTTON_SIZE			(106.0f)		// É{É^ÉìÇÃècïùÉTÉCÉYÅBëΩï™Ç±ÇÍÇ≠ÇÁÇ¢
@@ -40,6 +41,7 @@ static ID3D11ShaderResourceView		*g_IconTexture[IC_TEXTURE_MAX] = { NULL };	// É
 
 static char* g_TextureName[TEXTURE_MAX] = {
 	"data/TEXTURE/var.png",
+	"data/TEXTURE/button.png",
 	"data/TEXTURE/title_bg.png",
 	"data/TEXTURE/number.png",
 	"data/TEXTURE/costbox.png",
@@ -56,7 +58,8 @@ static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/neutro.png",
 	"data/TEXTURE/macro.png",
-	"data/TEXTURE/var.png",
+	"data/TEXTURE/thelper.png",
+	"data/TEXTURE/tkiller.png",
 	"data/TEXTURE/var.png",
 	"data/TEXTURE/var.png",
 
@@ -337,7 +340,7 @@ Reserve *GetReserve(void) { return &g_Reserve; };
 void DrawButton(XMFLOAT4 color, float px, float py, float sx, float sy)
 {
 	// ÉeÉNÉXÉ`ÉÉê›íË
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Button_bg]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Button_tx]);
 
 	// ÇPñáÇÃÉ|ÉäÉSÉìÇÃí∏ì_Ç∆ÉeÉNÉXÉ`ÉÉç¿ïWÇê›íË
 	SetSpriteColor(g_VertexBuffer, px, py, sx, sy, 0.0f, 0.0f, 1.0f, 1.0f,
@@ -399,11 +402,14 @@ void DrawTextReserve(int k, float px, float py, float sx, float sy, XMFLOAT4 col
 
 void NormalRserveMode(void)
 {
-	if (cursol < GameStart && GetKeyboardTrigger(DIK_DOWN))
+	if (cursol < GameStart && GetKeyboardTrigger(DIK_DOWN)) {
 		cursol++;
-	if (cursol > 0 && GetKeyboardTrigger(DIK_UP))
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
+	if (cursol > 0 && GetKeyboardTrigger(DIK_UP)) {
 		cursol--;
-
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
 	//ëIëÇ≥ÇÍÇƒÇ¢ÇÈÉ{É^ÉìÇã≠í≤ï\é¶Ç…
 	for (int i = 0; i < BUTTON_MAX; i++)
 	{
@@ -415,6 +421,7 @@ void NormalRserveMode(void)
 
 	//åàíËÉ{É^ÉìÇâüÇµÇΩÇÁÇªÇÍÇ…âûÇ∂ÇƒâÊñ ëJà⁄
 	if (GetKeyboardTrigger(DIK_RETURN)) {
+		PlaySound(SOUND_LABEL_SE_Decision);
 		switch (cursol)
 		{
 		case UnitPowerUp:
@@ -487,27 +494,36 @@ void NormalRserveModeDraw(void)
 void UnitPowerUpMode(void)
 {
 	//Ç‹Ç∏ã≠âªÉÇÅ[ÉhÇÃëÄçÏÇóDêÊÇµÇƒèàóù
-	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.pwMode && cursolPw > 0)cursolPw--;
-	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.pwMode && cursolPw <= 0)cursolPw++;
-
+	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.pwMode && cursolPw > 0) { 
+		cursolPw--;
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
+	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.pwMode && cursolPw <= 0) {
+		cursolPw++;
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
 	if ((GetKeyboardTrigger(DIK_RETURN)|| GetKeyboardTrigger(DIK_Z)) && !g_Reserve.pwMode)
 	{
 		g_Reserve.pwMode = TRUE;
+		PlaySound(SOUND_LABEL_SE_Decision);
 	}
 	else if (GetKeyboardTrigger(DIK_C) && !g_Reserve.pwMode)
 	{
 		g_Reserve.mode = 99;
+		PlaySound(SOUND_LABEL_SE_Cancel);
 	}
 	else if (GetKeyboardTrigger(DIK_C))
 	{
 		g_Reserve.pwMode = FALSE;
 		cursolPw = 0;
+		PlaySound(SOUND_LABEL_SE_Cancel);
 	}
 	else if ((GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_Z) )&& g_Reserve.pwMode)
 	{
 		switch (cursolPw) {
 		case 0:
 			g_Reserve.pwMode = FALSE;
+			PlaySound(SOUND_LABEL_SE_Cancel);
 			break;
 		case 1:
 			PlayerStatus *member = GetTeam();
@@ -515,6 +531,7 @@ void UnitPowerUpMode(void)
 			{
 				ReduceMaterial(&member[g_Reserve.selectPw]);	//ëfçﬁó Çå∏ÇÁÇ∑
 				member[g_Reserve.selectPw].level++;	//ÉåÉxÉãÉAÉbÉvÅI
+				PlaySound(SOUND_LABEL_SE_PowerUp);
 			}
 			break;
 		}
@@ -525,15 +542,18 @@ void UnitPowerUpMode(void)
 	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
 	{
 		g_Reserve.selectPw--;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 	else if (GetKeyboardTrigger(DIK_RIGHT) && g_Reserve.selectPw < GetMemberNum() - 1)
 	{
 		g_Reserve.selectPw++;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 
 	else if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw >4)
 	{
 		g_Reserve.selectPw -= ROW_NUM;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.selectPw < GetMemberNum() - 1)
 	{
@@ -541,6 +561,7 @@ void UnitPowerUpMode(void)
 			g_Reserve.selectPw = GetMemberNum() - 1;
 		else
 			g_Reserve.selectPw += ROW_NUM;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 }
 
@@ -549,15 +570,18 @@ void UnitConfirmMode(void)
 	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
 	{
 		g_Reserve.selectPw--;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 	else if (GetKeyboardTrigger(DIK_RIGHT) && g_Reserve.selectPw < GetMemberNum() - 1)
 	{
 		g_Reserve.selectPw++;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 
 	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw > 4)
 	{
 		g_Reserve.selectPw -= ROW_NUM;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.selectPw < GetMemberNum() - 1)
 	{
@@ -565,6 +589,7 @@ void UnitConfirmMode(void)
 			g_Reserve.selectPw = GetMemberNum() - 1;
 		else
 			g_Reserve.selectPw += ROW_NUM;
+		PlaySound(SOUND_LABEL_SE_Select);
 	}
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
@@ -574,6 +599,7 @@ void UnitConfirmMode(void)
 	if (GetKeyboardTrigger(DIK_C))
 	{
 		g_Reserve.mode = 99;
+		PlaySound(SOUND_LABEL_SE_Cancel);
 	}
 }
 
@@ -667,7 +693,7 @@ void DrawCharStatus(XMFLOAT2 pos,int k)
 	//â∫ínÇÃògÇï`âÊ
 	const float sizeX = SCREEN_WIDTH * 0.75f;
 	const float sizeY = SCREEN_HEIGHT * 0.70f;
-	XMFLOAT4 color = { 0.5f, 0.5f, 0.5f, 1.0f };
+	XMFLOAT4 color = { 0.4f, 0.4f, 1.0f, 1.0f };
 	DrawButton(color, pos.x, pos.y, sizeX, sizeY);
 
 	//ÉLÉÉÉââÊëúï`âÊ
@@ -818,7 +844,7 @@ void DrawNeedMaterial(XMFLOAT2 pos, float size, int no)
 {
 	XMFLOAT2 texSize = { size, size };
 	//Ç∆ÇËÇ†Ç¶Ç∏â∫ínï`âÊ
-	XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DrawButton(color, pos.x, pos.y, texSize.x, texSize.y);
 
 	//ÉeÉNÉXÉ`ÉÉâÊëúÇÃê›íË

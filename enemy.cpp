@@ -29,7 +29,8 @@
 #define	VALUE_MOVE			(2.0f)							// 移動量
 #define	VALUE_AT_MOVE		(4.0f)							// 移動量
 #define	VALUE_ROTATE		(XM_PI * 0.02f)					// 回転量
-
+#define ENEMY_VAR			(3)
+#define ENEMY_PARTS_VAR			(ENEMY_VAR * 3)
 #define ENEMY_SHADOW_SIZE	(1.0f)							// 影の大きさ
 #define ENEMY_OFFSET_Y		(0.0f)							// プレイヤーの足元をあわせる
 #define ENEMY_OFFSET_Z		(-300.0f)							// プレイヤーの足元をあわせる
@@ -56,7 +57,8 @@ static PLAYER_VAR	g_EnemyVar;
 static ENEMY		g_Enemy[MAX_ENEMY];						// エネミー
 static Enemyliner   g_Enemyline[MAX_PLAYER];
 static EnemyParts	g_Parts[MAX_ENEMY_PARTS];					// エネミーのパーツ。余裕をもってエネミー×2倍の数用意
-
+static Unit			g_EnemyModel[ENEMY_VAR];
+static Unit			g_EnemyPartsModel[ENEMY_PARTS_VAR];
 static BOOL			g_Load = FALSE;
 static int			atCount;
 static int			enemyNum = 0;		//何体のエネミーがいるか
@@ -89,13 +91,66 @@ HRESULT InitEnemy(void)
 	g_EnemyVar.rot = { XM_PI * -0.5f, 0.0f, 0.0f };
 	g_EnemyVar.scl = { 1.0f, 1.0f, 1.0f };
 	g_EnemyVar.load = TRUE;
+	int num = 0;
+	int p_num = 0;
+	{//ブドウ球菌モデル読み込み
+		LoadModel(MODEL_GRAPE, &g_EnemyModel[num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyModel[num].model, &g_Enemy[num].diffuse[0]);
+		num++;
+
+		LoadModel(MODEL_GRAPE_PARTS001, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_Parts[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_GRAPE_PARTS002, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_Parts[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_GRAPE_PARTS003, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_Parts[p_num].diffuse[0]);
+		p_num++;
+	}
+	{//A群β溶連菌モデル読み込み
+		LoadModel(MODEL_STREPT, &g_EnemyModel[num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_Enemy[num].model, &g_EnemyModel[num].diffuse[0]);
+		num++;
+
+		LoadModel(MODEL_STREPT_HEAD, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_STREPT_NECK, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_STREPT_TAIL, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+	}
+	{//緑膿菌モデル読み込み
+		LoadModel(MODEL_RYOKU, &g_EnemyModel[num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_Enemy[num].model, &g_EnemyModel[num].diffuse[0]);
+		num++;
+
+		LoadModel(MODEL_RYOKU_LEFT, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_RYOKU_RIGHT, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+	}
+
+
 
 	for (int i = 0; i < MAX_ENEMY; i++)
 	{
-		//LoadModel(MODEL_GRAPE, &g_Enemy[i].model);
-		//// モデルのディフューズを保存しておく。色変え対応の為。
-		//GetModelDiffuse(&g_Enemy[i].model, &g_Enemy[i].diffuse[0]);
-
 		g_Enemy[i].load = FALSE;
 
 		g_Enemy[i].pos = { -100.0f, ENEMY_OFFSET_Y, 0.0f };
@@ -181,6 +236,16 @@ void UninitEnemy(void)
 			UnloadModel(&g_Parts[i].model);
 			g_Parts[i].load = FALSE;
 		}
+	}
+	for (int i = 0; i < ENEMY_VAR; i++)
+	{
+		UnloadModel(&g_EnemyModel[i].model);
+		g_EnemyModel[i].load = FALSE;
+	}
+	for (int i = 0; i < ENEMY_PARTS_VAR; i++)
+	{
+			UnloadModel(&g_EnemyPartsModel[i].model);
+			g_EnemyPartsModel[i].load = FALSE;
 	}
 	g_Load = FALSE;
 }
@@ -283,10 +348,20 @@ void DrawEnemy(void)
 		XMStoreFloat4x4(&g_Enemy[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		DrawModel(&g_Enemy[i].model);
-
+		switch (g_Enemy[i].charID) {
+		case Grape:
+			DrawModel(&g_EnemyModel[Grape].model);
+			break;
+		case Strept:
+			DrawModel(&g_EnemyModel[Strept].model);
+			break;
+		case Ryoku:
+			DrawModel(&g_EnemyModel[Ryoku].model);
+			break;
+		}
 		if (g_Enemy[i].partsNum == 0)continue;
 
+		int h = 0;
 		// パーツの階層アニメーション
 		for (int k = g_Enemy[i].startNum; k < g_Enemy[i].startNum + g_Enemy[i].partsNum; k++)
 		{
@@ -321,8 +396,18 @@ void DrawEnemy(void)
 			SetWorldMatrix(&mtxWorld);
 
 			// モデル描画
-			DrawModel(&g_Parts[k].model);
-
+			switch (g_Enemy[i].charID) {
+			case Grape:
+				DrawModel(&g_EnemyPartsModel[Grape + h].model);
+				break;
+			case Strept:
+				DrawModel(&g_EnemyPartsModel[3 + h].model);
+				break;
+			case Ryoku:
+				DrawModel(&g_EnemyPartsModel[6 + h].model);
+				break;
+			}
+			h++;
 		}
 
 	}
@@ -347,6 +432,14 @@ EnemyParts *GetEnemyParts(void)
 {
 	return &g_Parts[0];
 }
+Unit *GetEnemyModel(void)
+{
+	return &g_EnemyModel[0];
+}
+Unit *GetPartsModel(void)
+{
+	return &g_EnemyPartsModel[0];
+}
 
 //添え字を引数に持ってくる
 void SetEnemyTime(int i)
@@ -356,12 +449,28 @@ void SetEnemyTime(int i)
 		if (g_Enemy[i].start <= 0.0f)continue;	//既に出現済みのエネミーはここで弾く
 
 		g_Enemy[i].start -= 1.0f;
-		if (g_Enemy[i].start <= 0.0f)//エネミーを出現させる
+		if (g_Enemy[i].start <= 180.0f && g_Enemy[i].start > 0.0f && !g_Enemy[i].use)//エネミーを出現させる
 		{
 			g_Enemy[i].use = TRUE;
-			FadeCharacter(&g_Enemy[i].model, 0);
-			for (int k = g_Enemy[i].startNum; k < g_Enemy[i].startNum + g_Enemy[i].partsNum; k++)
-				FadeCharacter(&g_Parts[k].model, 0);
+			int tbl = g_Enemy[i].nowTbl;
+			XMVECTOR v1 = XMLoadFloat3(&moveTbl[tbl + 1].start) - XMLoadFloat3(&moveTbl[tbl].start);
+			XMVECTOR nor = XMVector3Normalize(v1);
+			XMFLOAT3 angle;
+			XMStoreFloat3(&angle, nor);
+			float yangle = atan2f(angle.x, angle.z);
+			for (int d = 0; d < g_Enemy[i].tbl_sizeM; d++)
+			{
+				float buffx = g_Enemy[i].tbl_adrM[d].pos.x;
+				float buffz = g_Enemy[i].tbl_adrM[d].pos.z;
+				g_Enemy[i].tbl_adrM[d].pos.x = buffx * cosf(yangle - g_Enemy[i].rot.y) + buffz * sinf(yangle - g_Enemy[i].rot.y);
+				g_Enemy[i].tbl_adrM[d].pos.z = buffz * cosf(yangle - g_Enemy[i].rot.y) + buffx * -sinf(yangle - g_Enemy[i].rot.y);
+			}
+			g_Enemy[i].rot.y = yangle;
+			g_Enemy[i].spd *= -1.0f;
+		}
+		else if (g_Enemy[i].start <= 0.0f)
+		{
+			g_Enemy[i].spd *= -1.0f;
 		}
 	}
 }
@@ -543,6 +652,8 @@ void EnemyMove(int i)
 	//近接キャラでかつブロック中なら移動しない
 	if (g_Enemy[i].type == Proximity && g_Enemy[i].blocked)
 		return;
+	//速度がマイナスなら移動しない
+	if (g_Enemy[i].spd < 0.0f)return;
 
 	int tbl = g_Enemy[i].nowTbl;
 	//エネミーの移動速度を元に座標更新
@@ -707,7 +818,7 @@ void DrawEnemyLife(void)
 	//hpバーを設置
 	for (int i = 0; i < MAX_ENEMY; i++)
 	{
-		if (g_Enemy[i].use != TRUE)continue;	//使われてないプレイヤーはスルー
+		if (g_Enemy[i].use != TRUE || g_Enemy[i].lifeMax == g_Enemy[i].life)continue;	//使われてないか体力が減ってないならスルー
 
 		for (int k = 0; k < 2; k++)//最初に最大値体力を、次に現体力を表示
 		{

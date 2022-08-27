@@ -48,25 +48,23 @@ enum
 // サウンドファイル
 enum 
 {
-	SOUND_LABEL_SE_HeartBeat,		// SE
-	SOUND_LABEL_SE_LighterON,		// SE
-	SOUND_LABEL_SE_MatchON,			// SE
-	SOUND_LABEL_SE_Breath001,			// SE
-	SOUND_LABEL_SE_Breath002,			// SE
-	SOUND_LABEL_SE_Breath003,			// SE
-	SOUND_LABEL_SE_EnemyVoice,			// SE
-	SOUND_LABEL_SE_GetItem,			// SE
-	SOUND_LABEL_SE_WoodWalk,			// SE
-	SOUND_LABEL_SE_Walk_sound,			// SE
-	SOUND_LABEL_SE_Cursol_Move,			// SE
-	SOUND_LABEL_SE_Cursol_On,			// SE
-	SOUND_LABEL_SE_Door_Close,			// SE
-	SOUND_LABEL_SE_Door_Open,			// SE
-	SOUND_LABEL_SE_Dash,			// SE
+	SOUND_LABEL_SE_Cancel,		// SE
+	SOUND_LABEL_SE_Decision,		// SE
+	SOUND_LABEL_SE_PowerUp,			// SE
+	SOUND_LABEL_SE_Select,			// SE
+	SOUND_LABEL_SE_Cannon,			// SE
+	SOUND_LABEL_SE_Hit,			// SE
+	SOUND_LABEL_SE_HitStrong,			// SE
+	SOUND_LABEL_SE_Kick,			// SE
+	SOUND_LABEL_SE_KickStrong,			// SE
+	SOUND_LABEL_SE_Panch,			// SE
+	SOUND_LABEL_SE_PanchStrong,			// SE
 	SOUND_LABEL_BGM_Normal,			// BGM
-	SOUND_LABEL_BGM_Fear,			// BGM
-	SOUND_LABEL_BGM_GameOver,			// BGM
-	SOUND_LABEL_BGM_HorrorZone,			// BGM
+	SOUND_LABEL_BGM_Normal2,			// BGM
+	SOUND_LABEL_BGM_Battle1,			// BGM
+	SOUND_LABEL_BGM_Battle2,			// BGM
+	SOUND_LABEL_BGM_Win,			// BGM
+	SOUND_LABEL_BGM_Lose,			// BGM
 	SOUND_LABEL_MAX,
 };
 

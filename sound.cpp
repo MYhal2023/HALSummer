@@ -69,25 +69,23 @@ float g_RMSLevels[2];			//RMSレベルの受信場所
 // 各音素材のパラメータ
 SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 {
-	{ (char*)"data/SE/HeartBeat.wav", 0 },		// 心拍音
-	{ (char*)"data/SE/Lighter_ON.wav", 0 },		// ライターオン
-	{ (char*)"data/SE/Match_ON.wav", 0 },		// マッチオン
-	{ (char*)"data/SE/Breath_001.wav", 0 },		// 激しい息遣い
-	{ (char*)"data/SE/Breath_002.wav", 0 },		// 軽い息遣い
-	{ (char*)"data/SE/Breath_003.wav", 0 },		// 過呼吸
-	{ (char*)"data/SE/EnemyVoice.wav", 0 },		// 笑い声
-	{ (char*)"data/SE/GetItem.wav", 0 },		// 高音SE
-	{ (char*)"data/SE/WoodWalk.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/Walk_sound.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/CursorMove.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/Cursor_ON.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/Don_t_open_door.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/Unlock.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/SE/Dash.wav", 0 },		// 木のきしむ足音
-	{ (char*)"data/BGM/Normal.wav", 1 },		// 探索時通常bgm
-	{ (char*)"data/BGM/Fear.wav", 1 },			// 被発見時bgm
-	{ (char*)"data/BGM/GameOver.wav", 0 },			// 被発見時bgm
-	{ (char*)"data/BGM/HorrorZone.wav", 1 },			// 被発見時bgm
+	{ (char*)"data/SE/cancel.wav", 0 },		// キャンセル音
+	{ (char*)"data/SE/decision.wav", 0 },		// 決定音
+	{ (char*)"data/SE/powerup.wav", 0 },		// levelup音
+	{ (char*)"data/SE/select.wav", 0 },		// cursol select音
+	{ (char*)"data/SE/cannon.wav", 0 },		// cannon音
+	{ (char*)"data/SE/hit2.wav", 0 },		// hit音
+	{ (char*)"data/SE/hit3.wav", 0 },		// hit-strong音
+	{ (char*)"data/SE/kick1.wav", 0 },		// kick音
+	{ (char*)"data/SE/kick2.wav", 0 },		// kick-strong音
+	{ (char*)"data/SE/panch1.wav", 0 },		// panch音
+	{ (char*)"data/SE/panch2.wav", 0 },		// panch-strong音
+	{ (char*)"data/BGM/BGM001.wav", 1 },		// panch-strong音
+	{ (char*)"data/BGM/BGM002.wav", 1 },		// panch-strong音
+	{ (char*)"data/BGM/BGM101.wav", 1 },		// panch-strong音
+	{ (char*)"data/BGM/BGM102.wav", 1 },		// panch-strong音
+	{ (char*)"data/BGM/BGM201.wav", 1 },		// panch-strong音
+	{ (char*)"data/BGM/BGM202.wav", 1 },		// panch-strong音
 };
 
 //Fade関連

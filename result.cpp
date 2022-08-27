@@ -15,6 +15,7 @@
 #include "fade.h"
 #include "reserve.h"
 #include "playerSet.h"
+#include "sound.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -48,6 +49,8 @@ static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 static Result g_Result;
 static Reward g_Reward;
 static BOOL g_Load = FALSE;
+static BOOL once = FALSE;
+static BOOL bgm = FALSE;
 static float alpha[10];
 HRESULT InitResult(void)
 {
@@ -64,7 +67,7 @@ HRESULT InitResult(void)
 			&g_Texture[i],
 			NULL);
 	}
-	for (int i = 0; i < TEXTURE_MAX; i++)
+	for (int i = 0; i < CH_TEXTURE_MAX; i++)
 	{
 		g_CharTexture[i] = NULL;
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
@@ -98,6 +101,8 @@ HRESULT InitResult(void)
 	}
 	for (int i = 0; i < 10; i++) { alpha[i] = 0.0f; }
 	g_Load = TRUE;
+	once = FALSE;
+	bgm = FALSE;
 	return S_OK;
 }
 
@@ -122,6 +127,15 @@ void UninitResult(void)
 		{
 			g_Texture[i]->Release();
 			g_Texture[i] = NULL;
+		}
+	}
+	// テクスチャの解放
+	for (int i = 0; i < CH_TEXTURE_MAX; i++)
+	{
+		if (g_CharTexture[i])
+		{
+			g_CharTexture[i]->Release();
+			g_CharTexture[i] = NULL;
 		}
 	}
 
@@ -184,35 +198,48 @@ void DrawResult(void)
 		GetDeviceContext()->Draw(4, 0);
 	}
 
-	// 報告書を描画
-	{
-		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Report]);
-		const float x = 1754 * 0.4f;
-		const float y = 2480 * 0.4f;
-		// １枚のポリゴンの頂点とテクスチャ座標を設定
-		SetSpriteColor(g_VertexBuffer, SCREEN_CENTER_X, SCREEN_CENTER_Y, x, y, 0.0f, 0.0f, 1.0f, 1.0f,
-			XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	//// 報告書を描画
+	//{
+	//	// テクスチャ設定
+	//	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Report]);
+	//	const float x = 1754 * 0.4f;
+	//	const float y = 2480 * 0.4f;
+	//	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	//	SetSpriteColor(g_VertexBuffer, SCREEN_CENTER_X, SCREEN_CENTER_Y, x, y, 0.0f, 0.0f, 1.0f, 1.0f,
+	//		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
-		// ポリゴン描画
-		GetDeviceContext()->Draw(4, 0);
-	}
+	//	// ポリゴン描画
+	//	GetDeviceContext()->Draw(4, 0);
+	//}
 
 
 }
 
 void WinResult(void)
 {
-	if (GetKeyboardTrigger(DIK_RETURN))
+	if (!bgm) { 
+		PlaySound(SOUND_LABEL_BGM_Win);
+		bgm = TRUE;
+	}
+	if (GetKeyboardTrigger(DIK_RETURN) && !once)
 	{
+		Reserve* rs = GetReserve();
+		rs->day++;
+		IncreaseReward(&g_Reward);
+		once = TRUE;
 		SetFade(FADE_OUT, MODE_RESERVE);	//現状ループするように
 	}
 }
 
 void LoseResult(void)
 {
-	if (GetKeyboardTrigger(DIK_RETURN))
+	if (!bgm) {
+		PlaySound(SOUND_LABEL_BGM_Lose);
+		bgm = TRUE;
+	}
+	if (GetKeyboardTrigger(DIK_RETURN) && !once)
 	{
+		once = TRUE;
 		SetFade(FADE_OUT, MODE_RESERVE);	//現状ループするように
 	}
 }
@@ -249,6 +276,7 @@ void SetReward(int id, int value)
 	g_Reward.value[g_Reward.num] = value;
 	g_Reward.num++;
 }
+
 void IncreaseReward(Reward *reward)
 {
 	Reserve *reserve = GetReserve();

@@ -250,6 +250,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	SetHelpeerT(2);
 	SetKillerT(3);
 	SetNK(4);
+	SetKouen(5);
 #endif
 	// 最初のモードをセット
 	SetMode(g_Mode);	// ここはSetModeのままで！
@@ -469,6 +470,7 @@ void SetMode(int mode)
 	case MODE_RESERVE:
 		// 育成画面の初期化
 		InitReserve();
+		PlaySound(SOUND_LABEL_BGM_Normal2);
 		break;
 
 	case MODE_GAME:

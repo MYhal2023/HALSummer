@@ -23,6 +23,7 @@ enum PLAYER_CHAR
 	ID_HelperT,
 	ID_KillerT,
 	ID_NK,
+	ID_Kouen,
 };
 
 //素材ID
@@ -82,6 +83,7 @@ public:
 	int				charID;			//他のデータに渡すときのキャラ判別用変数
 	int				skillID;
 	int				charType;		//近接キャラか遠距離キャラか。CHIP_TYPEと同じ数字を入れる
+	int				attackSE;		//近接キャラか遠距離キャラか。CHIP_TYPEと同じ数字を入れる
 	BOOL			setAble;
 	BOOL			use;			//そもそもこの枠を使っているのか
 };
