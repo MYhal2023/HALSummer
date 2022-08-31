@@ -269,7 +269,7 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		//パーツの初期化処理
 		for (int k = member->startNum; k < member->startNum + member->partsNum; k++)
 		{
-			if (parts[k].load != FALSE)continue;	//未使用配列までスキップ
+			if (parts[k].use != FALSE)continue;	//未使用配列までスキップ
 
 			parts[k].model = memberParts->model;
 			GetModelDiffuse(&memberParts->model, &memberParts->diffuse[0]);
@@ -345,6 +345,7 @@ void CheckSetChar(void)
 {
 	PLAYER *player = GetPlayer();
 	PlayerParts *parts = GetPlayerParts();
+	//スキル発動
 	if (g_PlayerSet.setCheckMode &&
 		player[g_PlayerSet.setPlayer].skillAble &&
 		GetKeyboardTrigger(DIK_RETURN))
@@ -354,6 +355,7 @@ void CheckSetChar(void)
 		g_PlayerSet.setCheckMode = FALSE;
 		g_PlayerSet.setPlayer = 99;
 	}
+	//やっぱやーめた
 	else if (g_PlayerSet.setCheckMode &&
 		player[g_PlayerSet.setPlayer].skillAble &&
 		GetKeyboardTrigger(DIK_C))
@@ -367,6 +369,27 @@ void CheckSetChar(void)
 		int z = (int)(player[g_PlayerSet.setPlayer].pos.z / CHIP_SIZE);
 		SetMapChipUse(FALSE, z, x);
 		IncreaseCost(player[g_PlayerSet.setPlayer].cost / 2);
+	}
+	//キャラを除去
+	else if (g_PlayerSet.setCheckMode &&
+		GetKeyboardTrigger(DIK_X))
+	{
+		int i = g_PlayerSet.setPlayer;
+		player[i].use = FALSE;
+		for (int k = player[i].startNum; k < player[i].startNum + player[i].partsNum; k++)
+		{
+			parts[k].use = FALSE;
+		}
+		int x = (int)(player[i].pos.x / CHIP_SIZE);
+		int z = (int)(player[i].pos.z / CHIP_SIZE);
+		SetMapChipUse(FALSE, z, x);
+		g_PlayerSet.use[player[i].keyNum] = TRUE;	//セット可状態にする
+		g_PlayerSet.setMode = FALSE;	//セットモード解除
+		IncreaseCost(player[i].cost / 2);
+		SetSlowMode(FALSE);
+		g_PlayerSet.setPlayer = 99;
+		player[i].keyNum = 99;
+		g_PlayerSet.setCheckMode = FALSE;
 	}
 }
 
