@@ -45,8 +45,8 @@ static char* g_CharTextureName[] = {
 	"data/TEXTURE/macro.png",
 	"data/TEXTURE/thelper.png",
 	"data/TEXTURE/tkiller.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
+	"data/TEXTURE/NK.png",
+	"data/TEXTURE/kouen.png",
 };
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;

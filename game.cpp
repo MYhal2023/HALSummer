@@ -134,8 +134,13 @@ void InitSystem(void)
 	SetReward(2, 1);
 	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
 	SetGrape(800.0f, 40, 5, 1);
+	SetGrape(900.0f, 40, 5, 1);
+	SetGrape(1000.0f, 40, 5, 1);
 	SetRyoku(100.0f, 40, 5, 1);
 	SetStrept(1400.0f, 40, 5, 1);
+	SetStrept(9000.0f, 40, 5, 1);
+	SetStrept(9000.0f, 40, 5, 1);
+	SetStrept(9000.0f, 40, 5, 1);
 	XMFLOAT3 pos[1];
 	pos[0] = { 25.0f, 0.0f, 100.0f };
 	InitBase(3, &pos[0], 1);
@@ -150,10 +155,7 @@ void UninitGame(void)
 	// âeÇÃèIóπèàóù
 	UninitShadow();
 
-	UninitPlayer();
-
 	UninitOver();
-	//UninitTeam();
 
 	UninitEnemy();
 

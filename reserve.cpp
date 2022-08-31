@@ -60,8 +60,8 @@ static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/macro.png",
 	"data/TEXTURE/thelper.png",
 	"data/TEXTURE/tkiller.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
+	"data/TEXTURE/NK.png",
+	"data/TEXTURE/kouen.png",
 
 };
 static char* g_IconTextureName[IC_TEXTURE_MAX] = {

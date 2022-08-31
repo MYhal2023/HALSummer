@@ -62,7 +62,7 @@ static PlayerParts	g_Parts[MAX_PLAYER_PARTS];					// プレイヤー
 static BOOL			g_Load = FALSE;
 static int			playerNum = 0;
 static int			partsNum = 0;
-// 階層アニメーションデータ
+static int			atNum[MAX_PLAYER];
 static char name[2][64];
 
 //=============================================================================
@@ -97,9 +97,6 @@ HRESULT InitPlayer(void)
 
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
-		//LoadModel(MODEL_PLAYER, &g_Player[i].model);
-		//// モデルのディフューズを保存しておく。色変え対応の為。
-		//GetModelDiffuse(&g_Player[i].model, &g_Player[i].diffuse[0]);
 		g_Player[i].load = FALSE;
 		g_Player[i].pos = { 0.0f, PLAYER_OFFSET_Y, 0.0f };
 		g_Player[i].rot = { 0.0f, -XM_PI * 0.5f, 0.0f };
@@ -133,6 +130,8 @@ HRESULT InitPlayer(void)
 	g_Load = TRUE;
 	playerNum = 0;
 	partsNum = 0;
+	for (int i = 0; i < MAX_PLAYER; i++)
+		atNum[i] = 0;
 	return S_OK;
 }
 
@@ -184,7 +183,7 @@ void UpdatePlayer(void)
 	for (int i = 0; i < MAX_PLAYER; i++)
 	{
 		if (g_Player[i].use != TRUE)continue;
-
+		//全キャラ共通処理
 		//体力が無くなったキャラの処理。消去する。そこのマップチップを開ける
 		if (g_Player[i].life <= 0 && g_Player[i].use) {
 			g_Player[i].use = FALSE;
@@ -198,39 +197,128 @@ void UpdatePlayer(void)
 			continue;
 		}
 		IncreaseSP(i);
-		int oldState = g_Player[i].state;
-		g_Player[i].StateCheck(i);
-		if (oldState != g_Player[i].state)
+		//キャラ別処理
+		switch (g_Player[i].skillID)	//攻撃方法等はスキルIDで判別。ここら辺はコードぐちゃぐちゃなので注意
 		{
-			g_Player[i].move_time = 0.0f;
-			g_Player[i].atCount = 0;
-			g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
-			g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
-			g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
-			for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
-				g_Parts[k].move_time = 0.0f;
-		}
-		CheckEnemyTarget(i);
-		switch (g_Player[i].state)
-		{
-		case Standby:
-			PlayerStandLiner(i);
+		case neutro_skill:
+		case macro_skill:
+		case killerT_skill:
+		case NK_skill:
+		case kouen_skill:
+			AttackChar(i);
 			break;
+		case helperT_skill:
+			HealChar(i);
+			break;
+		}
 
-		case Deffend:
-			PlayerInterPoration(i);
-			break;
-		case Skill:
-			PlayerSkill(i);
-			break;
-		}
-			
 	}
 #ifdef _DEBUG
 	PrintDebugProc("プレイヤー:%d\n", g_Player[0].atFrameCount);
-	PrintDebugProc("プレイヤー:%d\n", g_Player[0].count);
 
 #endif
+}
+
+void AttackChar(int i)
+{
+	int oldState = g_Player[i].state;
+	g_Player[i].StateCheck(i);
+	//①ステート遷移
+	if (oldState != g_Player[i].state)
+	{
+		g_Player[i].move_time = 0.0f;
+		g_Player[i].atCount = 0;
+		g_Player[i].attackUse = FALSE;
+		atNum[i] = 0;
+		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
+		for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+			g_Parts[k].move_time = 0.0f;
+	}
+	CheckEnemyTarget(i);
+	//スキル使用中ならステートを上書き
+	int atState;
+	if (g_Player[i].skillUse) {
+		atState = g_Player[i].state;
+		g_Player[i].state = Skill;
+	}
+	switch (g_Player[i].state)
+	{
+	case Standby:
+		PlayerStandLiner(i);
+		break;
+
+	case Deffend:
+		PlayerInterPoration(i);
+		break;
+	case Skill:
+		PlayerSkill(i);
+		break;
+	}
+	if (g_Player[i].skillUse) {
+		g_Player[i].state = atState;
+	}
+
+}
+
+void HealChar(int i)
+{
+	int oldState = g_Player[i].state;
+	if (g_Player[i].state != Deffend) {
+		g_Player[i].state = Standby;	//とりあえず待機状態にセット
+		g_Player[i].count = 0;
+		for (int k = 0; k < MAX_TARGET; k++)
+		{
+			g_Player[i].targetable[k] = 99;
+		}
+
+		for (int k = 0; k < MAX_PLAYER; k++)
+		{
+			if (g_Player[k].use != TRUE || g_Player[k].life >= g_Player[k].lifeMax)continue;
+			//プレイヤーの攻撃範囲に1体でも敵がいるならば回復準備に入る。ターゲット情報も保存
+			if (CollisionBC(g_Player[i].pos, g_Player[k].pos, g_Player[i].size * 1.0f, 1.0f))
+			{
+				g_Player[i].state = Deffend;
+				g_Player[i].targetable[g_Player[i].count] = k;
+				g_Player[i].count++;
+			}
+		}
+	}
+	//①ステート遷移
+	if (oldState != g_Player[i].state)
+	{
+		g_Player[i].move_time = 0.0f;
+		g_Player[i].atCount = 0;
+		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
+		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
+		for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
+			g_Parts[k].move_time = 0.0f;
+	}
+	CheckHealTarget(i);
+	//スキル使用中ならステートを上書き
+	int atState;
+	if (g_Player[i].skillUse) {
+		atState = g_Player[i].state;
+		g_Player[i].state = Skill;
+	}
+	switch (g_Player[i].state)
+	{
+	case Standby:
+		PlayerStandLiner(i);
+		break;
+
+	case Deffend:
+		PlayerInterPoration(i);
+		break;
+	case Skill:
+		PlayerSkill(i);
+		break;
+	}
+	if (g_Player[i].skillUse) {
+		g_Player[i].state = atState;
+	}
 }
 
 //=============================================================================
@@ -414,6 +502,7 @@ void PlayerInterPoration(int i)
 		g_Player[i].atCount = 0;
 		g_Player[i].state = Standby;
 		g_Player[i].attackUse = FALSE;
+		atNum[i] = 0;
 		g_Playerline[i].pos = { 0.0f, 0.0f, 0.0f };
 		g_Playerline[i].rot = { 0.0f, 0.0f, 0.0f };
 		g_Playerline[i].scl = { 0.0f, 0.0f, 0.0f };
@@ -472,16 +561,37 @@ void PlayerInterPoration(int i)
 		XMStoreFloat3(&g_Parts[k].scl, s0 + scl * time);
 	}
 
-	//ここから攻撃処理
+	//ここから攻撃処理もしくは回復処理
+	if (g_Player[i].skillID == kouen_skill && g_Player[i].attackUse && 
+		atNum[i] < 5) {
+		g_Player[i].atFrameCount++;
+		if (g_Player[i].atFrameCount >= g_Player[i].atFrame)
+			g_Player[i].attackUse = FALSE;
+	}
 	if (g_Player[i].target == 99 || g_Player[i].attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？
 	g_Player[i].atFrameCount++;
-	ENEMY *enemy = GetEnemy();
-	//攻撃フレームに達したら、ダメージ計算関数を元にターゲットにダメージ
-	if (g_Player[i].atFrameCount >= g_Player[i].atFrame) {
-		enemy[g_Player[i].target].life -= DamageFunc(g_Player[i].power, enemy[g_Player[i].target].diffend);
-		g_Player[i].atFrameCount = 0;
-		g_Player[i].attackUse = TRUE;
-		PlaySound(g_Player[i].attackSE);
+	if (g_Player[i].skillID != helperT_skill) {
+		ENEMY *enemy = GetEnemy();
+		//攻撃フレームに達したら、ダメージ計算関数を元にターゲットにダメージ
+		if (g_Player[i].atFrameCount >= g_Player[i].atFrame) {
+			enemy[g_Player[i].target].life -= DamageFunc(g_Player[i].power, enemy[g_Player[i].target].diffend);
+			g_Player[i].atFrameCount = 0;
+			g_Player[i].attackUse = TRUE;
+			if (atNum[i] == 0)
+				PlaySound(g_Player[i].attackSE);
+			atNum[i]++;
+		}
+	}
+	else {
+		if (g_Player[i].atFrameCount >= g_Player[i].atFrame) {
+			g_Player[g_Player[i].target].life += DamageFunc(g_Player[i].power, 0);
+			//回復後は最大値に合わせる
+			if (g_Player[g_Player[i].target].life > g_Player[g_Player[i].target].lifeMax)
+				g_Player[g_Player[i].target].life = g_Player[g_Player[i].target].lifeMax;
+			g_Player[i].atFrameCount = 0;
+			g_Player[i].attackUse = TRUE;
+			PlaySound(g_Player[i].attackSE);
+		}
 	}
 }
 
@@ -496,6 +606,17 @@ void PlayerSkill(int i)
 		NeutroSkill(&g_Player[i]);
 		break;
 	case macro_skill:
+		MacroSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+		break;
+	case helperT_skill:
+		helperTSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+		break;
+	case killerT_skill:
+		KillerSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+	case NK_skill:
+		NKSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+	case kouen_skill:
+		KouenSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
 		break;
 	}
 }
@@ -556,6 +677,7 @@ void CheckEnemyTarget(int i)
 				XMVECTOR v2 = XMLoadFloat3(&enemy[g_Player[i].targetable[k]].pos) - XMLoadFloat3(&g_Player[i].pos);
 				XMStoreFloat3(&countData, v2);
 				float angle = atan2f(countData.x, countData.z);
+				if (g_Player[i].rot.y == 0.0f)g_Player[i].rot.y = XM_PI * 2.0f;	//バグ修正の為、処理を付け足した
 				for (int d = 0; d < g_Player[i].tbl_sizeA; d++)
 				{
 					float buffx = g_Player[i].tbl_adrA[d].pos.x;
@@ -568,10 +690,47 @@ void CheckEnemyTarget(int i)
 		}
 	}
 }
+void CheckHealTarget(int i)
+{
+	//攻撃中ではないならここでターゲット決定はしない
+	if (g_Player[i].state == Standby) {
+		g_Player[i].target = 99;
+		return;
+	}
+	int cmp = 0;
+	for (int k = 0; k < g_Player[i].count; k++)
+	{
+		int num = g_Player[i].targetable[k];	//添え字を格納
+		//ターゲットが無いか、ライフがマックスならスルー
+		if (g_Player[i].targetable[k] == 99 ||
+			g_Player[num].life == g_Player[num].lifeMax)continue;
+
+		if (g_Player[num].life < cmp || cmp <= 0)	//最初に来たときはcmpが0
+		{
+			XMVECTOR v1 = XMLoadFloat3(&g_Player[num].pos) - XMLoadFloat3(&g_Player[i].pos);
+			XMFLOAT3 countData;
+			XMStoreFloat3(&countData, v1);
+			float angle = atan2f(countData.x, countData.z);
+			if (g_Player[i].rot.y == 0.0f)g_Player[i].rot.y = XM_PI * 2.0f;	//バグ修正の為、処理を付け足した
+			for (int d = 0; d < g_Player[i].tbl_sizeA; d++)
+			{
+				float buffx = g_Player[i].tbl_adrA[d].pos.x;
+				float buffz = g_Player[i].tbl_adrA[d].pos.z;
+				g_Player[i].tbl_adrA[d].pos.x = buffx * cosf(angle - g_Player[i].rot.y) + buffz * sinf(angle - g_Player[i].rot.y);
+				g_Player[i].tbl_adrA[d].pos.z = buffz * cosf(angle - g_Player[i].rot.y) + buffx * -sinf(angle - g_Player[i].rot.y);
+			}
+			g_Player[i].target = num;
+			g_Player[i].rot.y = angle;
+			cmp = g_Player[num].life;
+		}
+	}
+}
 
 //スキルポイントに関する処理
 void IncreaseSP(int i)
 {
+	if (g_Player[i].skillUse == TRUE)return;
+
 	//一定フレームごとにSPを加算していく
 	if (g_Player[i].intervalSP < PLAYER_SP_FLAME)
 	g_Player[i].intervalSP++;
@@ -754,16 +913,13 @@ void PLAYER::StateCheck(int i)
 	{
 		if (enemy[k].use != TRUE)continue;
 		//プレイヤーの攻撃範囲に1体でも敵がいるならば攻撃準備に入る。ターゲット情報も保存
-		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size * 0.5f, g_Player[i].size * 0.5f))
+		if (CollisionBC(g_Player[i].pos, enemy[k].pos, g_Player[i].size, 1.0f))
 		{
 			g_Player[i].state = Deffend;
 			g_Player[i].targetable[g_Player[i].count] = k;
 			g_Player[i].count++;
 		}
 	}
-	//スキル使用中ならステートを上書き(ターゲット情報は取りたいため)
-	if(g_Player[i].skillUse)
-		g_Player[i].state = Skill;
 }
 
 //プレイヤーキャラの体力バーの表示処理とSP表示処理

@@ -59,6 +59,8 @@ enum
 	SOUND_LABEL_SE_KickStrong,			// SE
 	SOUND_LABEL_SE_Panch,			// SE
 	SOUND_LABEL_SE_PanchStrong,			// SE
+	SOUND_LABEL_SE_MachineGun,			// SE
+	SOUND_LABEL_SE_MachinGunLong,			// SE
 	SOUND_LABEL_BGM_Normal,			// BGM
 	SOUND_LABEL_BGM_Normal2,			// BGM
 	SOUND_LABEL_BGM_Battle1,			// BGM

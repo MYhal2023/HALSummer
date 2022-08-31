@@ -736,7 +736,7 @@ void CheckTarget(int i)
 		XMFLOAT3 countData;
 		XMStoreFloat3(&countData, v1);
 		float dist = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
-		if (dist > cmp)
+		if (dist < cmp || cmp <= 0.0f)
 		{
 			cmp = dist;
 			g_Enemy[i].target = &player[k];
@@ -762,12 +762,12 @@ void BaseDamage(int i)
 	Base *base = GetBase();
 	for (int k = 0; k < base->baseNum; k++)
 	{
-			if (g_Enemy[i].use != TRUE)continue;
-			if (!CollisionBC(g_Enemy[i].pos, base->pos[k], 10.0f, 10.0f))continue;
+		if (g_Enemy[i].use != TRUE)continue;
+		if (!CollisionBC(g_Enemy[i].pos, base->pos[k], 10.0f, 10.0f))continue;
 
-			base->life--;
-			banishEnemy++;
-			g_Enemy[i].use = FALSE;
+		base->life--;
+		banishEnemy++;
+		g_Enemy[i].use = FALSE;
 	}
 
 }

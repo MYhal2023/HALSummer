@@ -23,6 +23,7 @@
 #include "title.h"
 #include "reserve.h"
 #include "team.h"
+#include "player.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -53,7 +54,7 @@ char	g_DebugStr[2048] = WINDOW_NAME;		// デバッグ文字表示用
 
 #endif
 
-int	g_Mode = MODE_GAME;					// 起動時の画面を設定
+int	g_Mode = MODE_RESERVE;					// 起動時の画面を設定
 
 
 //=============================================================================
@@ -269,6 +270,8 @@ void Uninit(void)
 	// 終了のモードをセット
 	SetMode(MODE_MAX);
 
+	UninitTeam();
+	
 	// サウンド終了処理
 	UninitSound();
 

@@ -119,7 +119,7 @@ void SetNeutro(int i)
 	g_Team[i].charID = ID_Neutro;
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 50.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 40, 45, 60, 65, 80 };
 	int Power[MAX_LEVEL] = { 6, 7, 10, 12, 15 };
@@ -162,9 +162,11 @@ void SetMacrophages(int i)
 	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
 	g_Team[i].use = TRUE;
 	g_Team[i].charID = ID_Macro;
+	g_Team[i].skillID = macro_skill;
+	g_Team[i].skillTimeMax = 600;	//10秒間
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 35.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
 	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
@@ -180,7 +182,7 @@ void SetMacrophages(int i)
 	}
 
 	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
-	g_Team[i].blockMax = 2;
+	g_Team[i].blockMax = 3;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 2;
@@ -232,15 +234,17 @@ void SetHelpeerT(int i)
 	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
 	g_Team[i].use = TRUE;
 	g_Team[i].charID = ID_HelperT;
+	g_Team[i].skillID = helperT_skill;
+	g_Team[i].skillTimeMax = 600;	//15秒間
 	g_Team[i].charType = HighPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = HelperT_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 150.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
-	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
-	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
-	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
-	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
-	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	int Life[MAX_LEVEL] = { 30, 35, 50, 60, 70 };
+	int Power[MAX_LEVEL] = { 4, 6, 8, 10, 12 };
+	int Diffend[MAX_LEVEL] = { 2, 3, 5, 6, 7 };
+	int spMax[MAX_LEVEL] = { 10, 30, 28, 28, 25 };
+	int cost[MAX_LEVEL] = { 18, 18, 18, 18, 15 };
 	for (int k = 0; k < MAX_LEVEL; k++) {
 		g_Team[i].lifeMax[k] = Life[k];
 		g_Team[i].power[k] = Power[k];
@@ -250,11 +254,11 @@ void SetHelpeerT(int i)
 	}
 
 	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
-	g_Team[i].blockMax = 2;
+	g_Team[i].blockMax = 0;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 1;
-	g_Team[i].atFrame = 20;
+	g_Team[i].atFrame = 59;
 	g_Team[i].setAble = FALSE;
 
 	g_Team[i].material = Neutrovalue;
@@ -290,15 +294,17 @@ void SetKillerT(int i)
 	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
 	g_Team[i].use = TRUE;
 	g_Team[i].charID = ID_KillerT;
+	g_Team[i].skillID = killerT_skill;
+	g_Team[i].skillTimeMax = 0;	
 	g_Team[i].charType = LowPlaces;
 	g_Team[i].scl = { 1.2f, 1.2f, 1.2f };
-	g_Team[i].size = PLAYER_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 50.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
-	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
-	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
-	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
-	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
-	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	int Life[MAX_LEVEL] = { 45, 50, 65, 80, 100 };
+	int Power[MAX_LEVEL] = { 10, 11, 12, 14, 15 };
+	int Diffend[MAX_LEVEL] = { 3, 3, 5, 5, 8 };
+	int spMax[MAX_LEVEL] = { 10, 10, 8, 8, 8 };
+	int cost[MAX_LEVEL] = { 12, 12, 12, 12, 10 };
 	for (int k = 0; k < MAX_LEVEL; k++) {
 		g_Team[i].lifeMax[k] = Life[k];
 		g_Team[i].power[k] = Power[k];
@@ -308,11 +314,11 @@ void SetKillerT(int i)
 	}
 
 	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
-	g_Team[i].blockMax = 2;
+	g_Team[i].blockMax = 1;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 1;
-	g_Team[i].atFrame = 20;
+	g_Team[i].atFrame = 59;
 	g_Team[i].setAble = FALSE;
 	g_Team[i].attackSE = SOUND_LABEL_SE_Hit;
 	g_Team[i].material = Neutrovalue;
@@ -348,15 +354,17 @@ void SetNK(int i)
 	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
 	g_Team[i].use = TRUE;
 	g_Team[i].charID = ID_NK;
+	g_Team[i].skillID = NK_skill;
+	g_Team[i].skillTimeMax = 600;
 	g_Team[i].charType = HighPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = NK_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 150.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
-	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
-	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
-	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int Life[MAX_LEVEL] = { 35, 40, 50, 55, 70 };
+	int Power[MAX_LEVEL] = { 6, 6, 8, 8, 10 };
+	int Diffend[MAX_LEVEL] = { 2, 3, 4, 5, 5 };
 	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
-	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
+	int cost[MAX_LEVEL] = { 12, 12, 10, 10, 10 };
 	for (int k = 0; k < MAX_LEVEL; k++) {
 		g_Team[i].lifeMax[k] = Life[k];
 		g_Team[i].power[k] = Power[k];
@@ -366,11 +374,11 @@ void SetNK(int i)
 	}
 
 	g_Team[i].life = g_Team[i].lifeMax[g_Team[i].level - 1];
-	g_Team[i].blockMax = 2;
+	g_Team[i].blockMax = 0;
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 0;
-	g_Team[i].atFrame = 55;
+	g_Team[i].atFrame = 79;
 	g_Team[i].setAble = FALSE;
 
 	g_Team[i].material = Neutrovalue;
@@ -393,12 +401,14 @@ void SetKouen(int i)
 	GetModelDiffuse(&g_Team[i].model, &g_Team[i].diffuse[0]);
 	g_Team[i].use = TRUE;
 	g_Team[i].charID = ID_Kouen;
+	g_Team[i].skillID = kouen_skill;
+	g_Team[i].skillTimeMax = 600;
 	g_Team[i].charType = HighPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = NK_SIZE;	// 当たり判定の大きさ
+	g_Team[i].size = 150.0f;	// 当たり判定の大きさ
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
-	int Power[MAX_LEVEL] = { 4, 4, 6, 7, 10 };
+	int Power[MAX_LEVEL] = { 3, 3, 5, 5, 7 };
 	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
 	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
 	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
@@ -415,11 +425,11 @@ void SetKouen(int i)
 	g_Team[i].blockNum = 0;
 	g_Team[i].startNum = partsNum;
 	g_Team[i].partsNum = 2;
-	g_Team[i].atFrame = 55;
+	g_Team[i].atFrame = 5;
 	g_Team[i].setAble = FALSE;
 
 	g_Team[i].material = Neutrovalue;
-	g_Team[i].attackSE = SOUND_LABEL_SE_Cannon;
+	g_Team[i].attackSE = SOUND_LABEL_SE_MachineGun;
 
 
 	//アニメーションデータのセット

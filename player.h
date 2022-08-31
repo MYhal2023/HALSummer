@@ -44,7 +44,11 @@ enum PLAYER_STATE
 enum SKILL_TYPE
 {
 	neutro_skill,	//好中球のスキル
-	macro_skill,	//好中球のスキル
+	macro_skill,	//マクロファージのスキル
+	helperT_skill,
+	killerT_skill,
+	NK_skill,
+	kouen_skill,
 	skill_max,		//スキル最大数
 };
 //*****************************************************************************
@@ -126,6 +130,8 @@ struct PLAYER_VAR
 HRESULT InitPlayer(void);
 void UninitPlayer(void);
 void UpdatePlayer(void);
+void AttackChar(int i);
+void HealChar(int i);
 void DrawPlayer(void);
 
 void BlockEnemy(void);
@@ -136,6 +142,7 @@ void PlayerStandLiner(int i);
 void PlayerInterPoration(int i);
 void PlayerSkill(int i);
 void CheckEnemyTarget(int i);
+void CheckHealTarget(int i);
 void IncreaseSP(int i);
 void SetPlayer(XMFLOAT3 pos);
 void SetNeutrophils(XMFLOAT3 pos);

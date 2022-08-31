@@ -84,6 +84,7 @@ public:
 	int				skillID;
 	int				charType;		//近接キャラか遠距離キャラか。CHIP_TYPEと同じ数字を入れる
 	int				attackSE;		//近接キャラか遠距離キャラか。CHIP_TYPEと同じ数字を入れる
+	int				skillTimeMax;
 	BOOL			setAble;
 	BOOL			use;			//そもそもこの枠を使っているのか
 };

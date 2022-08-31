@@ -71,52 +71,48 @@ void DrawPlayerSet(void)
 //押されたテンキーを基にプレイヤーをセットする準備をする
 void PlayerSetMap(void)
 {
-	if (GetKeyboardTrigger(DIK_0))
+	if (GetKeyboardTrigger(DIK_1))
 	{
 		SetModeChange(0);
 	}
-	else if (GetKeyboardTrigger(DIK_1))
-	{
-		SetModeChange(1);
-	}
 	else if (GetKeyboardTrigger(DIK_2))
 	{
-		SetModeChange(2);
+		SetModeChange(1);
 
 	}
 	else if (GetKeyboardTrigger(DIK_3))
 	{
-		SetModeChange(3);
+		SetModeChange(2);
 
 	}
 	else if (GetKeyboardTrigger(DIK_4))
 	{
-		SetModeChange(4);
+		SetModeChange(3);
 
 	}
 	else if (GetKeyboardTrigger(DIK_5))
 	{
-		SetModeChange(5);
+		SetModeChange(4);
 
 	}
 	else if (GetKeyboardTrigger(DIK_6))
 	{
-		SetModeChange(6);
+		SetModeChange(5);
 
 	}
 	else if (GetKeyboardTrigger(DIK_7))
 	{
-		SetModeChange(7);
+		SetModeChange(6);
 
 	}
 	else if (GetKeyboardTrigger(DIK_8))
 	{
-		SetModeChange(8);
+		SetModeChange(7);
 
 	}
 	else if (GetKeyboardTrigger(DIK_9))
 	{
-		SetModeChange(9);
+		SetModeChange(8);
 	}
 }
 
@@ -246,6 +242,8 @@ void SetPlayerInfo(PlayerStatus *member, PlayerPartsStatus* memberParts)
 		player[i].target = 99;
 		player[i].skillAble = FALSE;
 		player[i].skillID = member->skillID;
+		player[i].skillTime = 0;
+		player[i].skillTimeMax = member->skillTimeMax;
 		player[i].skillPoint = 0;
 		player[i].skillPointMax = member->spMax[member->level - 1];
 		player[i].increaseSP = 1;
