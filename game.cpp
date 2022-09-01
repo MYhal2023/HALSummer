@@ -32,6 +32,7 @@
 #include "text_texture.h"
 #include "reserve.h"
 #include "result.h"
+#include "enemyLinerData.h"
 
 
 //*****************************************************************************
@@ -79,7 +80,85 @@ int g_DebugMapObject[][MAX_CHIP_WIDTH + 1]
 	{0,1,9,9,9,9,9,1},
 	{9,9,9,9,9,9,0,0},
 };
+int g_FirstMap[][MAX_CHIP_WIDTH + 1]
+{
+	{1,1,1,1,1,3,1,1},
+	{0,2,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,2},
+	{0,0,0,0,0,0,0,0},
+	{1,1,3,1,1,1,1,1},
 
+};
+
+int g_FirstMapObject[][MAX_CHIP_WIDTH + 1]
+{
+	{0,9,9,1,9,9,9,9},
+	{9,9,9,9,9,9,9,1},
+	{9,9,9,9,9,9,9,9},
+	{9,9,9,9,9,9,9,1},
+	{9,9,9,9,9,9,9,0},
+
+
+};
+int g_SecondMap[][MAX_CHIP_WIDTH + 1]
+{
+	{1,1,1,1,1,3,1,1},
+	{0,2,0,0,2,0,2,0},
+	{0,0,2,0,0,0,0,2},
+	{2,0,0,0,2,0,2,0},
+	{3,1,3,1,1,3,3,1},
+};
+
+int g_SecondMapObject[][MAX_CHIP_WIDTH + 1]
+{
+	{0,9,9,9,1,9,9,9},
+	{9,9,1,9,9,9,9,1},
+	{9,9,9,9,9,9,9,9},
+	{9,9,9,9,1,9,9,1},
+	{9,9,9,9,9,9,1,0},
+};
+int g_ThirdMap[][MAX_CHIP_WIDTH + 1]
+{
+	{1,1,1,3,1,1,1,1},
+	{0,2,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,2},
+	{2,0,0,2,0,0,2,0},
+	{0,0,2,0,0,0,0,0},
+	{0,0,0,0,2,0,0,0},
+	{1,1,3,1,1,1,1,1},
+};
+
+int g_ThirdMapObject[][MAX_CHIP_WIDTH + 1]
+{
+	{0,9,9,9,1,9,1,0},
+	{9,9,9,9,9,9,9,9},
+	{9,9,9,9,9,9,9,9},
+	{9,0,9,9,1,0,9,9},
+	{9,9,9,9,9,9,9,9},
+	{9,9,0,9,9,9,9,9},
+	{0,1,9,9,0,9,0,1},
+};
+int g_ForthMap[][MAX_CHIP_WIDTH + 1]
+{
+	{1,1,3,3,1,3,1,3},
+	{2,2,0,2,2,2,0,0},
+	{0,2,2,0,2,0,0,2},
+	{2,0,0,2,0,2,2,2},
+	{0,0,2,0,2,0,0,2},
+	{2,2,0,0,2,2,2,0},
+	{3,1,3,1,3,3,1,1},
+};
+
+int g_ForthMapObject[][MAX_CHIP_WIDTH + 1]
+{
+	{0,1,9,9,1,9,1,0},
+	{9,9,9,9,9,9,9,9},
+	{9,9,9,9,9,9,9,9},
+	{9,0,9,9,1,0,9,9},
+	{1,9,9,9,9,9,9,9},
+	{9,9,0,9,9,9,9,9},
+	{0,1,9,9,0,9,0,1},
+};
 //=============================================================================
 // ‰Šú‰»ˆ—
 //=============================================================================
@@ -127,24 +206,111 @@ void InitSystem(void)
 
 	InitUI();
 	InitReward();
-
+	mode = 1;
+	g_bPause = TRUE;
 	//‚±‚±‚©‚ç“ú•Ê‚²‚Æ‚ÌÝ’è‚ÉˆÚ‚éB‚±‚±‚ðŠÖ”‰»‚µ‚Äday–ˆ‚ÌÝ’è‚ð‘S‚Äì¬B
-	SetReward(0, 1000);
-	SetReward(1, 50);
-	SetReward(2, 1);
-	InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
-	SetGrape(800.0f, 40, 5, 1);
-	SetGrape(900.0f, 40, 5, 1);
-	SetGrape(1000.0f, 40, 5, 1);
-	SetRyoku(100.0f, 40, 5, 1);
-	SetStrept(1400.0f, 40, 5, 1);
-	SetStrept(9000.0f, 40, 5, 1);
-	SetStrept(9000.0f, 40, 5, 1);
-	SetStrept(9000.0f, 40, 5, 1);
+	//SetReward(0, 1000);
+	//SetReward(1, 50);
+	//SetReward(2, 1);
+	//InitMapChip(g_DebugMap, g_DebugMapObject, 7, MAX_CHIP_WIDTH);
+	//SetGrape(800.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetGrape(900.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetGrape(1000.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetRyoku(100.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetStrept(1400.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl, sizeof(FirstmoveTbl) / sizeof(MOVERINE));
+	//XMFLOAT3 pos[1];
+	//pos[0] = { 25.0f, 0.0f, 100.0f };
+	//InitBase(3, &pos[0], 1);
+	//PlaySound(SOUND_LABEL_BGM_Battle1);
+
+	Reserve *re = GetReserve();
+	int linesize = 0;
+	int linesize2 = 0;
 	XMFLOAT3 pos[1];
-	pos[0] = { 25.0f, 0.0f, 100.0f };
-	InitBase(3, &pos[0], 1);
-	PlaySound(SOUND_LABEL_BGM_Battle1);
+	switch (re->day)
+	{
+	case 1:
+		SetReward(0, 1000);
+		SetReward(1, 50);
+		SetReward(2, 1);
+		InitMapChip(g_FirstMap, g_FirstMapObject, 5, MAX_CHIP_WIDTH);
+		linesize = sizeof(FirstmoveTbl) / sizeof(MOVERINE);
+		linesize2 = sizeof(FirstmoveTbl2) / sizeof(MOVERINE);
+		SetInflue(200.0f, 40, 5, 1, FirstmoveTbl2, linesize);
+		//SetGrape(800.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		//SetGrape(900.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		//SetGrape(1000.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		//SetRyoku(100.0f, 40, 5, 1, FirstmoveTbl2, linesize2);
+		//SetStrept(1400.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl2, linesize2);
+		//SetStrept(7000.0f, 40, 5, 1, FirstmoveTbl, linesize);
+		SetCost(20);
+		pos[0] = { 25.0f, 0.0f, 100.0f };
+		InitBase(3, &pos[0], 1);
+		PlaySound(SOUND_LABEL_BGM_Battle1);
+		break;
+	case 2:
+		SetReward(0, 1000);
+		SetReward(1, 50);
+		SetReward(2, 1);
+		InitMapChip(g_SecondMap, g_SecondMapObject, 5, MAX_CHIP_WIDTH);
+		linesize = sizeof(SecondmoveTbl) / sizeof(MOVERINE);
+		SetGrape(800.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(900.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(1000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetRyoku(100.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(1400.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetCost(10);
+		pos[0] = { 25.0f, 0.0f, 100.0f };
+		InitBase(3, &pos[0], 1);
+		PlaySound(SOUND_LABEL_BGM_Battle2);
+		break;
+	case 3:
+		SetReward(0, 1000);
+		SetReward(1, 50);
+		SetReward(2, 1);
+		InitMapChip(g_ThirdMap, g_ThirdMapObject, 7, MAX_CHIP_WIDTH);
+		linesize = sizeof(ThirdmoveTbl) / sizeof(MOVERINE);
+		SetGrape(800.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetGrape(900.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetGrape(1000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetRyoku(100.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetStrept(1400.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetCost(10);
+		pos[0] = { 25.0f, 0.0f, 100.0f };
+		InitBase(3, &pos[0], 1);
+		PlaySound(SOUND_LABEL_BGM_Battle1);
+		break;
+	case 4:
+		SetReward(0, 1000);
+		SetReward(1, 50);
+		SetReward(2, 1);
+		InitMapChip(g_ForthMap, g_ForthMapObject, 7, MAX_CHIP_WIDTH);
+		linesize = sizeof(ForthmoveTbl) / sizeof(MOVERINE);
+		SetGrape(800.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetGrape(900.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetGrape(1000.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetRyoku(100.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetStrept(1400.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetStrept(9000.0f, 40, 5, 1, ForthmoveTbl, linesize);
+		SetCost(10);
+		pos[0] = { 25.0f, 0.0f, 100.0f };
+		InitBase(3, &pos[0], 1);
+		PlaySound(SOUND_LABEL_BGM_Battle2);
+		break;
+	}
 }
 
 //=============================================================================

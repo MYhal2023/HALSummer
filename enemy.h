@@ -24,6 +24,7 @@
 #define	MODEL_RYOKU				"data/MODEL/ryokunoukin.obj"			// 読み込むモデル名
 #define	MODEL_RYOKU_LEFT		"data/MODEL/ryokunoukin_left.obj"			// 読み込むモデル名
 #define	MODEL_RYOKU_RIGHT		"data/MODEL/ryokunoukin_right.obj"			// 読み込むモデル名
+#define	MODEL_INFLUE		"data/MODEL/influenza.obj"			// 読み込むモデル名
 
 #define MAX_ENEMY		(15)					// エネミーの数
 
@@ -47,6 +48,7 @@ enum ENEMY_ID
 	Grape,
 	Strept,
 	Ryoku,
+	Infule,
 };
 //*****************************************************************************
 // 構造体定義

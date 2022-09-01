@@ -29,7 +29,7 @@
 #define	VALUE_MOVE			(2.0f)							// 移動量
 #define	VALUE_AT_MOVE		(4.0f)							// 移動量
 #define	VALUE_ROTATE		(XM_PI * 0.02f)					// 回転量
-#define ENEMY_VAR			(3)
+#define ENEMY_VAR			(4)
 #define ENEMY_PARTS_VAR			(ENEMY_VAR * 3)
 #define ENEMY_SHADOW_SIZE	(1.0f)							// 影の大きさ
 #define ENEMY_OFFSET_Y		(0.0f)							// プレイヤーの足元をあわせる
@@ -144,6 +144,21 @@ HRESULT InitEnemy(void)
 		LoadModel(MODEL_RYOKU_RIGHT, &g_EnemyPartsModel[p_num].model);
 		// モデルのディフューズを保存しておく。色変え対応の為。
 		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_EnemyPartsModel[p_num].diffuse[0]);
+		p_num++;
+	}
+	{//ブドウ球菌モデル読み込み
+		LoadModel(MODEL_INFLUE, &g_EnemyModel[num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyModel[num].model, &g_Enemy[num].diffuse[0]);
+		num++;
+
+		LoadModel(MODEL_INFLUE, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_Parts[p_num].diffuse[0]);
+		p_num++;
+		LoadModel(MODEL_INFLUE, &g_EnemyPartsModel[p_num].model);
+		// モデルのディフューズを保存しておく。色変え対応の為。
+		GetModelDiffuse(&g_EnemyPartsModel[p_num].model, &g_Parts[p_num].diffuse[0]);
 		p_num++;
 	}
 
@@ -358,6 +373,9 @@ void DrawEnemy(void)
 		case Ryoku:
 			DrawModel(&g_EnemyModel[Ryoku].model);
 			break;
+		case Infule:
+			DrawModel(&g_EnemyModel[Infule].model);
+			break;
 		}
 		if (g_Enemy[i].partsNum == 0)continue;
 
@@ -405,6 +423,9 @@ void DrawEnemy(void)
 				break;
 			case Ryoku:
 				DrawModel(&g_EnemyPartsModel[6 + h].model);
+				break;
+			case Infule:
+				DrawModel(&g_EnemyPartsModel[9 + h].model);
 				break;
 			}
 			h++;
@@ -657,7 +678,7 @@ void EnemyMove(int i)
 
 	int tbl = g_Enemy[i].nowTbl;
 	//エネミーの移動速度を元に座標更新
-	XMVECTOR v1 = XMLoadFloat3(&moveTbl[tbl + 1].start) - XMLoadFloat3(&moveTbl[tbl].start);
+	XMVECTOR v1 = XMLoadFloat3(&g_Enemy[i].moveData[tbl + 1].start) - XMLoadFloat3(&g_Enemy[i].moveData[tbl].start);
 	XMVECTOR nor = XMVector3Normalize(v1);
 	XMStoreFloat3(&g_Enemy[i].pos, XMLoadFloat3(&g_Enemy[i].pos) + nor * g_Enemy[i].spd);
 	XMFLOAT3 angle;
@@ -679,7 +700,7 @@ void EnemyMove(int i)
 	XMFLOAT3 countMove;
 	XMStoreFloat3(&countMove, nor * g_Enemy[i].spd);
 	float moveMax = fabsf(countData.x) + fabsf(countData.y) + fabsf(countData.z);
-	g_Enemy[i].moveCount += fabsf(countMove.x) + fabsf(countMove.y) + fabsf(countMove.z);
+	g_Enemy[i].moveCount = fabsf(countMove.x) + fabsf(countMove.y) + fabsf(countMove.z) + g_Enemy[i].moveCount;
 	//移動量を超えていたら次のデータテーブルへ
 	if (g_Enemy[i].moveCount >= moveMax)
 	{

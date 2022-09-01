@@ -185,12 +185,10 @@ static INTERPOLATION_DATA Kouen_Standby[] = {	// pos, rot, scl, frame
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f,XM_PI * -0.5f, 0.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f), 0 },
 };
 static INTERPOLATION_DATA Kouen_Arm_Standby[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 55 },
-	{ XMFLOAT3(0.0f, 0.0f, 15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f, 15.0f), XMFLOAT3(-XM_PI * 2.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 120 },
 	{ XMFLOAT3(0.0f, 0.0f, 15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 };
 static INTERPOLATION_DATA Kouen_Arm2_Standby[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, -15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 55 },
-	{ XMFLOAT3(0.0f, 0.0f, -15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 5 },
+	{ XMFLOAT3(0.0f, 0.0f, -15.0f), XMFLOAT3(-XM_PI * 2.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f), 120 },
 	{ XMFLOAT3(0.0f, 0.0f, -15.0f), XMFLOAT3(0.0f, XM_PI * 0.0f, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 };

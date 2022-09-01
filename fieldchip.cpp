@@ -19,6 +19,7 @@
 #include "fieldchip.h"
 #include "playerSet.h"
 #include "sprite.h"
+#include "base.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -229,6 +230,7 @@ void DrawMapChip(void)
 	//選択されているチップは色が変わる
 	SwapShader(MODE_FIELD_CHIP);
 	PlayerSet *ps = GetSetPos();
+	Base *bs = GetBase();
 	for (int i = 0; i < m_height; i++)
 	{
 		for (int k = 0; k < m_width; k++)
@@ -239,6 +241,15 @@ void DrawMapChip(void)
 				SetChip(1);
 			else
 				SetChip(0);
+
+			for (int s = 0; s < bs->baseNum; s++)
+			{
+				if (bs->pos->x - 25.0f == g_MapSet[i][k].pos.x &&
+					bs->pos->z == g_MapSet[i][k].pos.z) {
+					SetChip(2);
+					break;
+				}
+			}
 			int m = g_BattleMap[i][k];
 			if (m == 99)continue;	//マップチップ無し。描画不要
 			// ワールドマトリックスの初期化

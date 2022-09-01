@@ -452,5 +452,10 @@ void PixelShaderFieldChipPolygon(	in  float4 inPosition	: SV_POSITION,
 	{
 		outDiffuse.rgb *= 0.5f;
 	}
+	else if (chip == 2)
+	{
+		outDiffuse.b = 1.0f;
+		outDiffuse.r = 0.0f;
+	}
 
 }

@@ -125,6 +125,7 @@ HRESULT InitPlayer(void)
 	for (int i = 0; i < MAX_PLAYER_PARTS; i++)
 	{
 		g_Parts[i].load = FALSE;
+		g_Parts[i].use = FALSE;
 	}
 	
 	g_Load = TRUE;
