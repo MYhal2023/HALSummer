@@ -227,7 +227,7 @@ void SetRyoku(float time, int life, int power, int deffend, MOVERINE *move, int 
 	g_Enemy[GetEnemyNum()].tbl_sizeA = sizeof(ryoku_Attack) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Enemy[GetEnemyNum()].tbl_sizeM = sizeof(ryoku_Move) / sizeof(INTERPOLATION_DATA);	// 登録したテーブルのレコード総数
 	g_Enemy[GetEnemyNum()].move_time = 0.0f;	// 実行時間
-	g_Enemy[GetEnemyNum()].partsNum = 3;
+	g_Enemy[GetEnemyNum()].partsNum = 2;
 	g_Enemy[GetEnemyNum()].startNum = GetEnemyPartsNum();
 	// 階層アニメーション用の初期化処理
 	g_Enemy[GetEnemyNum()].parent = NULL;			// 本体（親）なのでNULLを入れる

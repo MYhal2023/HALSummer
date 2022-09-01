@@ -17,7 +17,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(9)				// テクスチャの数
+#define TEXTURE_MAX			(10)				// テクスチャの数
 #define CHAR_TEXTURE_MAX	(7)				// キャラテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
@@ -38,6 +38,7 @@ static char* g_TextureName[] = {
 	"data/TEXTURE/button_double.png",
 	"data/TEXTURE/button_stop.png",
 	"data/TEXTURE/costbox.png",
+	"data/TEXTURE/var.png",
 };
 static char* g_CharTextureName[] = {
 	"data/TEXTURE/neutro.png",
@@ -108,6 +109,8 @@ HRESULT InitUI(void)
 	g_UI[button_s].size = { 1000.0f * mnp, 600.0f * mnp };
 	g_UI[costbox].size = { 160.0f, 160.0f };
 	g_UI[costbox].pos = { SCREEN_WIDTH - g_UI[costbox].size.x*0.5f , SCREEN_HEIGHT - g_UI[costbox].size.y * 0.5f };
+	g_UI[button_help].size = { 1000.0f * mnp, 600.0f * mnp };
+	g_UI[button_help].pos = { 200.0f, SCREEN_HEIGHT - g_UI[button_help].size.y };
 
 	g_Load = TRUE;
 	return S_OK;
@@ -189,6 +192,7 @@ void DrawUI(void)
 	DrawButtonNorD();
 	DrawButtonStop();
 	DrawCost();
+	DrawHelpButton();
 	SetDepthEnable(TRUE);
 
 	// ライティングを無効
@@ -393,4 +397,18 @@ void DrawCost(void)
 
 	DrawNumber(GetCost(), g_UI[costbox].pos.x + COST_NUMBER_SIZE * 0.5f, g_UI[costbox].pos.y, COST_NUMBER_SIZE, COST_NUMBER_SIZE * 1.25f,
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+}
+
+void DrawHelpButton(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[button_help]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_UI[button_help].pos.x, g_UI[button_help].pos.y, g_UI[button_help].size.x, g_UI[button_help].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_UI[button_help].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
 }

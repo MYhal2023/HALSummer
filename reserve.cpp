@@ -28,7 +28,7 @@
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 #define BUTTON_SIZE			(106.0f)		// ボタンの縦幅サイズ。多分これくらい
-#define BUTTON_MAX			(3)				// ユーサーが選択できるボタン数
+#define BUTTON_MAX			(4)				// ユーサーが選択できるボタン数
 #define ROW_NUM				(5)				// 一列に並べるユニット数
 
 //*****************************************************************************
@@ -163,7 +163,10 @@ HRESULT InitReserve(void)
 	
 	g_Button[UnitConfirm].pos.y = g_Button[UnitPowerUp].pos.y + BUTTON_SIZE + 16.0f;
 	g_Button[UnitConfirm].pos.x = 8.0f + BUTTON_SIZE * 1.5f;
-	
+
+	g_Button[Help].pos.y = g_Button[UnitConfirm].pos.y + BUTTON_SIZE + 16.0f;
+	g_Button[Help].pos.x = 8.0f + BUTTON_SIZE * 1.5f;
+
 	g_Button[GameStart].pos.y = SCREEN_HEIGHT - 40.0f - BUTTON_SIZE * 0.5f;
 	g_Button[GameStart].pos.x = SCREEN_WIDTH - 16.0f - BUTTON_SIZE * 1.5f;
 
@@ -484,6 +487,9 @@ void NormalRserveModeDraw(void)
 	DrawButton(g_Button[UnitConfirm].color, g_Button[UnitConfirm].pos.x, g_Button[UnitConfirm].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
 	DrawTextReserve(TEXT_CONFIRM, g_Button[UnitConfirm].pos.x, g_Button[UnitConfirm].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+	DrawButton(g_Button[Help].color, g_Button[Help].pos.x, g_Button[Help].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+	DrawTextReserve(TEXT_CONFIRM, g_Button[Help].pos.x, g_Button[Help].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
 	DrawButton(g_Button[GameStart].color, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
 	DrawTextReserve(TEXT_START, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
@@ -699,7 +705,7 @@ void DrawCharStatus(XMFLOAT2 pos,int k)
 	//キャラ画像描画
 	const float boxsize = 180.0f;	//ボックスサイズ定義
 	const int id = member[k].charID;
-	float posX = pos.x - sizeX * 0.40f;
+	float posX = pos.x - sizeX * 0.36f;
 	float posY = pos.y - sizeY * 0.375f;
 	// テクスチャ設定
 	GetDeviceContext()->PSSetShaderResources(0, 1, &g_CharTexture[id]);

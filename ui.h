@@ -26,6 +26,7 @@ enum UI_TEXTURE
 	button_d,
 	button_s,
 	costbox,
+	button_help,
 };
 
 HRESULT InitUI(void);
@@ -40,3 +41,4 @@ void DrawEnemyNum(void);
 void DrawButtonNorD(void);
 void DrawButtonStop(void);
 void DrawCost(void);
+void DrawHelpButton(void);

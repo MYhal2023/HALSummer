@@ -35,6 +35,7 @@ enum ButtonType
 {
 	UnitPowerUp,
 	UnitConfirm,
+	Help,
 	GameStart,
 };
 

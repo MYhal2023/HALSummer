@@ -30,7 +30,7 @@
 #define	VALUE_AT_MOVE		(4.0f)							// 移動量
 #define	VALUE_ROTATE		(XM_PI * 0.02f)					// 回転量
 #define ENEMY_VAR			(4)
-#define ENEMY_PARTS_VAR			(ENEMY_VAR * 3)
+#define ENEMY_PARTS_VAR		(ENEMY_VAR * 3)
 #define ENEMY_SHADOW_SIZE	(1.0f)							// 影の大きさ
 #define ENEMY_OFFSET_Y		(0.0f)							// プレイヤーの足元をあわせる
 #define ENEMY_OFFSET_Z		(-300.0f)							// プレイヤーの足元をあわせる
@@ -425,7 +425,7 @@ void DrawEnemy(void)
 				DrawModel(&g_EnemyPartsModel[6 + h].model);
 				break;
 			case Infule:
-				DrawModel(&g_EnemyPartsModel[9 + h].model);
+				DrawModel(&g_EnemyPartsModel[8 + h].model);
 				break;
 			}
 			h++;

@@ -246,14 +246,14 @@ static INTERPOLATION_DATA infule_Move[] = {	// pos, rot, scl, frame
 };
 // パーツ1
 static INTERPOLATION_DATA infule_Parts001Move[] = {	// pos, rot, scl, frame
-	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
+	{ XMFLOAT3(0.0f, 40.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 60 },
 	{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, -2.0f*XM_PI, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
 // パーツ2
 static INTERPOLATION_DATA infule_Parts002Move[] = {	// pos, rot, scl, frame
 	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),			XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
-	{ XMFLOAT3(0.0f, -20.0f, 0.0f), XMFLOAT3(0.0f, XM_PI, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
+	{ XMFLOAT3(0.0f, 60.0f, 0.0f), XMFLOAT3(0.0f, XM_PI, 0.0f),		XMFLOAT3(1.0f, 1.0f, 1.0f), 30 },
 	{ XMFLOAT3(0.0f,   0.0f, 0.0f), XMFLOAT3(0.0f, 2.0f*XM_PI, 0.0f),	XMFLOAT3(1.0f, 1.0f, 1.0f),  0 },
 
 };
