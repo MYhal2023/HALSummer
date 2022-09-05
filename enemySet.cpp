@@ -15,7 +15,7 @@ void SetGrape(float time, int life, int power, int deffend, MOVERINE *move, int 
 	g_Enemy[GetEnemyNum()].rot = { 0.0f, 0.0f, 0.0f };
 	g_Enemy[GetEnemyNum()].scl = { 0.8f, 1.0f, 1.0f };
 
-	g_Enemy[GetEnemyNum()].size = ENEMY_SIZE;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+	g_Enemy[GetEnemyNum()].size = 60.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Enemy[GetEnemyNum()].life = life;
 	g_Enemy[GetEnemyNum()].lifeMax = g_Enemy[GetEnemyNum()].life;
 	g_Enemy[GetEnemyNum()].spd = 0.5f;
@@ -108,7 +108,7 @@ void SetStrept(float time, int life, int power, int deffend, MOVERINE *move, int
 	g_Enemy[GetEnemyNum()].rot = { 0.0f, 0.0f, 0.0f };
 	g_Enemy[GetEnemyNum()].scl = { 0.25f, 0.25f, 0.25f };
 
-	g_Enemy[GetEnemyNum()].size = ENEMY_SIZE;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+	g_Enemy[GetEnemyNum()].size = 30.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Enemy[GetEnemyNum()].life = life;
 	g_Enemy[GetEnemyNum()].lifeMax = g_Enemy[GetEnemyNum()].life;
 	g_Enemy[GetEnemyNum()].spd = 0.5f;
@@ -201,7 +201,7 @@ void SetRyoku(float time, int life, int power, int deffend, MOVERINE *move, int 
 	g_Enemy[GetEnemyNum()].rot = { 0.0f, 0.0f, 0.0f };
 	g_Enemy[GetEnemyNum()].scl = { 2.0f, 2.0f, 2.0f };
 
-	g_Enemy[GetEnemyNum()].size = ENEMY_SIZE;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+	g_Enemy[GetEnemyNum()].size = 30.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Enemy[GetEnemyNum()].life = life;
 	g_Enemy[GetEnemyNum()].lifeMax = g_Enemy[GetEnemyNum()].life;
 	g_Enemy[GetEnemyNum()].spd = 0.5f;

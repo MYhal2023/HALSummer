@@ -35,7 +35,7 @@ enum ButtonType
 {
 	UnitPowerUp,
 	UnitConfirm,
-	Help,
+	ReserveHelp,
 	GameStart,
 };
 
@@ -44,6 +44,8 @@ enum PwButtonType
 	CanselButton,
 	LevelupButton
 };
+
+//ƒwƒ‹ƒv‰æ‘œ‚Í˜A‘±‚³‚¹‚é
 enum Reserve_TEXTURE
 {
 	Button_bg,
@@ -58,6 +60,7 @@ enum Reserve_TEXTURE
 	TEXT_START,
 	TEXT_LUP,
 	TEXT_CANCEL,
+	Help_ReserveTex,
 };
 enum Icon_TEXTURE
 {
@@ -87,6 +90,7 @@ void UnitPowerUpMode(void);
 void UnitConfirmMode(void);
 void PowerUpButton(void);
 void ConfirmButton(void); 
+void ReserveHelpButton(void);
 void GameStartButton(void);
 int GetDay(void);
 void DrawReserveChar(void);
@@ -95,3 +99,8 @@ void DrawCharAllStatus(XMFLOAT2 pos, int k);
 void DrawNeedMaterial(XMFLOAT2 pos, float size, int no);
 BOOL CheckPowerUpMaterial(PlayerStatus *member);
 void ReduceMaterial(PlayerStatus *member);
+void ReserveHelpMode(void);
+void DrawReserveHelp(void);
+void DrawMaxLevelChar(XMFLOAT2 pos, int k);
+//180.0f*0.75f+pos.y - SCREEN_HEIGHT *0.70f * 0.375f
+//pos.x - SCREEN_WIDTH * 0.75f * 0.36f

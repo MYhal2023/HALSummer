@@ -139,7 +139,7 @@ void SetNeutro(int i)
 	int Life[MAX_LEVEL] = { 40, 45, 60, 65, 80 };
 	int Power[MAX_LEVEL] = { 6, 7, 10, 12, 15 };
 	int Diffend[MAX_LEVEL] = { 3, 4, 5, 7, 10 };
-	int spMax[MAX_LEVEL] = { 10, 10, 8, 8, 8 };
+	int spMax[MAX_LEVEL] = { 15, 15, 15, 15, 12 };
 	int cost[MAX_LEVEL] = { 8, 8, 7, 7, 6 };
 	for (int k = 0; k < MAX_LEVEL; k++){
 		g_Team[i].lifeMax[k] = Life[k];
@@ -185,7 +185,7 @@ void SetMacrophages(int i)
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 80, 95, 120, 130, 150 };
 	int Power[MAX_LEVEL] = { 3, 4, 5, 6, 7 };
-	int Diffend[MAX_LEVEL] = { 8, 10, 15, 17, 20 };
+	int Diffend[MAX_LEVEL] = { 5, 7, 10, 12, 15 };
 	int spMax[MAX_LEVEL] = { 20, 20, 18, 18, 18 };
 	int cost[MAX_LEVEL] = { 15, 15, 15, 15, 13 };
 	for (int k = 0; k < MAX_LEVEL; k++) {

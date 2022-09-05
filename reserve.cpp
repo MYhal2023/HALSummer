@@ -21,7 +21,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(12)				// テクスチャの数
+#define TEXTURE_MAX			(13)				// テクスチャの数
 #define CH_TEXTURE_MAX		(7)				// キャラテクスチャの数
 #define IC_TEXTURE_MAX		(9)				// アイコンテクスチャの数
 #define CHAR_TEXTURE_MAX	(7)				// キャラテクスチャの数
@@ -30,6 +30,7 @@
 #define BUTTON_SIZE			(106.0f)		// ボタンの縦幅サイズ。多分これくらい
 #define BUTTON_MAX			(4)				// ユーサーが選択できるボタン数
 #define ROW_NUM				(5)				// 一列に並べるユニット数
+#define HELP_TEX_NUM		(1)				// 一列に並べるユニット数
 
 //*****************************************************************************
 // グローバル変数
@@ -52,7 +53,7 @@ static char* g_TextureName[TEXTURE_MAX] = {
 	"data/TEXTURE/t_start.png",
 	"data/TEXTURE/t_levelup.png",
 	"data/TEXTURE/t_cancel.png",
-
+	"data/TEXTURE/var.png",
 };
 static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/neutro.png",
@@ -82,6 +83,7 @@ static Button g_Button[BUTTON_MAX];
 static Button g_PwButton[2];	//キャンセルとOKボタン
 static int cursol;
 static int cursolPw;	//パワーアップ画面に使われるカーソル
+static int HelpTexNum = 0;	//ヘルプの画像枚数
 static float cursolAlpha;	//カーソル透明度
 static float alphaSpeed;	//カーソル透明度加算量
 static BOOL g_Load = FALSE;
@@ -164,8 +166,8 @@ HRESULT InitReserve(void)
 	g_Button[UnitConfirm].pos.y = g_Button[UnitPowerUp].pos.y + BUTTON_SIZE + 16.0f;
 	g_Button[UnitConfirm].pos.x = 8.0f + BUTTON_SIZE * 1.5f;
 
-	g_Button[Help].pos.y = g_Button[UnitConfirm].pos.y + BUTTON_SIZE + 16.0f;
-	g_Button[Help].pos.x = 8.0f + BUTTON_SIZE * 1.5f;
+	g_Button[ReserveHelp].pos.y = g_Button[UnitConfirm].pos.y + BUTTON_SIZE + 16.0f;
+	g_Button[ReserveHelp].pos.x = 8.0f + BUTTON_SIZE * 1.5f;
 
 	g_Button[GameStart].pos.y = SCREEN_HEIGHT - 40.0f - BUTTON_SIZE * 0.5f;
 	g_Button[GameStart].pos.x = SCREEN_WIDTH - 16.0f - BUTTON_SIZE * 1.5f;
@@ -243,6 +245,9 @@ void UpdateReserve(void)
 	case UnitConfirm:
 		UnitConfirmMode();
 		break;
+	case ReserveHelp:
+		ReserveHelpMode();
+		break;
 	case 99:
 		NormalRserveMode();
 		break;
@@ -292,7 +297,7 @@ void DrawReserve(void)
 	case UnitPowerUp:
 		DrawButton(color, SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f, SCREEN_WIDTH * 0.75f, SCREEN_HEIGHT* 0.70f);
 		DrawReserveChar();
-		if (g_Reserve.pwMode) {//強化モードになったら、画面の上に色々描画する
+		if (g_Reserve.pwMode && member[g_Reserve.selectPw].level < MAX_LEVEL) {//強化モードになったら、画面の上に色々描画する
 			DrawCharStatus(pos, g_Reserve.selectPw);	//ステータス描画
 			for (int k = 0; k < MAX_MATERIAL; k++) {
 				if (member[g_Reserve.selectPw].material[k].no == 99 || 
@@ -322,10 +327,31 @@ void DrawReserve(void)
 				break;
 			}
 		}
+		else if (g_Reserve.pwMode && member[g_Reserve.selectPw].level >= MAX_LEVEL)
+		{
+			DrawMaxLevelChar(pos, g_Reserve.selectPw);
+			//ボタン描画
+			DrawButton(g_PwButton[CanselButton].color, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+			DrawTextReserve(TEXT_CANCEL, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+				XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+			//カーソルに対応して上から透明なボックスを描画
+			if ((cursolAlpha > 0.8f && alphaSpeed > 0.0f) || (cursolAlpha < 0.4f && alphaSpeed < 0.0f))alphaSpeed *= -1;
+			cursolAlpha += alphaSpeed;
+			switch (cursolPw) {
+			case 0:
+				DrawButton(XMFLOAT4{ 1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			case 1:
+				DrawButton(XMFLOAT4{ 1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[LevelupButton].pos.x, g_PwButton[LevelupButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			}
+		}
 		break;
 	case UnitConfirm:
 		DrawButton(color, SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f, SCREEN_WIDTH * 0.75f, SCREEN_HEIGHT* 0.70f);
-		DrawReserveChar();
+		break;
+	case ReserveHelp:
+		DrawReserveHelp();
 		break;
 	case 99:
 		break;
@@ -433,6 +459,9 @@ void NormalRserveMode(void)
 		case UnitConfirm:
 			ConfirmButton();
 			break;
+		case ReserveHelp:
+			ReserveHelpButton();
+			break;
 		case GameStart:
 			GameStartButton();
 			break;
@@ -487,8 +516,8 @@ void NormalRserveModeDraw(void)
 	DrawButton(g_Button[UnitConfirm].color, g_Button[UnitConfirm].pos.x, g_Button[UnitConfirm].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
 	DrawTextReserve(TEXT_CONFIRM, g_Button[UnitConfirm].pos.x, g_Button[UnitConfirm].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
-	DrawButton(g_Button[Help].color, g_Button[Help].pos.x, g_Button[Help].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
-	DrawTextReserve(TEXT_CONFIRM, g_Button[Help].pos.x, g_Button[Help].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+	DrawButton(g_Button[ReserveHelp].color, g_Button[ReserveHelp].pos.x, g_Button[ReserveHelp].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+	DrawTextReserve(TEXT_CONFIRM, g_Button[ReserveHelp].pos.x, g_Button[ReserveHelp].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
 	DrawButton(g_Button[GameStart].color, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
@@ -499,75 +528,88 @@ void NormalRserveModeDraw(void)
 
 void UnitPowerUpMode(void)
 {
-	//まず強化モードの操作を優先して処理
-	if (GetKeyboardTrigger(DIK_UP) && g_Reserve.pwMode && cursolPw > 0) { 
-		cursolPw--;
-		PlaySound(SOUND_LABEL_SE_Select);
-	}
-	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.pwMode && cursolPw <= 0) {
-		cursolPw++;
-		PlaySound(SOUND_LABEL_SE_Select);
-	}
-	if ((GetKeyboardTrigger(DIK_RETURN)|| GetKeyboardTrigger(DIK_Z)) && !g_Reserve.pwMode)
+	PlayerStatus *member = GetTeam();
+	if (member[g_Reserve.selectPw].level >= MAX_LEVEL && g_Reserve.pwMode)
 	{
-		g_Reserve.pwMode = TRUE;
-		PlaySound(SOUND_LABEL_SE_Decision);
-	}
-	else if (GetKeyboardTrigger(DIK_C) && !g_Reserve.pwMode)
-	{
-		g_Reserve.mode = 99;
-		PlaySound(SOUND_LABEL_SE_Cancel);
-	}
-	else if (GetKeyboardTrigger(DIK_C))
-	{
-		g_Reserve.pwMode = FALSE;
 		cursolPw = 0;
-		PlaySound(SOUND_LABEL_SE_Cancel);
-	}
-	else if ((GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_Z) )&& g_Reserve.pwMode)
-	{
-		switch (cursolPw) {
-		case 0:
+		if (GetKeyboardTrigger(DIK_C) || GetKeyboardTrigger(DIK_RETURN))
+		{
 			g_Reserve.pwMode = FALSE;
+			cursolPw = 0;
 			PlaySound(SOUND_LABEL_SE_Cancel);
-			break;
-		case 1:
-			PlayerStatus *member = GetTeam();
-			if (CheckPowerUpMaterial(&member[g_Reserve.selectPw]))	//セレクトしているキャラはレベルアップ可能か？
-			{
-				ReduceMaterial(&member[g_Reserve.selectPw]);	//素材量を減らす
-				member[g_Reserve.selectPw].level++;	//レベルアップ！
-				PlaySound(SOUND_LABEL_SE_PowerUp);
-			}
-			break;
 		}
 	}
+	else {
+		//まず強化モードの操作を優先して処理
+		if (GetKeyboardTrigger(DIK_UP) && g_Reserve.pwMode && cursolPw > 0) {
+			cursolPw--;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
+		else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.pwMode && cursolPw <= 0) {
+			cursolPw++;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
+		if ((GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_Z)) && !g_Reserve.pwMode)
+		{
+			g_Reserve.pwMode = TRUE;
+			PlaySound(SOUND_LABEL_SE_Decision);
+		}
+		else if (GetKeyboardTrigger(DIK_C) && !g_Reserve.pwMode)
+		{
+			g_Reserve.mode = 99;
+			PlaySound(SOUND_LABEL_SE_Cancel);
+		}
+		else if (GetKeyboardTrigger(DIK_C))
+		{
+			g_Reserve.pwMode = FALSE;
+			cursolPw = 0;
+			PlaySound(SOUND_LABEL_SE_Cancel);
+		}
+		else if ((GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_Z)) && g_Reserve.pwMode)
+		{
+			switch (cursolPw) {
+			case 0:
+				g_Reserve.pwMode = FALSE;
+				PlaySound(SOUND_LABEL_SE_Cancel);
+				break;
+			case 1:
+				PlayerStatus *member = GetTeam();
+				if (CheckPowerUpMaterial(&member[g_Reserve.selectPw]))	//セレクトしているキャラはレベルアップ可能か？
+				{
+					ReduceMaterial(&member[g_Reserve.selectPw]);	//素材量を減らす
+					member[g_Reserve.selectPw].level++;	//レベルアップ！
+					PlaySound(SOUND_LABEL_SE_PowerUp);
+				}
+				break;
+			}
+		}
 
-	if (g_Reserve.pwMode)return;//強化中なら他操作を受け付けない
-	
-	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
-	{
-		g_Reserve.selectPw--;
-		PlaySound(SOUND_LABEL_SE_Select);
-	}
-	else if (GetKeyboardTrigger(DIK_RIGHT) && g_Reserve.selectPw < GetMemberNum() - 1)
-	{
-		g_Reserve.selectPw++;
-		PlaySound(SOUND_LABEL_SE_Select);
-	}
+		if (g_Reserve.pwMode)return;//強化中なら他操作を受け付けない
 
-	else if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw >4)
-	{
-		g_Reserve.selectPw -= ROW_NUM;
-		PlaySound(SOUND_LABEL_SE_Select);
-	}
-	else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.selectPw < GetMemberNum() - 1)
-	{
-		if (g_Reserve.selectPw + ROW_NUM > GetMemberNum() - 1)
-			g_Reserve.selectPw = GetMemberNum() - 1;
-		else
-			g_Reserve.selectPw += ROW_NUM;
-		PlaySound(SOUND_LABEL_SE_Select);
+		if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
+		{
+			g_Reserve.selectPw--;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
+		else if (GetKeyboardTrigger(DIK_RIGHT) && g_Reserve.selectPw < GetMemberNum() - 1)
+		{
+			g_Reserve.selectPw++;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
+
+		else if (GetKeyboardTrigger(DIK_UP) && g_Reserve.selectPw > 4)
+		{
+			g_Reserve.selectPw -= ROW_NUM;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
+		else if (GetKeyboardTrigger(DIK_DOWN) && g_Reserve.selectPw < GetMemberNum() - 1)
+		{
+			if (g_Reserve.selectPw + ROW_NUM > GetMemberNum() - 1)
+				g_Reserve.selectPw = GetMemberNum() - 1;
+			else
+				g_Reserve.selectPw += ROW_NUM;
+			PlaySound(SOUND_LABEL_SE_Select);
+		}
 	}
 }
 
@@ -617,6 +659,11 @@ void PowerUpButton(void)
 void ConfirmButton(void)
 {
 	g_Reserve.mode = UnitConfirm;
+}
+
+void ReserveHelpButton(void)
+{
+	g_Reserve.mode = ReserveHelp;
 }
 
 void GameStartButton(void)
@@ -917,4 +964,65 @@ void ReduceMaterial(PlayerStatus *member)
 			break;
 		}
 	}
+}
+
+void ReserveHelpMode(void)
+{
+	if (GetKeyboardTrigger(DIK_RIGHT)) {
+		HelpTexNum++;
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
+	else if (GetKeyboardTrigger(DIK_LEFT) && HelpTexNum > 0) {
+		HelpTexNum--;
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
+
+	//ヘルプ画像をオーバーしていたらリセット
+	if (HelpTexNum >= HELP_TEX_NUM || GetKeyboardTrigger(DIK_C))
+	{
+		HelpTexNum = 0;
+		g_Reserve.mode = 99;
+		PlaySound(SOUND_LABEL_SE_Cancel);
+	}
+}
+
+void DrawReserveHelp(void)
+{
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Help_ReserveTex + HelpTexNum]);
+	const XMFLOAT2 pos = { SCREEN_CENTER_X, SCREEN_CENTER_Y };
+	const XMFLOAT2 texSize = { 1600.0f, 900.0f };
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, pos.x, pos.y, texSize.x, texSize.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+}
+
+void DrawMaxLevelChar(XMFLOAT2 pos, int k)
+{
+	PlayerStatus *member = GetTeam();
+	//下地の枠を描画
+	const float sizeX = SCREEN_WIDTH * 0.75f;
+	const float sizeY = SCREEN_HEIGHT * 0.70f;
+	XMFLOAT4 color = { 0.4f, 0.4f, 1.0f, 1.0f };
+	DrawButton(color, pos.x, pos.y, sizeX, sizeY);
+
+	//キャラ画像描画
+	const float boxsize = 180.0f;	//ボックスサイズ定義
+	const int id = member[k].charID;
+	float posX = pos.x - sizeX * 0.36f;
+	float posY = pos.y - sizeY * 0.375f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_CharTexture[id]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, boxsize, boxsize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// ポリゴン描画
+	pos.y = 180.0f*0.75f + pos.y - SCREEN_HEIGHT * 0.70f * 0.375f;
+	pos.x = pos.x - SCREEN_WIDTH * 0.75f * 0.36f - 180.0f * 0.35f;
+	GetDeviceContext()->Draw(4, 0);
+	DrawCharAllStatus(pos, k);
 }

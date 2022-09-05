@@ -10,6 +10,7 @@
 #include "player.h"
 #include "game.h"
 #include "cost.h"
+#include "ui.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -38,10 +39,14 @@ HRESULT InitPlayerSet(void)
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		g_PlayerSet.use[i] = FALSE;
+		g_PlayerSet.cost[i] = FALSE;
+		g_PlayerSet.setAble[i] = FALSE;
 		member[i].setAble = FALSE;
 		if (member[i].use == FALSE)continue;	//編成枠未使用
 		g_PlayerSet.use[i] = TRUE;	//セット可能であることを表している
+		g_PlayerSet.setAble[i] = FALSE;
 		g_PlayerSet.setCharID[i] = member[i].charID;
+		g_PlayerSet.cost[i] = member[i].cost[member[i].level];
 	}
 	g_Load = TRUE;
 	return S_OK;
@@ -60,7 +65,8 @@ void UpdatePlayerSet(void)
 	PlayerSetMap();
 	SetPosition();
 	CheckSetChar();
-
+	if (GetKeyboardTrigger(DIK_H))
+		GetHelpButton() == TRUE ? SetHelpButton(FALSE) : SetHelpButton(TRUE);
 }
 
 void DrawPlayerSet(void)
@@ -333,10 +339,14 @@ void SetAbleChar(void)
 	for (int i = 0; i < MAX_PLAYER_SET; i++)
 	{
 		if (member[i].use == FALSE)continue;
-		if (member[i].cost[member[i].level] <= cost->cost)
+		if (member[i].cost[member[i].level] <= cost->cost) {
 			member[i].setAble = TRUE;
-		else
+			g_PlayerSet.setAble[i] = TRUE;
+		}
+		else {
 			member[i].setAble = FALSE;
+			g_PlayerSet.setAble[i] = FALSE;
+		}
 	}
 }
 

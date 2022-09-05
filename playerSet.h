@@ -108,6 +108,8 @@ class PlayerSet
 public:
 	XMFLOAT3 setRot;	//セットする先の座標
 	BOOL use[MAX_PLAYER_SET];			//この編成番号は有効か否か
+	BOOL setAble[MAX_PLAYER_SET];
+	int cost[MAX_PLAYER_SET];			//キャラコスト
 	int setPlayer;	//セットするプレイヤー番号テーブル(添え字？)
 	int setCharID[MAX_PLAYER_SET];	//セットしようとしてるキャラが何なのか？
 	PlayerStatus *setPlayerNum;

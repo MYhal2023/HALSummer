@@ -55,7 +55,7 @@ static char* g_TextureName[] = {
 };
 static PLAYER_VAR	g_EnemyVar;
 static ENEMY		g_Enemy[MAX_ENEMY];						// エネミー
-static Enemyliner   g_Enemyline[MAX_PLAYER];
+static Enemyliner   g_Enemyline[MAX_ENEMY];
 static EnemyParts	g_Parts[MAX_ENEMY_PARTS];					// エネミーのパーツ。余裕をもってエネミー×2倍の数用意
 static Unit			g_EnemyModel[ENEMY_VAR];
 static Unit			g_EnemyPartsModel[ENEMY_PARTS_VAR];
@@ -726,7 +726,7 @@ int StateCheck(int i)
 	{
 		//1人でも生存しているユニットを見つけたら攻撃モードへ
 		if (player[k].use != TRUE)continue;
-		if (CollisionBC(g_Enemy[i].pos, player[k].pos, 100.0f, 1.0f)) { 
+		if (CollisionBC(g_Enemy[i].pos, player[k].pos, g_Enemy[i].size, 1.0f)) { 
 			check = TRUE;
 			break;
 		}

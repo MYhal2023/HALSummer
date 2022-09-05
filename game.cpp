@@ -233,22 +233,25 @@ void InitSystem(void)
 	switch (re->day)
 	{
 	case 1:
-		SetReward(0, 1000);
-		SetReward(1, 50);
+		SetReward(0, 700);
+		SetReward(1, 30);
 		SetReward(2, 1);
 		InitMapChip(g_FirstMap, g_FirstMapObject, 5, MAX_CHIP_WIDTH);
 		linesize = sizeof(FirstmoveTbl) / sizeof(MOVERINE);
 		linesize2 = sizeof(FirstmoveTbl2) / sizeof(MOVERINE);
-		SetInflue(200.0f, 40, 5, 1, FirstmoveTbl2, linesize);
-		//SetGrape(800.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		//SetGrape(900.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		//SetGrape(1000.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		//SetRyoku(100.0f, 40, 5, 1, FirstmoveTbl2, linesize2);
-		//SetStrept(1400.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		//SetStrept(9000.0f, 40, 5, 1, FirstmoveTbl2, linesize2);
-		//SetStrept(7000.0f, 40, 5, 1, FirstmoveTbl, linesize);
-		SetCost(20);
+		SetGrape(600.0f, 30, 4, 2, FirstmoveTbl2, linesize2);
+		SetGrape(1200.0f, 30, 4, 2, FirstmoveTbl2, linesize2);
+		SetGrape(9000.0f, 30, 4, 2, FirstmoveTbl, linesize);
+		SetRyoku(9600.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+		SetRyoku(10200.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+		SetStrept(18000.0f, 50, 7, 2, FirstmoveTbl, linesize);
+		SetStrept(19000.0f, 50, 7, 2, FirstmoveTbl, linesize);
+		SetStrept(22000.0f, 50, 7, 2, FirstmoveTbl, linesize);
+		SetStrept(23000.0f, 50, 7, 2, FirstmoveTbl, linesize);
+		SetRyoku(25000.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+		SetRyoku(26000.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+
+		SetCost(10);
 		pos[0] = { 25.0f, 0.0f, 100.0f };
 		InitBase(3, &pos[0], 1);
 		PlaySound(SOUND_LABEL_BGM_Battle1);
@@ -308,7 +311,7 @@ void InitSystem(void)
 		SetCost(10);
 		pos[0] = { 25.0f, 0.0f, 100.0f };
 		InitBase(3, &pos[0], 1);
-		PlaySound(SOUND_LABEL_BGM_Battle2);
+		PlaySound(SOUND_LABEL_BGM_Title);
 		break;
 	}
 }
@@ -337,7 +340,7 @@ void UninitGame(void)
 //=============================================================================
 void UpdateGame(void)
 {
-	if (GetKeyboardTrigger(DIK_P))
+	if (GetKeyboardTrigger(DIK_P) && !GetHelpButton())
 	{
 		if (g_bPause == TRUE)
 			g_bPause = FALSE;
@@ -364,6 +367,8 @@ void UpdateGame(void)
 	if (CheckGameover())return;
 
 	UpdatePlayerSet();
+
+	if (GetHelpButton())return;
 
 	if (g_Slow == TRUE)
 	{
