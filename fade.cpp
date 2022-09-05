@@ -15,7 +15,7 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(SCREEN_WIDTH)	// îwåiÉTÉCÉY
 #define TEXTURE_HEIGHT				(SCREEN_HEIGHT)	// 
-#define TEXTURE_MAX					(1)				// ÉeÉNÉXÉ`ÉÉÇÃêî
+#define TEXTURE_MAX					(2)				// ÉeÉNÉXÉ`ÉÉÇÃêî
 
 #define	FADE_RATE					(0.02f)			// ÉtÉFÅ[ÉhåWêî
 
@@ -32,6 +32,7 @@ static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// ÉeÉNÉXÉ`É
 
 static char *g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/battle_ilust.png",
+	"data/TEXTURE/fade_black.png",
 };
 
 
@@ -81,7 +82,7 @@ HRESULT InitFade(void)
 	g_w     = TEXTURE_WIDTH;
 	g_h     = TEXTURE_HEIGHT;
 	g_Pos   = { SCREEN_CENTER_X, SCREEN_CENTER_Y, 0.0f };
-	g_TexNo = 0;
+	g_TexNo = 1;
 
 	g_Fade  = FADE_IN;
 	g_Color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -133,7 +134,7 @@ void UpdateFade(void)
 
 				// ÉtÉFÅ[ÉhÉCÉìèàóùÇ…êÿÇËë÷Ç¶
 				g_Color.w = 1.0f;
-				SetFade(FADE_IN, g_ModeNext);
+				SetFade(FADE_IN, g_ModeNext, g_TexNo);
 
 				// ÉÇÅ[ÉhÇê›íË
 				SetMode(g_ModeNext);
@@ -147,7 +148,7 @@ void UpdateFade(void)
 			{
 				// ÉtÉFÅ[ÉhèàóùèIóπ
 				g_Color.w = 0.0f;
-				SetFade(FADE_NONE, g_ModeNext);
+				SetFade(FADE_NONE, g_ModeNext, g_TexNo);
 			}
 
 		}
@@ -215,10 +216,11 @@ void DrawFade(void)
 //=============================================================================
 // ÉtÉFÅ[ÉhÇÃèÛë‘ê›íË
 //=============================================================================
-void SetFade(FADE fade, int modeNext)
+void SetFade(FADE fade, int modeNext, int texNo)
 {
 	g_Fade = fade;
 	g_ModeNext = modeNext;
+	g_TexNo = texNo;
 }
 
 //=============================================================================

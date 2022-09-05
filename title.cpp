@@ -13,10 +13,11 @@
 #include "gameover.h"
 #include "debugproc.h"
 #include "fade.h"
+#include "sound.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(5)				// テクスチャの数
+#define TEXTURE_MAX			(6)				// テクスチャの数
 #define TEXTURE_SPEED		(0.1f)		// テクスチャの移動速度
 #define TITLE_BUTTON_NUM	(2)			//
 #define COLOR_SPEED			(0.01f)		// テクスチャの変色速度
@@ -33,6 +34,7 @@ static char* g_TextureName[] = {
 	"data/TEXTURE/title_enemy.png",
 	"data/TEXTURE/newgame.png",
 	"data/TEXTURE/loadgame.png",
+	"data/TEXTURE/title_logo.png",
 };
 static Title g_Title[TEXTURE_MAX];
 static BOOL g_Load = FALSE;
@@ -94,6 +96,11 @@ HRESULT InitTitle(void)
 			g_Title[i].pos = { SCREEN_CENTER_X, SCREEN_CENTER_Y *1.2f };
 			g_Title[i].size = { 390, 90 };
 			break;
+		case title_logo:
+			g_Title[i].color = { 1.0f, 1.0f, 1.0f, 0.0f };
+			g_Title[i].pos = { SCREEN_CENTER_X, SCREEN_HEIGHT * 0.18f };
+			g_Title[i].size = { 400*1.75f, 200*1.75f };
+			break;
 		}
 	}
 	for (int i = 0; i < TEXTURE_MAX; i++)
@@ -111,6 +118,9 @@ HRESULT InitTitle(void)
 			break;
 		case loadgame:
 			speed[i] = COLOR_SPEED;
+			break;
+		case title_logo:
+			speed[i] = 0.1f;
 			break;
 		}
 	}
@@ -165,8 +175,11 @@ void UpdateTitle(void)
 		{
 			FadeTexture(0, &g_Title[title_allies]);
 		}
-	}
 
+		if (g_Title[title_logo].color.w < 1.0f) {
+			FadeTexture(0, &g_Title[title_logo]);
+		}
+	}
 	//フェードインしたら各自で動かさせる
 	if (g_Title[title_enemy].color.w > 0.5f) {
 		if (g_Title[title_enemy].pos.y > SCREEN_CENTER_Y * 1.025f || g_Title[title_enemy].pos.y < SCREEN_CENTER_Y * 0.975f)
@@ -192,18 +205,25 @@ void UpdateTitle(void)
 
 	//カーソル変更
 	if (GetKeyboardTrigger(DIK_LEFT) && cursol > 0)
+	{
 		cursol--;
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
 	else if (GetKeyboardTrigger(DIK_RIGHT) && cursol < TITLE_BUTTON_NUM - 1)
+	{
 		cursol++;
-
+		PlaySound(SOUND_LABEL_SE_Select);
+	}
 	if (GetKeyboardTrigger(DIK_Z) || GetKeyboardTrigger(DIK_RETURN))
 	{
 		switch (cursol) {
 		case 0://はじめから
-			SetFade(FADE_OUT, MODE_RESERVE);
+			PlaySound(SOUND_LABEL_SE_Decision);
+			SetFade(FADE_OUT, MODE_RESERVE, BlackFade);
 			break;
 		case 1://つづきから
-			SetFade(FADE_OUT, MODE_RESERVE);
+			PlaySound(SOUND_LABEL_SE_Decision);
+			SetFade(FADE_OUT, MODE_RESERVE, BlackFade);
 			break;
 		}
 	}
@@ -261,6 +281,17 @@ void DrawTitle(void)
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
 	SetSpriteColor(g_VertexBuffer, g_Title[title_allies].pos.x, g_Title[title_allies].pos.y, g_Title[title_allies].size.x, g_Title[title_allies].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
 		g_Title[title_allies].color);
+
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+	// タイトルロゴを描画
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Title[title_logo].textNo]);
+
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, g_Title[title_logo].pos.x, g_Title[title_logo].pos.y, g_Title[title_logo].size.x, g_Title[title_logo].size.y, 0.0f, 0.0f, 1.0f, 1.0f,
+		g_Title[title_logo].color);
 
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);

@@ -22,6 +22,7 @@ enum TitleTexture
 	title_enemy,
 	newgame,
 	loadgame,
+	title_logo,
 };
 
 HRESULT InitTitle(void);

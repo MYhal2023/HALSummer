@@ -621,7 +621,7 @@ void ConfirmButton(void)
 
 void GameStartButton(void)
 {
-	SetFade(FADE_OUT, MODE_GAME);
+	SetFade(FADE_OUT, MODE_GAME, battleFade);
 }
 
 int GetDay(void)

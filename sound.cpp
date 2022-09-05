@@ -82,6 +82,7 @@ SOUNDPARAM g_aParam[SOUND_LABEL_MAX] =
 	{ (char*)"data/SE/panch2.wav", 0 },		// panch-strong‰¹
 	{ (char*)"data/SE/machine_gun.wav", 0 },		// panch-strong‰¹
 	{ (char*)"data/SE/machine_gunLong.wav", 0 },		// panch-strong‰¹
+	{ (char*)"data/BGM/BGM000.wav", 1 },		// panch-strong‰¹
 	{ (char*)"data/BGM/BGM001.wav", 1 },		// panch-strong‰¹
 	{ (char*)"data/BGM/BGM002.wav", 1 },		// panch-strong‰¹
 	{ (char*)"data/BGM/BGM101.wav", 1 },		// panch-strong‰¹

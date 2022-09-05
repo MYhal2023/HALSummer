@@ -123,7 +123,7 @@ void UpdateOver(void)
 	}
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
-		SetFade(FADE_OUT, MODE_RESULT);
+		SetFade(FADE_OUT, MODE_RESULT, battleFade);
 	}
 }
 

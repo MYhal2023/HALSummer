@@ -20,7 +20,11 @@ typedef enum
 	FADE_MAX
 } FADE;
 
-
+enum FadeTexture
+{
+	battleFade,
+	BlackFade,
+};
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -30,7 +34,7 @@ void UninitFade(void);
 void UpdateFade(void);
 void DrawFade(void);
 
-void SetFade(FADE fade, int modeNext);
+void SetFade(FADE fade, int modeNext, int texNo);
 FADE GetFade(void);
 
 
