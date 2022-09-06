@@ -102,5 +102,3 @@ void ReduceMaterial(PlayerStatus *member);
 void ReserveHelpMode(void);
 void DrawReserveHelp(void);
 void DrawMaxLevelChar(XMFLOAT2 pos, int k);
-//180.0f*0.75f+pos.y - SCREEN_HEIGHT *0.70f * 0.375f
-//pos.x - SCREEN_WIDTH * 0.75f * 0.36f

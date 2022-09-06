@@ -12,6 +12,7 @@
 #include "enemy.h"
 #include "collision.h"
 #include "base.h"
+#include "bullet.h"
 #define SKILL_TIME (600)
 static int atNum = 0;
 //好中球のスキル処理
@@ -672,6 +673,12 @@ void NKInterPoration(PLAYER *player, Playerliner *line, PlayerParts *parts)
 	if (player->attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？
 	player->atFrameCount++;
 	ENEMY *enemy = GetEnemy();
+	//演出用のバレットセット
+	if (player->skillID == NK_skill && player->atFrameCount == player->atFrame - 5) {
+		ENEMY *enemy = GetEnemy();
+		XMFLOAT3 setpos = { player->pos.x, player->pos.y + 15.0f, player->pos.z };
+		SetBullet(setpos, player->rot, 1.0f, &enemy[player->target]);
+	}
 	//攻撃フレームに達したら、ダメージ計算関数を元にターゲットにダメージ
 	if (player->atFrameCount >= player->atFrame) {
 		enemy[player->target].life -= DamageFunc(player->power, enemy[player->target].diffend);
@@ -849,6 +856,13 @@ void KouenInterPoration(PLAYER *player, Playerliner *line, PlayerParts *parts)
 	if (player->attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？
 	player->atFrameCount++;
 	ENEMY *enemy = GetEnemy();
+	if (player->atFrameCount >= player->atFrame - 1) {
+		ENEMY *enemy = GetEnemy();
+		XMFLOAT3 setpos = { player->pos.x + cosf(player->rot.y) * 20.0f, player->pos.y, player->pos.z + sinf(player->rot.y) *20.0f };
+		XMFLOAT3 invpos = { player->pos.x - cosf(player->rot.y) * 20.0f, player->pos.y, player->pos.z - sinf(player->rot.y) *20.0f };
+		SetBullet(setpos, player->rot, 0.5f, &enemy[player->target]);
+		SetBullet(invpos, player->rot, 0.5f, &enemy[player->target]);
+	}
 	//攻撃フレームに達したら、ダメージ計算関数を元にターゲットにダメージ
 	if (player->atFrameCount >= player->atFrame) {
 		enemy[player->target].life -= DamageFunc(player->power, enemy[player->target].diffend);

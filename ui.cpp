@@ -13,12 +13,14 @@
 #include "base.h"
 #include "cost.h"
 #include "team.h"
+#include "reserve.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
 #define TEXTURE_MAX			(19)				// テクスチャの数
 #define CHAR_TEXTURE_MAX	(7)				// キャラテクスチャの数
+#define IC_TEXTURE_MAX		(9)				// アイコンテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 
@@ -28,6 +30,8 @@
 static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView		*g_IconTexture[IC_TEXTURE_MAX] = { NULL };	// テクスチャ情報
+
 static char* g_TextureName[] = {
 	"data/TEXTURE/box.png",
 	"data/TEXTURE/var.png",
@@ -58,6 +62,19 @@ static char* g_CharTextureName[] = {
 	"data/TEXTURE/NK.png",
 	"data/TEXTURE/kouen.png",
 };
+
+static char* g_IconTextureName[IC_TEXTURE_MAX] = {
+	"data/TEXTURE/icon_cost.png",
+	"data/TEXTURE/icon_life.png",
+	"data/TEXTURE/icon_attack.png",
+	"data/TEXTURE/icon_diffend.png",
+	"data/TEXTURE/icon_block.png",
+	"data/TEXTURE/icon_sp.png",
+	"data/TEXTURE/icon_energy.png",
+	"data/TEXTURE/icon_oxygen.png",
+	"data/TEXTURE/icon_iron.png",
+};
+
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;
 static BOOL g_Help = FALSE;
@@ -85,6 +102,16 @@ HRESULT InitUI(void)
 			&g_CharTexture[i],
 			NULL);
 	}
+	for (int i = 0; i < IC_TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_IconTextureName[i],
+			NULL,
+			NULL,
+			&g_IconTexture[i],
+			NULL);
+	}
+
 	// 頂点バッファ生成
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -167,6 +194,15 @@ void UninitUI(void)
 			g_CharTexture[i] = NULL;
 		}
 	}
+	// テクスチャの解放
+	for (int i = 0; i < IC_TEXTURE_MAX; i++)
+	{
+		if (g_IconTexture[i])
+		{
+			g_IconTexture[i]->Release();
+			g_IconTexture[i] = NULL;
+		}
+	}
 
 	g_Load = FALSE;
 }
@@ -212,6 +248,7 @@ void DrawUI(void)
 	DrawButtonStop();
 	DrawCost();
 	DrawHelpButton();
+	DrawBattleCharStatus();
 	SetDepthEnable(TRUE);
 
 	// ライティングを無効
@@ -499,5 +536,148 @@ void DrawHelpButton(void)
 		GetDeviceContext()->Draw(4, 0);
 	}
 }
+void DrawBattleCharStatus(void)
+{
+	PLAYER *player = GetPlayer();
+	PlayerSet *ps = GetSetPos();
+	if (ps->setPlayer == 99 || !player[ps->setPlayer].use)return;
+	if (!ps->setCheckMode && !ps->setMode)return;
+
+	//下地の枠を描画
+	const float sizeX = SCREEN_WIDTH * 0.45f;
+	const float sizeY = SCREEN_HEIGHT * 0.70f;
+	XMFLOAT4 color = { 0.4f, 0.4f, 1.0f, 0.3f };
+	XMFLOAT2 bgpos = { SCREEN_WIDTH * 0.25f, SCREEN_HEIGHT * 0.4f };
+
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[var_bg]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, bgpos.x, bgpos.y, sizeX, sizeY, 0.0f, 0.0f, 1.0f, 1.0f,
+		color);
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+
+
+	//キャラ画像をまずは描画
+	const float boxsize = 180.0f;	//ボックスサイズ定義
+	int id = player[ps->setPlayer].skillID + 1;
+	XMFLOAT2 pos1 = {SCREEN_WIDTH * 0.1f, SCREEN_HEIGHT * 0.2f};
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_CharTexture[id]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, pos1.x, pos1.y, boxsize, boxsize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	pos1.x += boxsize;
+	DrawCharAllStatus(pos1);
+
+}
+void DrawCharAllStatus(XMFLOAT2 pos)
+{
+	PlayerSet *ps = GetSetPos();
+	PLAYER *player = GetPlayer();
+	PLAYER *id = &player[ps->setPlayer];
+	//コスト描画
+	float posX = pos.x;
+	float posY = pos.y;
+	const float iconSize = 75.0f;	//ボックスサイズ定義
+	const float iconBuff = 16.0f;
+	float buffX = iconSize + iconBuff;
+	int level = id->level - 1;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icCost]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	float isx = iconSize - 8.0f;
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 0.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->cost, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//ライフ描画
+	posX = pos.x;
+	posY = pos.y + buffX * 1.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icLife]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 1.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->lifeMax, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//攻撃力描画
+	posX = pos.x;
+	posY = pos.y + buffX * 2.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icAttack]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 2.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->power, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//防御力描画
+	posX = pos.x;
+	posY = pos.y + buffX * 3.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icDiffend]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 3.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->diffend, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//ブロック数描画
+	posX = pos.x;
+	posY = pos.y + buffX * 4.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icBlock]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 4.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->blockMax, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//SP描画
+	posX = pos.x;
+	posY = pos.y + buffX * 5.0f;
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_IconTexture[icSp]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, posX, posY, iconSize, iconSize, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	posX = pos.x + isx;
+	posY = pos.y + buffX * 5.0f;
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
+	DrawNumber(id->skillPointMax, posX + iconSize * 0.5f, posY, iconSize * 0.5f, iconSize, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+}
+
 void SetHelpButton(BOOL flag) { g_Help = flag; }
 BOOL GetHelpButton(void) { return g_Help; }

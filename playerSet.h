@@ -129,3 +129,4 @@ void CharaStateCheck(int num);
 void SetAbleChar(void);
 void CheckSetChar(void);
 PlayerSet *GetSetPos(void);
+void DrawBattleSetChar(void);

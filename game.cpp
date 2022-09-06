@@ -33,6 +33,7 @@
 #include "reserve.h"
 #include "result.h"
 #include "enemyLinerData.h"
+#include "bullet.h"
 
 
 //*****************************************************************************
@@ -190,6 +191,7 @@ void InitSystem(void)
 
 	InitEnemy();
 
+	InitBullet();	
 	// フィールドの初期化
 	InitMeshField(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), FIELD_X, FIELD_Z, BLOCK_SIZE, BLOCK_SIZE, WATER);
 
@@ -244,10 +246,10 @@ void InitSystem(void)
 		SetGrape(9000.0f, 30, 4, 2, FirstmoveTbl, linesize);
 		SetRyoku(9600.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
 		SetRyoku(10200.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
-		SetStrept(18000.0f, 50, 7, 2, FirstmoveTbl, linesize);
-		SetStrept(19000.0f, 50, 7, 2, FirstmoveTbl, linesize);
-		SetStrept(22000.0f, 50, 7, 2, FirstmoveTbl, linesize);
-		SetStrept(23000.0f, 50, 7, 2, FirstmoveTbl, linesize);
+		SetRyoku(18000.0f, 30, 7, 1, FirstmoveTbl, linesize);
+		SetRyoku(19000.0f, 30, 7, 1, FirstmoveTbl, linesize);
+		SetStrept(22000.0f, 90, 5, 1, FirstmoveTbl, linesize);
+		SetStrept(23000.0f, 90, 5, 1, FirstmoveTbl, linesize);
 		SetRyoku(25000.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
 		SetRyoku(26000.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
 
@@ -262,33 +264,56 @@ void InitSystem(void)
 		SetReward(2, 1);
 		InitMapChip(g_SecondMap, g_SecondMapObject, 5, MAX_CHIP_WIDTH);
 		linesize = sizeof(SecondmoveTbl) / sizeof(MOVERINE);
-		SetGrape(800.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetGrape(900.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetGrape(1000.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetRyoku(100.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetStrept(1400.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		linesize2 = sizeof(FirstmoveTbl2) / sizeof(MOVERINE);
+		SetGrape(1600.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(2000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(6000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetRyoku(9000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(9600.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetStrept(12000.0f, 90, 4, 3, SecondmoveTbl, linesize);
+		SetStrept(13000.0f, 90, 4, 3, FirstmoveTbl2, linesize2);
+		SetRyoku(21000.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+		SetRyoku(22200.0f, 30, 7, 1, FirstmoveTbl2, linesize2);
+		SetRyoku(24200.0f, 30, 7, 1, SecondmoveTbl, linesize);
+		SetRyoku(26000.0f, 30, 7, 1, SecondmoveTbl, linesize);
+		SetGrape(40000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(42500.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(44000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetGrape(46000.0f, 40, 5, 1, SecondmoveTbl, linesize);
+		SetInflue(70000.0f, 30, 10, 2, ThirdmoveTbl, linesize);
+		SetInflue(71000.0f, 30, 10, 2, ThirdmoveTbl, linesize);
+		SetInflue(72000.0f, 30, 10, 2, ThirdmoveTbl, linesize);
+
 		SetCost(10);
 		pos[0] = { 25.0f, 0.0f, 100.0f };
 		InitBase(3, &pos[0], 1);
 		PlaySound(SOUND_LABEL_BGM_Battle2);
 		break;
 	case 3:
-		SetReward(0, 1000);
-		SetReward(1, 50);
+		SetReward(0, 1200);
+		SetReward(1, 80);
 		SetReward(2, 1);
 		InitMapChip(g_ThirdMap, g_ThirdMapObject, 7, MAX_CHIP_WIDTH);
 		linesize = sizeof(ThirdmoveTbl) / sizeof(MOVERINE);
-		SetGrape(800.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetGrape(900.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetGrape(1000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetRyoku(100.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetStrept(1400.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
-		SetStrept(9000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetInflue(900.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetInflue(3000.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetInflue(3600.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetInflue(5800.0f, 40, 5, 1, ThirdmoveTbl, linesize);
+		SetInflue(9000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(9300.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(9600.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(20000.0f, 60, 5, 3, ThirdmoveTbl, linesize);
+		SetInflue(22000.0f, 60, 5, 3, ThirdmoveTbl, linesize);
+		SetInflue(24000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(26000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(28000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(28000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(30000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(30600.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(31200.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(31800.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(32400.0f, 40, 7, 2, ThirdmoveTbl, linesize);
+		SetInflue(33000.0f, 40, 7, 2, ThirdmoveTbl, linesize);
 		SetCost(10);
 		pos[0] = { 25.0f, 0.0f, 100.0f };
 		InitBase(3, &pos[0], 1);
@@ -325,6 +350,8 @@ void UninitGame(void)
 	UninitShadow();
 
 	UninitOver();
+
+	UninitBullet();
 
 	UninitEnemy();
 
@@ -391,6 +418,8 @@ void UpdateGame(void)
 
 		UpdateEnemy();
 
+		UpdateBullet();
+
 		UpdateLight();
 
 		IncTimeCost();
@@ -426,6 +455,10 @@ void DrawGame0(void)
 	DrawPlayer();
 
 	DrawEnemy();
+
+	DrawBattleSetChar();
+
+	DrawBullet();
 
 	DrawPlayerLife();
 

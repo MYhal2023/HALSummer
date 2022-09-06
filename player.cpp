@@ -22,6 +22,8 @@
 #include "fieldchip.h"
 #include "skill.h"
 #include "sound.h"
+#include "bullet.h"
+#include "playerSet.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -187,7 +189,10 @@ void UpdatePlayer(void)
 		//全キャラ共通処理
 		//体力が無くなったキャラの処理。消去する。そこのマップチップを開ける
 		if (g_Player[i].life <= 0 && g_Player[i].use) {
+			PlayerSet  *ps = GetSetPos();
 			g_Player[i].use = FALSE;
+			ps->use[g_Player[i].keyNum] = TRUE;
+			g_Player[i].keyNum = 99;
 			for (int k = g_Player[i].startNum; k < g_Player[i].startNum + g_Player[i].partsNum; k++)
 			{
 				g_Parts[k].use = FALSE;
@@ -571,8 +576,26 @@ void PlayerInterPoration(int i)
 	}
 	if (g_Player[i].target == 99 || g_Player[i].attackUse == TRUE)return;	//セットしていない、セットする必要がない攻撃があるかも？
 	g_Player[i].atFrameCount++;
+	//ヘルパーTなら回復、そうでないなら攻撃
 	if (g_Player[i].skillID != helperT_skill) {
 		ENEMY *enemy = GetEnemy();
+		//演出用のバレットセット
+		if (g_Player[i].skillID == NK_skill &&
+			g_Player[i].atFrameCount == g_Player[i].atFrame - 5) {
+			ENEMY *enemy = GetEnemy();
+			XMFLOAT3 setpos = { g_Player[i].pos.x, g_Player[i].pos.y + 15.0f, g_Player[i].pos.z};
+			SetBullet(setpos, g_Player[i].rot, 1.0f, &enemy[g_Player[i].target]);
+		}
+		else if (g_Player[i].skillID == kouen_skill &&
+			g_Player[i].atFrameCount >= g_Player[i].atFrame - 1 &&
+			atNum[i] < 5) {
+			ENEMY *enemy = GetEnemy();
+			XMFLOAT3 setpos = { g_Player[i].pos.x + cosf(g_Player[i].rot.y) * 20.0f, g_Player[i].pos.y, g_Player[i].pos.z + sinf(g_Player[i].rot.y) *20.0f };
+			XMFLOAT3 invpos = { g_Player[i].pos.x - cosf(g_Player[i].rot.y) * 20.0f, g_Player[i].pos.y, g_Player[i].pos.z - sinf(g_Player[i].rot.y) *20.0f };
+			SetBullet(setpos, g_Player[i].rot, 0.5f, &enemy[g_Player[i].target]);
+			SetBullet(invpos, g_Player[i].rot, 0.5f, &enemy[g_Player[i].target]);
+		}
+
 		//攻撃フレームに達したら、ダメージ計算関数を元にターゲットにダメージ
 		if (g_Player[i].atFrameCount >= g_Player[i].atFrame) {
 			enemy[g_Player[i].target].life -= DamageFunc(g_Player[i].power, enemy[g_Player[i].target].diffend);
@@ -582,6 +605,7 @@ void PlayerInterPoration(int i)
 				PlaySound(g_Player[i].attackSE);
 			atNum[i]++;
 		}
+
 	}
 	else {
 		if (g_Player[i].atFrameCount >= g_Player[i].atFrame) {
@@ -614,8 +638,10 @@ void PlayerSkill(int i)
 		break;
 	case killerT_skill:
 		KillerSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+		break;
 	case NK_skill:
 		NKSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
+		break;
 	case kouen_skill:
 		KouenSkill(&g_Player[i], &g_Playerline[i], &g_Parts[0]);
 		break;

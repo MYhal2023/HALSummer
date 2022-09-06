@@ -373,7 +373,7 @@ void SetNK(int i)
 	g_Team[i].skillTimeMax = 600;
 	g_Team[i].charType = HighPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = 150.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+	g_Team[i].size = 180.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 35, 40, 50, 55, 70 };
 	int Power[MAX_LEVEL] = { 6, 8, 10, 11, 12 };
@@ -420,7 +420,7 @@ void SetKouen(int i)
 	g_Team[i].skillTimeMax = 600;
 	g_Team[i].charType = HighPlaces;
 	g_Team[i].scl = { 1.0f, 1.0f, 1.0f };
-	g_Team[i].size = 150.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
+	g_Team[i].size = 180.0f;	// “–‚½‚è”»’è‚Ì‘å‚«‚³
 	g_Team[i].level = 1;
 	int Life[MAX_LEVEL] = { 40, 40, 50, 50, 60 };
 	int Power[MAX_LEVEL] = { 3, 3, 5, 6, 8 };

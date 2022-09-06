@@ -38,6 +38,7 @@ enum UI_TEXTURE
 	icon_6,
 };
 
+
 HRESULT InitUI(void);
 void UninitUI(void);
 void UpdateUI(void);
@@ -53,3 +54,5 @@ void DrawCost(void);
 void DrawHelpButton(void);
 void SetHelpButton(BOOL flag); 
 BOOL GetHelpButton(void);
+void DrawBattleCharStatus(void);
+void DrawCharAllStatus(XMFLOAT2 pos);

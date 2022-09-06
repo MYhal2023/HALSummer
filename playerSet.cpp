@@ -27,9 +27,11 @@
 //*****************************************************************************
 static PlayerSet g_PlayerSet;
 static BOOL g_Load = FALSE;
+static PLAYER s_Player;
+static PlayerParts g_Parts[3];
 HRESULT InitPlayerSet(void)
 {
-	g_PlayerSet.setPos = XMFLOAT3(0.0f, 15.0f, 0.0f);
+	g_PlayerSet.setPos = XMFLOAT3(200.0f, 15.0f, 200.0f);
 	g_PlayerSet.setRot = XMFLOAT3(0.0f, XM_PI * 0.5f, 0.0f);
 	g_PlayerSet.setMode = FALSE;
 	g_PlayerSet.setCheckMode = FALSE;
@@ -170,12 +172,12 @@ void SetPosition(void)
 	}
 	else if (GetKeyboardTrigger(DIK_RIGHT))
 	{
-		if (g_PlayerSet.setPos.x < GetMapWidth())
+		if (g_PlayerSet.setPos.x < GetMapWidth() - CHIP_SIZE)
 		g_PlayerSet.setPos.x += CHIP_SIZE;
 	}
 	else if (GetKeyboardTrigger(DIK_UP))
 	{
-		if (g_PlayerSet.setPos.z < GetMapHeight())
+		if (g_PlayerSet.setPos.z < GetMapHeight() - CHIP_SIZE)
 		g_PlayerSet.setPos.z += CHIP_SIZE;
 	}
 	else if (GetKeyboardTrigger(DIK_DOWN))
@@ -406,4 +408,108 @@ void CheckSetChar(void)
 PlayerSet *GetSetPos(void)
 {
 	return &g_PlayerSet;
+}
+
+void DrawBattleSetChar(void)
+{
+	if (g_PlayerSet.setPlayer == 99 || 
+		g_PlayerSet.use[g_PlayerSet.setPlayer] == FALSE)return;
+	if (!g_PlayerSet.setMode || g_PlayerSet.setCheckMode)return;
+	//&member[g_PlayerSet.setPlayer], &parts[member[g_PlayerSet.setPlayer].startNum]
+	//プレイヤーモデルのロードとセット
+	{
+		PlayerStatus *member = GetTeam();
+		PlayerPartsStatus *parts = GetTeamParts();
+		int x = (int)(g_PlayerSet.setPos.x / CHIP_SIZE);
+		int z = (int)(g_PlayerSet.setPos.z / CHIP_SIZE);
+
+		s_Player.model = member[g_PlayerSet.setPlayer].model;
+		s_Player.scl = member[g_PlayerSet.setPlayer].scl;
+		s_Player.rot = { 0.0f, XM_PI * 0.5f, 0.0f };
+		s_Player.pos = g_PlayerSet.setPos;
+		s_Player.partsNum = member[g_PlayerSet.setPlayer].partsNum;
+		switch (GetMapChiptype(z, x))
+		{
+		case LowPlaces:
+			g_PlayerSet.setPos.y = 20.0f;
+			break;
+		case HighPlaces:
+			g_PlayerSet.setPos.y = 32.0f;
+			break;
+		}
+
+		if (member[g_PlayerSet.setPlayer].partsNum > 0)
+		{
+			int i = member[g_PlayerSet.setPlayer].startNum;
+			for (int k = 0; k < s_Player.partsNum; k++)
+			{
+				g_Parts[k].model = parts[i + k].model;
+				g_Parts[k].scl = { 1.0f, 1.0f, 1.0f };
+				g_Parts[k].rot = { 0.0f, 0.0f, 0.0f };
+				g_Parts[k].pos = { 0.0f, 0.0f, 0.0f };
+			}
+		}
+	}
+	// カリング無効
+	SetCullingMode(CULL_MODE_NONE);
+
+	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
+	// ワールドマトリックスの初期化
+	mtxWorld = XMMatrixIdentity();
+
+	// スケールを反映
+	mtxScl = XMMatrixScaling(s_Player.scl.x, s_Player.scl.y, s_Player.scl.z);
+	mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+	// 回転を反映
+	mtxRot = XMMatrixRotationRollPitchYaw(s_Player.rot.x, s_Player.rot.y + XM_PI, s_Player.rot.z);
+	mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+	// 移動を反映
+	mtxTranslate = XMMatrixTranslation(s_Player.pos.x, s_Player.pos.y, s_Player.pos.z);
+	mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+	// ワールドマトリックスの設定
+	SetWorldMatrix(&mtxWorld);
+
+	XMStoreFloat4x4(&s_Player.mtxWorld, mtxWorld);
+
+	// モデル描画
+	DrawModel(&s_Player.model);
+
+	if (s_Player.partsNum == 0)return;
+
+	// パーツの階層アニメーション
+	for (int k = 0; k < s_Player.partsNum; k++)
+	{
+		// ワールドマトリックスの初期化
+		mtxWorld = XMMatrixIdentity();
+
+		// スケールを反映
+		mtxScl = XMMatrixScaling(g_Parts[k].scl.x, g_Parts[k].scl.y, g_Parts[k].scl.z);
+		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
+
+		// 回転を反映
+		mtxRot = XMMatrixRotationRollPitchYaw(g_Parts[k].rot.x, g_Parts[k].rot.y, g_Parts[k].rot.z);
+		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
+
+		// 移動を反映
+		mtxTranslate = XMMatrixTranslation(g_Parts[k].pos.x, g_Parts[k].pos.y, g_Parts[k].pos.z);
+		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
+
+		mtxWorld = XMMatrixMultiply(mtxWorld, XMLoadFloat4x4(&s_Player.mtxWorld));
+		// ↑
+		// s_Player.mtxWorldを指している
+
+		XMStoreFloat4x4(&g_Parts[k].mtxWorld, mtxWorld);
+
+		// ワールドマトリックスの設定
+		SetWorldMatrix(&mtxWorld);
+
+		// モデル描画
+		DrawModel(&g_Parts[k].model);
+	}
+
+	// カリング設定を戻す
+	SetCullingMode(CULL_MODE_BACK);
 }
