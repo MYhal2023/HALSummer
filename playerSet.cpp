@@ -11,6 +11,7 @@
 #include "game.h"
 #include "cost.h"
 #include "ui.h"
+#include "sound.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -213,6 +214,7 @@ void SetPosition(void)
 			SetSlowMode(FALSE);
 			DecreaseCost(member[g_PlayerSet.setPlayer].cost[member[g_PlayerSet.setPlayer].level - 1]);
 			g_PlayerSet.setPlayer = 99;
+			PlaySound(SOUND_LABEL_SE_Set);
 		}
 	}
 }
@@ -366,6 +368,7 @@ void CheckSetChar(void)
 		player[g_PlayerSet.setPlayer].skillUse = TRUE;
 		g_PlayerSet.setCheckMode = FALSE;
 		g_PlayerSet.setPlayer = 99;
+		PlaySound(SOUND_LABEL_SE_Skill);
 	}
 	//やっぱやーめた
 	else if (g_PlayerSet.setCheckMode &&

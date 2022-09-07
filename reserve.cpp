@@ -21,17 +21,17 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_MAX			(13)				// テクスチャの数
+#define TEXTURE_MAX			(19)				// テクスチャの数
 #define CH_TEXTURE_MAX		(7)				// キャラテクスチャの数
 #define IC_TEXTURE_MAX		(9)				// アイコンテクスチャの数
 #define CHAR_TEXTURE_MAX	(7)				// キャラテクスチャの数
-#define SKILL_TEXTURE_MAX	(7)				// キャラスキルテクスチャの数
+#define SKILL_TEXTURE_MAX	(6)				// キャラスキルテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 #define BUTTON_SIZE			(106.0f)		// ボタンの縦幅サイズ。多分これくらい
 #define BUTTON_MAX			(4)				// ユーサーが選択できるボタン数
 #define ROW_NUM				(5)				// 一列に並べるユニット数
-#define HELP_TEX_NUM		(1)				// 一列に並べるユニット数
+#define HELP_TEX_NUM		(6)				// ヘルプ画像の枚数
 
 //*****************************************************************************
 // グローバル変数
@@ -55,7 +55,13 @@ static char* g_TextureName[TEXTURE_MAX] = {
 	"data/TEXTURE/t_start.png",
 	"data/TEXTURE/t_levelup.png",
 	"data/TEXTURE/t_cancel.png",
-	"data/TEXTURE/var.png",
+	"data/TEXTURE/t_help.png",
+	"data/TEXTURE/201.png",
+	"data/TEXTURE/202.png",
+	"data/TEXTURE/203.png",
+	"data/TEXTURE/204.png",
+	"data/TEXTURE/205.png",
+	"data/TEXTURE/206.png",
 };
 static char* g_CharTextureName[CH_TEXTURE_MAX] = {
 	"data/TEXTURE/neutro.png",
@@ -79,14 +85,12 @@ static char* g_IconTextureName[IC_TEXTURE_MAX] = {
 	"data/TEXTURE/icon_iron.png",
 };
 static char* g_SkillTextureName[SKILL_TEXTURE_MAX] = {
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-	"data/TEXTURE/var.png",
-
+	"data/TEXTURE/skill_1.png",
+	"data/TEXTURE/skill_2.png",
+	"data/TEXTURE/skill_3.png",
+	"data/TEXTURE/skill_4.png",
+	"data/TEXTURE/skill_5.png",
+	"data/TEXTURE/skill_6.png",
 };
 
 static Reserve g_Reserve;
@@ -100,6 +104,7 @@ static float cursolAlpha;	//カーソル透明度
 static float alphaSpeed;	//カーソル透明度加算量
 static BOOL g_Load = FALSE;
 static BOOL restart = FALSE;
+static BOOL confirm = FALSE;
 HRESULT InitReserve(void)
 {
 	//起動時、一度だけ初期化
@@ -204,6 +209,7 @@ HRESULT InitReserve(void)
 	cursolPw = 0;
 	cursolAlpha = 0.5f;
 	alphaSpeed = 0.02f;
+	confirm = FALSE;
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -247,6 +253,15 @@ void UninitReserve(void)
 		{
 			g_IconTexture[i]->Release();
 			g_IconTexture[i] = NULL;
+		}
+	}
+	// テクスチャの解放
+	for (int i = 0; i < SKILL_TEXTURE_MAX; i++)
+	{
+		if (g_SkillTexture[i])
+		{
+			g_SkillTexture[i]->Release();
+			g_SkillTexture[i] = NULL;
 		}
 	}
 
@@ -304,7 +319,7 @@ void DrawReserve(void)
 	NormalRserveModeDraw();	//全体共通部分を描画(共通部はここに入れる。レイヤーに気を付ける事)
 
 	const XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.75f };
-	const XMFLOAT2 pos = { SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f };
+	XMFLOAT2 pos = { SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f };
 	XMFLOAT2 pos2 = { SCREEN_WIDTH * 0.6f, SCREEN_HEIGHT * 0.25f };
 	PlayerStatus *member = GetTeam();
 	//必要素材関連の変数設定
@@ -370,6 +385,27 @@ void DrawReserve(void)
 		break;
 	case UnitConfirm:
 		DrawButton(color, SCREEN_WIDTH * 0.55f, SCREEN_HEIGHT * 0.475f, SCREEN_WIDTH * 0.75f, SCREEN_HEIGHT* 0.70f);
+		DrawReserveChar();
+		if (confirm)
+		{
+			DrawMaxLevelChar(pos, g_Reserve.selectPw);
+			pos.y -= SCREEN_HEIGHT * 0.70f * 0.1f;
+			DrawCharSkill(pos, g_Reserve.selectPw);
+			DrawButton(g_PwButton[CanselButton].color, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+			DrawTextReserve(TEXT_CANCEL, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+				XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
+			//カーソルに対応して上から透明なボックスを描画
+			if ((cursolAlpha > 0.8f && alphaSpeed > 0.0f) || (cursolAlpha < 0.4f && alphaSpeed < 0.0f))alphaSpeed *= -1;
+			cursolAlpha += alphaSpeed;
+			switch (cursolPw) {
+			case 0:
+				DrawButton(XMFLOAT4{ 1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[CanselButton].pos.x, g_PwButton[CanselButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			case 1:
+				DrawButton(XMFLOAT4{ 1.0f, 1.0f, 1.0f, cursolAlpha }, g_PwButton[LevelupButton].pos.x, g_PwButton[LevelupButton].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
+				break;
+			}
+		}
 		break;
 	case ReserveHelp:
 		DrawReserveHelp();
@@ -538,7 +574,7 @@ void NormalRserveModeDraw(void)
 	DrawTextReserve(TEXT_CONFIRM, g_Button[UnitConfirm].pos.x, g_Button[UnitConfirm].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 	DrawButton(g_Button[ReserveHelp].color, g_Button[ReserveHelp].pos.x, g_Button[ReserveHelp].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
-	DrawTextReserve(TEXT_CONFIRM, g_Button[ReserveHelp].pos.x, g_Button[ReserveHelp].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
+	DrawTextReserve(Help_ReserveTex, g_Button[ReserveHelp].pos.x, g_Button[ReserveHelp].pos.y, BUTTON_SIZE * 2.0f, BUTTON_SIZE,
 		XMFLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
 	DrawButton(g_Button[GameStart].color, g_Button[GameStart].pos.x, g_Button[GameStart].pos.y, BUTTON_SIZE * 2.5f, BUTTON_SIZE);
@@ -636,6 +672,16 @@ void UnitPowerUpMode(void)
 
 void UnitConfirmMode(void)
 {
+	if (confirm == TRUE)
+	{
+		if (GetKeyboardTrigger(DIK_C) || GetKeyboardTrigger(DIK_RETURN))
+		{
+			confirm = FALSE;
+			PlaySound(SOUND_LABEL_SE_Cancel);
+		}
+		return;
+	}
+
 	if (GetKeyboardTrigger(DIK_LEFT) && g_Reserve.selectPw > 0)
 	{
 		g_Reserve.selectPw--;
@@ -662,7 +708,8 @@ void UnitConfirmMode(void)
 	}
 	if (GetKeyboardTrigger(DIK_RETURN))
 	{
-
+		confirm = TRUE;
+		PlaySound(SOUND_LABEL_SE_Decision);
 	}
 
 	if (GetKeyboardTrigger(DIK_C))
@@ -989,11 +1036,11 @@ void ReduceMaterial(PlayerStatus *member)
 
 void ReserveHelpMode(void)
 {
-	if (GetKeyboardTrigger(DIK_RIGHT)) {
+	if (GetKeyboardTrigger(DIK_RIGHT) || GetKeyboardTrigger(DIK_RETURN)) {
 		HelpTexNum++;
 		PlaySound(SOUND_LABEL_SE_Select);
 	}
-	else if (GetKeyboardTrigger(DIK_LEFT) && HelpTexNum > 0) {
+	else if ((GetKeyboardTrigger(DIK_LEFT))&& HelpTexNum > 0) {
 		HelpTexNum--;
 		PlaySound(SOUND_LABEL_SE_Select);
 	}
@@ -1010,7 +1057,7 @@ void ReserveHelpMode(void)
 void DrawReserveHelp(void)
 {
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[Help_ReserveTex + HelpTexNum]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[ReserveHelp_1 + HelpTexNum]);
 	const XMFLOAT2 pos = { SCREEN_CENTER_X, SCREEN_CENTER_Y };
 	const XMFLOAT2 texSize = { 1600.0f, 900.0f };
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
@@ -1050,5 +1097,16 @@ void DrawMaxLevelChar(XMFLOAT2 pos, int k)
 
 void DrawCharSkill(XMFLOAT2 pos, int k)
 {
+	PlayerStatus *member = GetTeam();
+	const float p = 1.4f;
+	const float width = 462.0f * p;	//ボックスサイズ定義
+	const float height = 125.0f * p;	//ボックスサイズ定義
+	const int id = member[k].charID - 1;	//樹状細胞がいないのでその分マイナス
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_SkillTexture[id]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, pos.x, pos.y, width, height, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	GetDeviceContext()->Draw(4, 0);
 
 }

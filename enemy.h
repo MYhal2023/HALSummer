@@ -26,7 +26,7 @@
 #define	MODEL_RYOKU_RIGHT		"data/MODEL/ryokunoukin_right.obj"			// 読み込むモデル名
 #define	MODEL_INFLUE		"data/MODEL/influenza.obj"			// 読み込むモデル名
 
-#define MAX_ENEMY		(50)					// エネミーの数
+#define MAX_ENEMY		(30)					// エネミーの数
 
 #define	ENEMY_SIZE		(5.0f)				// 当たり判定の大きさ
 

@@ -277,7 +277,7 @@ void SetHelpeerT(int i)
 	g_Team[i].setAble = FALSE;
 
 	g_Team[i].material = HelperTvalue;
-	g_Team[i].attackSE = SOUND_LABEL_SE_Hit;
+	g_Team[i].attackSE = SOUND_LABEL_SE_Spray;
 
 	//アニメーションデータのセット
 	g_Team[i].tbl_adrA = helperT_Attack;	//先頭アドレスの指定なため、添え字はi

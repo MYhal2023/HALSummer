@@ -61,6 +61,12 @@ enum Reserve_TEXTURE
 	TEXT_LUP,
 	TEXT_CANCEL,
 	Help_ReserveTex,
+	ReserveHelp_1,
+	ReserveHelp_2,
+	ReserveHelp_3,
+	ReserveHelp_4,
+	ReserveHelp_5,
+	ReserveHelp_6,
 };
 enum Icon_TEXTURE
 {
@@ -102,3 +108,4 @@ void ReduceMaterial(PlayerStatus *member);
 void ReserveHelpMode(void);
 void DrawReserveHelp(void);
 void DrawMaxLevelChar(XMFLOAT2 pos, int k);
+void DrawCharSkill(XMFLOAT2 pos, int k);

@@ -224,6 +224,7 @@ void WinResult(void)
 	if (GetKeyboardTrigger(DIK_RETURN) && !once)
 	{
 		Reserve* rs = GetReserve();
+		if(rs->day < 4)
 		rs->day++;
 		IncreaseReward(&g_Reward);
 		once = TRUE;

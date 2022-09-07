@@ -23,6 +23,7 @@
 #define IC_TEXTURE_MAX		(9)				// アイコンテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
+#define SKILL_TEXTURE_MAX	(6)				// キャラスキルテクスチャの数
 
 //*****************************************************************************
 // グローバル変数
@@ -31,6 +32,7 @@ static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_IconTexture[IC_TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView		*g_SkillTexture[IC_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TextureName[] = {
 	"data/TEXTURE/box.png",
@@ -74,6 +76,14 @@ static char* g_IconTextureName[IC_TEXTURE_MAX] = {
 	"data/TEXTURE/icon_oxygen.png",
 	"data/TEXTURE/icon_iron.png",
 };
+static char* g_SkillTextureName[SKILL_TEXTURE_MAX] = {
+	"data/TEXTURE/skill_1.png",
+	"data/TEXTURE/skill_2.png",
+	"data/TEXTURE/skill_3.png",
+	"data/TEXTURE/skill_4.png",
+	"data/TEXTURE/skill_5.png",
+	"data/TEXTURE/skill_6.png",
+};
 
 static UI g_UI[TEXTURE_MAX];
 static BOOL g_Load = FALSE;
@@ -109,6 +119,15 @@ HRESULT InitUI(void)
 			NULL,
 			NULL,
 			&g_IconTexture[i],
+			NULL);
+	}
+	for (int i = 0; i < SKILL_TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_SkillTextureName[i],
+			NULL,
+			NULL,
+			&g_SkillTexture[i],
 			NULL);
 	}
 
@@ -201,6 +220,14 @@ void UninitUI(void)
 		{
 			g_IconTexture[i]->Release();
 			g_IconTexture[i] = NULL;
+		}
+	}
+	for (int i = 0; i < SKILL_TEXTURE_MAX; i++)
+	{
+		if (g_SkillTexture[i])
+		{
+			g_SkillTexture[i]->Release();
+			g_SkillTexture[i] = NULL;
 		}
 	}
 
@@ -541,7 +568,7 @@ void DrawBattleCharStatus(void)
 	PLAYER *player = GetPlayer();
 	PlayerSet *ps = GetSetPos();
 	if (ps->setPlayer == 99 || !player[ps->setPlayer].use)return;
-	if (!ps->setCheckMode && !ps->setMode)return;
+	if (!ps->setCheckMode)return;
 
 	//下地の枠を描画
 	const float sizeX = SCREEN_WIDTH * 0.45f;
@@ -570,7 +597,22 @@ void DrawBattleCharStatus(void)
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 	pos1.x += boxsize;
+	//ステータス描画
 	DrawCharAllStatus(pos1);
+
+	//スキル及び特性描画
+	pos1 = { SCREEN_WIDTH * 0.365f, SCREEN_HEIGHT * 0.125f };
+	const float p = 0.85f;
+	const float width = 462.0f * p;	//ボックスサイズ定義
+	const float height = 125.0f * p;	//ボックスサイズ定義
+	id = player[ps->setPlayer].skillID;		//スキルIDに基づいた画像を選択
+	// テクスチャ設定
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_SkillTexture[id]);
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, pos1.x, pos1.y, width, height, 0.0f, 0.0f, 1.0f, 1.0f,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	GetDeviceContext()->Draw(4, 0);
+
 
 }
 void DrawCharAllStatus(XMFLOAT2 pos)
