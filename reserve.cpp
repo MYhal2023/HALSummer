@@ -25,6 +25,7 @@
 #define CH_TEXTURE_MAX		(7)				// キャラテクスチャの数
 #define IC_TEXTURE_MAX		(9)				// アイコンテクスチャの数
 #define CHAR_TEXTURE_MAX	(7)				// キャラテクスチャの数
+#define SKILL_TEXTURE_MAX	(7)				// キャラスキルテクスチャの数
 #define NUMBER_SIZE			(30.0f)			// x方向のサイズ
 #define COST_NUMBER_SIZE	(45.0f)			// x方向のサイズ
 #define BUTTON_SIZE			(106.0f)		// ボタンの縦幅サイズ。多分これくらい
@@ -39,6 +40,7 @@ static ID3D11Buffer					*g_VertexBuffer = NULL;	// 頂点情報
 static ID3D11ShaderResourceView		*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_CharTexture[CHAR_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 static ID3D11ShaderResourceView		*g_IconTexture[IC_TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView		*g_SkillTexture[SKILL_TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TextureName[TEXTURE_MAX] = {
 	"data/TEXTURE/var.png",
@@ -75,6 +77,16 @@ static char* g_IconTextureName[IC_TEXTURE_MAX] = {
 	"data/TEXTURE/icon_energy.png",
 	"data/TEXTURE/icon_oxygen.png",
 	"data/TEXTURE/icon_iron.png",
+};
+static char* g_SkillTextureName[SKILL_TEXTURE_MAX] = {
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+	"data/TEXTURE/var.png",
+
 };
 
 static Reserve g_Reserve;
@@ -137,6 +149,15 @@ HRESULT InitReserve(void)
 			NULL,
 			NULL,
 			&g_IconTexture[i],
+			NULL);
+	}
+	for (int i = 0; i < SKILL_TEXTURE_MAX; i++)
+	{
+		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+			g_SkillTextureName[i],
+			NULL,
+			NULL,
+			&g_SkillTexture[i],
 			NULL);
 	}
 
@@ -1025,4 +1046,9 @@ void DrawMaxLevelChar(XMFLOAT2 pos, int k)
 	pos.x = pos.x - SCREEN_WIDTH * 0.75f * 0.36f - 180.0f * 0.35f;
 	GetDeviceContext()->Draw(4, 0);
 	DrawCharAllStatus(pos, k);
+}
+
+void DrawCharSkill(XMFLOAT2 pos, int k)
+{
+
 }
